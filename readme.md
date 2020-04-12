@@ -5,7 +5,7 @@ python3.x setup.py build_ext --inplace
 
 # Testing:
 ```bash
-python3.x tests/tests.py
+cd tests && python3.x tests.py
 ```
 
 # Benchmarks:
