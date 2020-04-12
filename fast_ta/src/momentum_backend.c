@@ -1,13 +1,8 @@
 #include <stdlib.h>
-#include "funcs.c"
 
-/**
- * Computes Relative Strength Indicator On Data
- * @param close     Close Time Series
- * @param close_len Length of Close Time Series
- * @param _n        n-Value
- * @return          RSI Indicator Time Series
- */
+#include "funcs.c"
+#include "momentum_backend.h"
+
 double* _RSI_DOUBLE(const double* close, double* out, int close_len, int _n) {
     // support the user mallocing themselves OR this function allocating the memory
     double* rsi;
@@ -165,16 +160,6 @@ float* _RSI_FLOAT(const float* close, float* out, int close_len, int _n) {
     return rsi;
 }
 
-/**
- * Computes Awesome Oscillator Indicator On Data
- * @param high  High Time Series
- * @param low   Low Time Series     Note: high and low must have same lengths,
- *                                        this should be checked for before calling.
- * @param n1    High Time Series SMA Window Length
- * @param n2    Low Time Series SMA Window Length
- * @param len   Time Series Length
- * @return      AO Indicator Time Series
- */
 double* _AO_DOUBLE(double* high, double* low, int n1, int n2, int len) {
     double* median = _double_pairwise_mean(high, low, len);
     double* sma1 = _double_sma(median, len, n1);

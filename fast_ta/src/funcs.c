@@ -1,5 +1,6 @@
 #include "Python.h"
 #include "numpy/arrayobject.h"
+
 #include <immintrin.h>
 #include <stdlib.h>
 
@@ -7,25 +8,12 @@
 #define max(a,b) ((a) > (b) ? (a) : (b))
 #endif
 
-/**
- * Inplace Exponential Moving Average
- * @param arr
- * @param len
- * @param alpha
- */
 void inplace_ema(double* arr, int len, double alpha) {
     for (int i = 1; i < len; i++) {
         arr[i] = arr[i-1] * (1-alpha) + arr[i] * alpha;
     }
 }
 
-/**
- * Vectorized Pairwise Mean Between Two Arrays
- * @param arr1
- * @param arr2
- * @param len
- * @return
- */
 double* _double_pairwise_mean(double* arr1, double* arr2, int len) {
     double* median = aligned_alloc(256, len * sizeof(double));
     __m256d v1;
@@ -68,12 +56,6 @@ float* _float_pairwise_mean(float* arr1, float* arr2, int len) {
     return median;
 }
 
-/**
- * Vectorized Inplace Division
- * @param arr
- * @param len
- * @param x
- */
 void double_inplace_div(double* arr, int len, double x) {
     __m256d v;
     __m256d vx;
@@ -104,13 +86,6 @@ void float_inplace_div(float* arr, int len, float x) {
     }
 }
 
-/**
- * Compute the Simple Moving Average on an array.
- * @param arr
- * @param len
- * @param window
- * @return sma
- */
 double* _double_sma(const double* arr, int len, int window) {
     double wsum = 0;
     double* sma = malloc(len*sizeof(double));
@@ -147,13 +122,6 @@ float* _float_sma(const float* arr, int len, int window) {
     return sma;
 }
 
-/**
- * Subtract two arrays, store the result in a third array
- * @param arr1
- * @param arr2
- * @param arr3
- * @param len
- */
 void _double_sub(double *arr1, double *arr2, double *arr3, int len) {
     __m256d v1;
     __m256d v2;
