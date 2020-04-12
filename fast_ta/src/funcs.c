@@ -13,9 +13,9 @@
  * @param len
  * @param alpha
  */
-void inplace_ema(double * arr, int len, double alpha) {
+void inplace_ema(double* arr, int len, double alpha) {
     for (int i = 1; i < len; i++) {
-        arr[i] = arr[i-1]*(1-alpha)+arr[i]*alpha;
+        arr[i] = arr[i-1] * (1-alpha) + arr[i] * alpha;
     }
 }
 
@@ -26,8 +26,8 @@ void inplace_ema(double * arr, int len, double alpha) {
  * @param len
  * @return
  */
-double *_double_pairwise_mean(double * arr1, double * arr2, int len) {
-    double * median = aligned_alloc(256, len*sizeof(double));
+double* _double_pairwise_mean(double* arr1, double* arr2, int len) {
+    double* median = aligned_alloc(256, len * sizeof(double));
     __m256d v1, v2;
     __m256d d2 = _mm256_set_pd(0.5, 0.5, 0.5, 0.5);
 
@@ -46,8 +46,8 @@ double *_double_pairwise_mean(double * arr1, double * arr2, int len) {
     return median;
 }
 
-float *_float_pairwise_mean(float * arr1, float * arr2, int len) {
-    float * median = aligned_alloc(256, len*sizeof(float));
+float* _float_pairwise_mean(float* arr1, float* arr2, int len) {
+    float* median = aligned_alloc(256, len*sizeof(float));
     __m256 v1, v2;
     __m256 d2 = _mm256_set_ps(0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5);
 
@@ -72,7 +72,7 @@ float *_float_pairwise_mean(float * arr1, float * arr2, int len) {
  * @param len
  * @param x
  */
-void double_inplace_div(double * arr, int len, double x) {
+void double_inplace_div(double* arr, int len, double x) {
     __m256d v, vx;
     vx = _mm256_set_pd(x, x, x, x);
 
@@ -86,7 +86,7 @@ void double_inplace_div(double * arr, int len, double x) {
     }
 }
 
-void float_inplace_div(float * arr, int len, float x) {
+void float_inplace_div(float* arr, int len, float x) {
     __m256 v, vx;
     vx = _mm256_set_ps(x, x, x, x, x, x, x, x);
 
@@ -107,9 +107,9 @@ void float_inplace_div(float * arr, int len, float x) {
  * @param window
  * @return sma
  */
-double *_double_sma(const double * arr, int len, int window) {
+double* _double_sma(const double* arr, int len, int window) {
     double wsum = 0;
-    double *sma = malloc(len*sizeof(double));
+    double* sma = malloc(len*sizeof(double));
 
     for (int i = 0; i < window; i++) {
         wsum += arr[i];
@@ -125,9 +125,9 @@ double *_double_sma(const double * arr, int len, int window) {
     return sma;
 }
 
-float *_float_sma(const float * arr, int len, int window) {
+float* _float_sma(const float* arr, int len, int window) {
     float wsum = 0;
-    float *sma = malloc(len*sizeof(float));
+    float* sma = malloc(len*sizeof(float));
 
     for (int i = 0; i < window; i++) {
         wsum += arr[i];
@@ -162,7 +162,7 @@ void _double_sub(double *arr1, double *arr2, double *arr3, int len) {
     }
 }
 
-void _float_sub(float *arr1, float *arr2, float *arr3, int len) {
+void _float_sub(float* arr1, float* arr2, float* arr3, int len) {
     __m256 v1, v2;
     for (int i = 0; i < len-len%8; i+=8) {
         v1 = _mm256_loadu_ps(&arr1[i]);

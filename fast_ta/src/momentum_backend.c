@@ -8,9 +8,9 @@
  * @param _n        n-Value
  * @return          RSI Indicator Time Series
  */
-double *_RSI_DOUBLE(const double *close, int close_len, int _n) {
+double* _RSI_DOUBLE(const double* close, int close_len, int _n) {
     double last_gain, last_loss, cd, cgain, closs;
-    double *rsi = malloc(close_len * sizeof(double));
+    double* rsi = malloc(close_len * sizeof(double));
 
     last_gain = 0;
     last_loss = 0;
@@ -74,9 +74,9 @@ double *_RSI_DOUBLE(const double *close, int close_len, int _n) {
     return rsi;
 }
 
-float *_RSI_FLOAT(const float *close, int close_len, int _n) {
+float* _RSI_FLOAT(const float* close, int close_len, int _n) {
     float last_gain, last_loss, cd, cgain, closs;
-    float *rsi = malloc(close_len * sizeof(float));
+    float* rsi = malloc(close_len * sizeof(float));
 
     last_gain = 0;
     last_loss = 0;
@@ -150,18 +150,18 @@ float *_RSI_FLOAT(const float *close, int close_len, int _n) {
  * @param len   Time Series Length
  * @return      AO Indicator Time Series
  */
-double *_AO_DOUBLE(double * high, double * low, int n1, int n2, int len) {
-    double *median = _double_pairwise_mean(high, low, len);
-    double *sma1 = _double_sma(median, len, n1);
-    double *sma2 = _double_sma(median, len, n2);
+double* _AO_DOUBLE(double*  high, double*  low, int n1, int n2, int len) {
+    double* median = _double_pairwise_mean(high, low, len);
+    double* sma1 = _double_sma(median, len, n1);
+    double* sma2 = _double_sma(median, len, n2);
     _double_sub(sma1, sma2, median, len);
     return median;
 }
 
-float *_AO_FLOAT(float * high, float * low, int n1, int n2, int len) {
-    float *median = _float_pairwise_mean(high, low, len);
-    float *sma1 = _float_sma(median, len, n1);
-    float *sma2 = _float_sma(median, len, n2);
+float* _AO_FLOAT(float* high, float* low, int n1, int n2, int len) {
+    float* median = _float_pairwise_mean(high, low, len);
+    float* sma1 = _float_sma(median, len, n1);
+    float* sma2 = _float_sma(median, len, n2);
     _float_sub(sma1, sma2, median, len);
     return median;
 }

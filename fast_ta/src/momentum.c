@@ -7,9 +7,9 @@
 #include <stdlib.h>
 #include "error_methods.c"
 
-static PyObject *RSI(PyObject* self, PyObject* args) {
+static PyObject* RSI(PyObject* self, PyObject* args) {
     int _n;
-    PyObject *in;
+    PyObject* in;
 
     if (!PyArg_ParseTuple(args, "Oi",
                           &in,
@@ -18,28 +18,28 @@ static PyObject *RSI(PyObject* self, PyObject* args) {
     }
 
     int type = PyArray_TYPE((PyArrayObject*) in);
-    PyArrayObject *arr = (PyArrayObject*) PyArray_FROM_OTF(in, type, NPY_ARRAY_IN_ARRAY);
+    PyArrayObject* arr = (PyArrayObject*) PyArray_FROM_OTF(in, type, NPY_ARRAY_IN_ARRAY);
     int close_len = PyArray_SIZE(arr);
 
     switch(type) {
         case NPY_FLOAT64: {
-            double *close = PyArray_DATA(arr);
-            double *rsi = _RSI_DOUBLE(close, close_len, _n);
+            double* close = PyArray_DATA(arr);
+            double* rsi = _RSI_DOUBLE(close, close_len, _n);
             npy_intp dims[1] = {close_len};
 
             Py_DECREF(arr);
-            PyObject *ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
+            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
             memcpy(PyArray_DATA((PyArrayObject*) ret), rsi, close_len*sizeof(double));
             free(rsi);
             return ret;
         }
         case NPY_FLOAT32: {
-            float *close = PyArray_DATA(arr);
-            float *rsi = _RSI_FLOAT(close, close_len, _n);
+            float* close = PyArray_DATA(arr);
+            float* rsi = _RSI_FLOAT(close, close_len, _n);
             npy_intp dims[1] = {close_len};
 
             Py_DECREF(arr);
-            PyObject *ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
+            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
             memcpy(PyArray_DATA((PyArrayObject*) ret), rsi, close_len*sizeof(float));
             free(rsi);
             return ret;
@@ -50,9 +50,10 @@ static PyObject *RSI(PyObject* self, PyObject* args) {
     }
 };
 
-static PyObject *AO(PyObject* self, PyObject* args) {
+static PyObject* AO(PyObject* self, PyObject* args) {
     int n1, n2;
-    PyObject *in1, *in2;
+    PyObject* in1;
+    PyObject* in2;
 
     if (!PyArg_ParseTuple(args, "OOii",
                           &in1,
@@ -69,8 +70,8 @@ static PyObject *AO(PyObject* self, PyObject* args) {
         return NULL;
     }
 
-    PyArrayObject *_high = (PyArrayObject*) PyArray_FROM_OTF(in1, type1, NPY_ARRAY_IN_ARRAY);
-    PyArrayObject *_low = (PyArrayObject*) PyArray_FROM_OTF(in2, type1, NPY_ARRAY_IN_ARRAY);
+    PyArrayObject* _high = (PyArrayObject*) PyArray_FROM_OTF(in1, type1, NPY_ARRAY_IN_ARRAY);
+    PyArrayObject* _low = (PyArrayObject*) PyArray_FROM_OTF(in2, type1, NPY_ARRAY_IN_ARRAY);
     int high_len = PyArray_SIZE(_high);
 
     if (high_len != PyArray_SIZE(_low)) {
@@ -80,27 +81,27 @@ static PyObject *AO(PyObject* self, PyObject* args) {
 
     switch(type1) {
         case NPY_FLOAT64: {
-            double *high = PyArray_DATA(_high);
-            double *low = PyArray_DATA(_low);
-            double *ao = _AO_DOUBLE(high, low, n1, n2, high_len);
+            double* high = PyArray_DATA(_high);
+            double* low = PyArray_DATA(_low);
+            double* ao = _AO_DOUBLE(high, low, n1, n2, high_len);
             npy_intp dims[1] = {high_len};
 
             Py_DECREF(_high);
             Py_DECREF(_low);
-            PyObject *ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
+            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
             memcpy(PyArray_DATA((PyArrayObject*) ret), ao, high_len*sizeof(double));
             free(ao);
             return ret;
         }
         case NPY_FLOAT32: {
-            float *high = PyArray_DATA(_high);
-            float *low = PyArray_DATA(_low);
-            float *ao = _AO_FLOAT(high, low, n1, n2, high_len);
+            float* high = PyArray_DATA(_high);
+            float* low = PyArray_DATA(_low);
+            float* ao = _AO_FLOAT(high, low, n1, n2, high_len);
             npy_intp dims[1] = {high_len};
 
             Py_DECREF(_high);
             Py_DECREF(_low);
-            PyObject *ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
+            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
             memcpy(PyArray_DATA((PyArrayObject*) ret), ao, high_len*sizeof(float));
             free(ao);
             return ret;
