@@ -143,8 +143,8 @@ float* _RSI_FLOAT(const float* close, int close_len, int _n) {
 /**
  * Computes Awesome Oscillator Indicator On Data
  * @param high  High Time Series
- * @param low   Low Time Series     Note: high and low must have same lengths,
- *                                        this should be checked for before calling.
+ * @param low   Low Time Series  Note: high and low must have same lengths,
+ *                                     his should be checked for before calling.
  * @param n1    High Time Series SMA Window Length
  * @param n2    Low Time Series SMA Window Length
  * @param len   Time Series Length

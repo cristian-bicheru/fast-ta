@@ -49,7 +49,7 @@ double* _double_pairwise_mean(double* arr1, double* arr2, int len) {
 float* _float_pairwise_mean(float* arr1, float* arr2, int len) {
     float* median = aligned_alloc(256, len*sizeof(float));
     __m256 v1, v2;
-    __m256 d2 = _mm256_set_ps(0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5);
+    __m256 d2 = _mm256_set_ps(0.5, 0.5, 0.5, 0.5,0.5, 0.5, 0.5, 0.5);
 
     for (int i = 0; i < len-len%8; i += 8) {
         v1 = _mm256_loadu_ps(&arr1[i]);

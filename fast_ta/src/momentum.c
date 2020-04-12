@@ -18,7 +18,9 @@ static PyObject* RSI(PyObject* self, PyObject* args) {
     }
 
     int type = PyArray_TYPE((PyArrayObject*) in);
-    PyArrayObject* arr = (PyArrayObject*) PyArray_FROM_OTF(in, type, NPY_ARRAY_IN_ARRAY);
+    PyArrayObject* arr = (PyArrayObject*) PyArray_FROM_OTF(in,
+                                                           type,
+                                                           NPY_ARRAY_IN_ARRAY);
     int close_len = PyArray_SIZE(arr);
 
     switch(type) {
@@ -29,7 +31,8 @@ static PyObject* RSI(PyObject* self, PyObject* args) {
 
             Py_DECREF(arr);
             PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), rsi, close_len*sizeof(double));
+            memcpy(PyArray_DATA((PyArrayObject*) ret), rsi,
+                             close_len*sizeof(double));
             free(rsi);
             return ret;
         }
@@ -40,7 +43,8 @@ static PyObject* RSI(PyObject* self, PyObject* args) {
 
             Py_DECREF(arr);
             PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), rsi, close_len*sizeof(float));
+            memcpy(PyArray_DATA((PyArrayObject*) ret), rsi,
+                             close_len*sizeof(float));
             free(rsi);
             return ret;
         }
@@ -70,8 +74,12 @@ static PyObject* AO(PyObject* self, PyObject* args) {
         return NULL;
     }
 
-    PyArrayObject* _high = (PyArrayObject*) PyArray_FROM_OTF(in1, type1, NPY_ARRAY_IN_ARRAY);
-    PyArrayObject* _low = (PyArrayObject*) PyArray_FROM_OTF(in2, type1, NPY_ARRAY_IN_ARRAY);
+    PyArrayObject* _high = (PyArrayObject*) PyArray_FROM_OTF(in1,
+                                                             type1,
+                                                             NPY_ARRAY_IN_ARRAY);
+    PyArrayObject* _low = (PyArrayObject*) PyArray_FROM_OTF(in2,
+                                                            type1,
+                                                            NPY_ARRAY_IN_ARRAY);
     int high_len = PyArray_SIZE(_high);
 
     if (high_len != PyArray_SIZE(_low)) {
@@ -89,7 +97,8 @@ static PyObject* AO(PyObject* self, PyObject* args) {
             Py_DECREF(_high);
             Py_DECREF(_low);
             PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), ao, high_len*sizeof(double));
+            memcpy(PyArray_DATA((PyArrayObject*) ret), ao,
+                             high_len*sizeof(double));
             free(ao);
             return ret;
         }
@@ -102,7 +111,8 @@ static PyObject* AO(PyObject* self, PyObject* args) {
             Py_DECREF(_high);
             Py_DECREF(_low);
             PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), ao, high_len*sizeof(float));
+            memcpy(PyArray_DATA((PyArrayObject*) ret), ao,
+                             high_len*sizeof(float));
             free(ao);
             return ret;
         }
