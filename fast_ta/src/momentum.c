@@ -51,7 +51,8 @@ static PyObject* RSI(PyObject* self, PyObject* args) {
 };
 
 static PyObject* AO(PyObject* self, PyObject* args) {
-    int n1, n2;
+    int n1;
+    int n2;
     PyObject* in1;
     PyObject* in2;
 
