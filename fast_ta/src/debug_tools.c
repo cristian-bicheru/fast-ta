@@ -1,5 +1,6 @@
 #include "Python.h"
 #include <stdlib.h>
+#include <math.h>
 
 void print(char * str) {
     PyObject* pyBuiltIn = PyImport_ImportModule("builtins");

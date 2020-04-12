@@ -1,6 +1,6 @@
 # Building:
 ```bash
-python3.x fast_ta/setup.py build_ext --inplace
+python3.x setup.py build_ext --inplace
 ```
 
 # Testing:

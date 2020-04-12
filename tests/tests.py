@@ -29,13 +29,13 @@ open_data = np.array(open_data, dtype=np.float)
 
 
 def rsi():
-    plt.plot(fast_ta.RSI(close_data, 14))
+    plt.plot(fast_ta.momentum.RSI(close_data, 14))
     plt.plot(ta.momentum.RSIIndicator(pandas.Series(close_data), n=14).rsi())
     plt.show()
     
 def ao():
     plt.plot(ta.momentum.AwesomeOscillatorIndicator(pandas.Series(high_data), pandas.Series(low_data)).ao())
-    plt.plot(fast_ta.AO(high_data, low_data, 5, 34))
+    plt.plot(fast_ta.momentum.AO(high_data, low_data, 5, 34))
     plt.show()
 
 ao()
