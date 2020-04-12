@@ -8,15 +8,22 @@
  * @param _n        n-Value
  * @return          RSI Indicator Time Series
  */
-double* _RSI_DOUBLE(const double* close, int close_len, int _n) {
-    double last_gain, last_loss, cd, cgain, closs;
-    double* rsi = malloc(close_len * sizeof(double));
+double* _RSI_DOUBLE(const double* close, double* out, int close_len, int _n) {
+    // support the user mallocing themselves OR this function allocating the memory
+    double* rsi;
+    if (out == NULL) {
+        rsi = malloc(close_len * sizeof(double));
+    } else {
+        rsi = out;
+    }
 
-    last_gain = 0;
-    last_loss = 0;
-
+    double last_gain = 0;
+    double last_loss = 0;
     for (int i = 0; i<_n; i++) {
-        cd = close[i+1]-close[i];
+        double cd = close[i+1]-close[i];
+
+        double cgain;
+        double closs;
         if (cd > 0) {
             cgain = cd;
             closs = 0;
@@ -43,8 +50,10 @@ double* _RSI_DOUBLE(const double* close, int close_len, int _n) {
     }
 
     for (int i = _n+1; i < close_len; i++) {
-        cd = close[i]-close[i-1];
+        double cd = close[i]-close[i-1];
 
+        double cgain;
+        double closs;
         if (cd > 0) {
             cgain = cd;
             closs = 0;
@@ -74,15 +83,29 @@ double* _RSI_DOUBLE(const double* close, int close_len, int _n) {
     return rsi;
 }
 
-float* _RSI_FLOAT(const float* close, int close_len, int _n) {
-    float last_gain, last_loss, cd, cgain, closs;
-    float* rsi = malloc(close_len * sizeof(float));
+/**
+ * Computes Relative Strength Indicator On Data
+ * @param close     Close Time Series
+ * @param close_len Length of Close Time Series
+ * @param _n        n-Value
+ * @return          RSI Indicator Time Series
+ */
+float* _RSI_FLOAT(const float* close, float* out, int close_len, int _n) {
+    // support the user mallocing themselves OR this function allocating the memory
+    float* rsi;
+    if (out == NULL) {
+        rsi = malloc(close_len * sizeof(float));
+    } else {
+        rsi = out;
+    }
 
-    last_gain = 0;
-    last_loss = 0;
-
+    float last_gain = 0;
+    float last_loss = 0;
     for (int i = 0; i<_n; i++) {
-        cd = close[i+1]-close[i];
+        float cd = close[i+1]-close[i];
+
+        float cgain;
+        float closs;
         if (cd > 0) {
             cgain = cd;
             closs = 0;
@@ -109,8 +132,10 @@ float* _RSI_FLOAT(const float* close, int close_len, int _n) {
     }
 
     for (int i = _n+1; i < close_len; i++) {
-        cd = close[i]-close[i-1];
+        float cd = close[i]-close[i-1];
 
+        float cgain;
+        float closs;
         if (cd > 0) {
             cgain = cd;
             closs = 0;
@@ -150,7 +175,7 @@ float* _RSI_FLOAT(const float* close, int close_len, int _n) {
  * @param len   Time Series Length
  * @return      AO Indicator Time Series
  */
-double* _AO_DOUBLE(double*  high, double*  low, int n1, int n2, int len) {
+double* _AO_DOUBLE(double* high, double* low, int n1, int n2, int len) {
     double* median = _double_pairwise_mean(high, low, len);
     double* sma1 = _double_sma(median, len, n1);
     double* sma2 = _double_sma(median, len, n2);

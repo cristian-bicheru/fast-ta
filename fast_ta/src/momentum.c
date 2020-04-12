@@ -24,7 +24,7 @@ static PyObject* RSI(PyObject* self, PyObject* args) {
     switch(type) {
         case NPY_FLOAT64: {
             double* close = PyArray_DATA(arr);
-            double* rsi = _RSI_DOUBLE(close, close_len, _n);
+            double* rsi = _RSI_DOUBLE(close, NULL, close_len, _n);
             npy_intp dims[1] = {close_len};
 
             Py_DECREF(arr);
@@ -35,7 +35,7 @@ static PyObject* RSI(PyObject* self, PyObject* args) {
         }
         case NPY_FLOAT32: {
             float* close = PyArray_DATA(arr);
-            float* rsi = _RSI_FLOAT(close, close_len, _n);
+            float* rsi = _RSI_FLOAT(close, NULL, close_len, _n);
             npy_intp dims[1] = {close_len};
 
             Py_DECREF(arr);
