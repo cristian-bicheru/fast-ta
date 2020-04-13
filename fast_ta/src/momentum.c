@@ -1,11 +1,14 @@
 #define PY_SSIZE_T_CLEAN
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include "Python.h"
-#include "numpy/arrayobject.h"
+
 #include <stdio.h>
-#include "momentum_backend.c"
 #include <stdlib.h>
-#include "error_methods.c"
+
+#include "numpy/arrayobject.h"
+#include "momentum_backend.h"
+#include "parallel_momentum_backend.h"
+#include "error_methods.h"
 
 static PyObject* RSI(PyObject* self, PyObject* args) {
     int _n;
@@ -23,8 +26,10 @@ static PyObject* RSI(PyObject* self, PyObject* args) {
 
     switch(type) {
         case NPY_FLOAT64: {
+            printf("Running double.\n");
             double* close = PyArray_DATA(arr);
-            double* rsi = _RSI_DOUBLE(close, NULL, close_len, _n);
+            double* rsi = _PARALLEL_RSI_DOUBLE(close, close_len, _n, 4);
+            //double* rsi = _RSI_DOUBLE(close, NULL, close_len, _n, 0);
             npy_intp dims[1] = {close_len};
 
             Py_DECREF(arr);
@@ -34,8 +39,9 @@ static PyObject* RSI(PyObject* self, PyObject* args) {
             return ret;
         }
         case NPY_FLOAT32: {
+            printf("Running float.\n");
             float* close = PyArray_DATA(arr);
-            float* rsi = _RSI_FLOAT(close, NULL, close_len, _n);
+            float* rsi = _RSI_FLOAT(close, NULL, close_len, _n, 0);
             npy_intp dims[1] = {close_len};
 
             Py_DECREF(arr);
