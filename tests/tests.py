@@ -17,10 +17,16 @@ low_data = []
 open_data = []
 
 for row in csv_data:
+    """
     close_data.append(row[1])
     high_data.append(row[2])
     low_data.append(row[3])
     open_data.append(row[4])
+    """
+    open_data.append(row[1])
+    high_data.append(row[2])
+    low_data.append(row[3])
+    close_data.append(row[4])
 
 close_data = np.array(close_data, dtype=np.double)
 high_data = np.array(high_data, dtype=np.double)
@@ -51,12 +57,14 @@ def kama():
 
 def run_tests():
     rsi()
-    ao()
+    #ao()
     #kama()
 
 run_tests()
+"""
 close_data = np.array(close_data, dtype=np.float32)
 high_data = np.array(high_data, dtype=np.float32)
 low_data = np.array(low_data, dtype=np.float32)
 open_data = np.array(open_data, dtype=np.float32)
 run_tests()
+"""
