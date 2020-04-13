@@ -26,7 +26,7 @@ double* _PARALLEL_RSI_DOUBLE(const double* close, int close_len,
     pthread_t threads[thread_count];
     struct RsiDoubleArgs args[thread_count];
 
-    int chunk_size = close_len/thread_count;
+    int chunk_size = close_len/thread_count+1;
     // 1 is a special case since we _don't_ want to skip_perlim, since there
     // is no preliminary data to be calculated.
     args[0].close = close;
@@ -44,6 +44,9 @@ double* _PARALLEL_RSI_DOUBLE(const double* close, int close_len,
     // the rest of the workers are normal
     for (int i=1; i<thread_count; i++) {
         int offset = i * chunk_size;
+	if (offset+chunk_size>close_len) {
+            offset = close_len-chunk_size;
+        }
         args[i].close = close + offset;
         args[i].out = rsi + offset;
         args[i].close_len = chunk_size;
