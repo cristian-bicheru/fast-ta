@@ -52,7 +52,7 @@ def kama():
 def run_tests():
     rsi()
     ao()
-    kama()
+    #kama()
 
 run_tests()
 close_data = np.array(close_data, dtype=np.float32)

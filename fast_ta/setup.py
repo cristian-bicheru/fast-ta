@@ -4,7 +4,7 @@ ta_mod = Extension('momentum',
                    sources=['src/momentum.c', 'src/momentum_backend.c',
                             'src/parallel_momentum_backend.c',
                             'src/error_methods.c', 'src/funcs.c'],
-                   extra_compile_args=['-mavx2'])
+                   extra_compile_args=['-mavx'])
 
 setup(name = 'fast_ta',
       version = 0.1,
