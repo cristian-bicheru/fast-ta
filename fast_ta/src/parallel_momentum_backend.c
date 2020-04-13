@@ -13,48 +13,48 @@
 /*
  * Only meant as a private helper. Not defined in header.
  */
-void _rsi_double_helper(void* _args) {
+void* _rsi_double_helper(void* _args) {
     struct RsiDoubleArgs* args = (struct RsiDoubleArgs*)_args;
     _RSI_DOUBLE(args->close, args->out, args->close_len, args->window_size,
                 args->prelim);
+
+    pthread_exit(NULL);
 }
 
 double* _PARALLEL_RSI_DOUBLE(const double* close, int close_len,
                              int window_size, int thread_count) {
     double* rsi = malloc(close_len * sizeof(double));
+    // zero the dynamic memory so it is obvious when values are not filled in
+    for (int i=0; i<close_len; i++) {
+        rsi[i] = 0;
+    }
 
     pthread_t threads[thread_count];
     struct RsiDoubleArgs args[thread_count];
 
-    int chunk_size = close_len/thread_count+1;
-    // 1 is a special case since we _don't_ want to skip_perlim, since there
-    // is no preliminary data to be calculated.
-    args[0].close = close;
-    args[0].out = rsi;
-    args[0].close_len = chunk_size;
-    args[0].window_size = window_size;
-    args[0].prelim = 0;
-    int error = pthread_create(&threads[0], NULL, _rsi_double_helper,
-                               (void *) &args[0]);
-    if (error != 0) {
-        raise_error("Error creating pthread.");
-        return NULL;
-    }
+    // the +1 here is to accomodate for uneven division of the Close Time Series.
+    int chunk_size = close_len/thread_count + 1;
 
     // the rest of the workers are normal
-    for (int i=1; i<thread_count; i++) {
+    for (int i=0; i<thread_count; i++) {
         int offset = i * chunk_size;
-	if (offset+chunk_size>close_len) {
-            offset = close_len-chunk_size;
-        }
+
         args[i].close = close + offset;
         args[i].out = rsi + offset;
-        args[i].close_len = chunk_size;
         args[i].window_size = window_size;
-
         // TODO: This could throw an error if the window_size pushes the pointer
-        // behind the array
-        args[i].prelim = window_size;
+        // behind the array. Also, there is an exception for the first chunk
+        // as there is no data to look at before it.
+        args[i].prelim = i == 0 ? 0 : window_size;
+        if (offset + chunk_size + 1 > close_len) {
+            // if we are at the end of the array, just compute to the end of
+            // the array and don't go out of bounds.
+            args[i].close_len = close_len - offset;
+        } else {
+            // the +1 here is to compute an overlapping value with the next
+            // block since each block's first value is messed up.
+            args[i].close_len = chunk_size + 1;
+        }
 
         int error = pthread_create(&threads[i], NULL, _rsi_double_helper,
                                    (void *) &args[i]);

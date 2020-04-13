@@ -52,7 +52,7 @@ double* _RSI_DOUBLE(const double* close, double* out, int close_len, int _n,
         // so we can get the moving averages to where they should be.
         // NOTE: This is the dangerous part of the code.
         double* reduced_close = close - prelim;
-        for (int i = 0; i<prelim; i++) {
+        for (int i = 0; i<prelim + 1; i++) {
             double cd = reduced_close[i+1]-reduced_close[i];
 
             double cgain;
@@ -73,7 +73,7 @@ double* _RSI_DOUBLE(const double* close, double* out, int close_len, int _n,
         }
     }
 
-    int start = prelim == 0 ? _n+1 : 0;
+    int start = prelim == 0 ? _n+1 : 1;
     for (int i = start; i < close_len; i++) {
         double cd = close[i]-close[i-1];
 
@@ -104,12 +104,16 @@ double* _RSI_DOUBLE(const double* close, double* out, int close_len, int _n,
         }
     }
 
-    rsi[0] = rsi[1];
+    if (prelim == 0) {
+        rsi[0] = rsi[1];
+    }
+
     return rsi;
 }
 
 float* _RSI_FLOAT(const float* close, float* out, int close_len, int _n,
                   int prelim) {
+    // TODO: merge this function with the double version
 }
 
 double* _AO_DOUBLE(double* high, double* low, int n1, int n2, int len) {
