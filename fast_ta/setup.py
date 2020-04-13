@@ -1,8 +1,8 @@
 from distutils.core import setup, Extension
 
-ta_mod = Extension('fast_ta',
+ta_mod = Extension('momentum',
                    sources=['src/momentum.c'],
-                   extra_compile_args=['-mavx2'])
+                   extra_compile_args=['-mavx'])
 
 setup(name = 'fast_ta',
       version = 0.1,

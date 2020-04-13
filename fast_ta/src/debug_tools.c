@@ -1,3 +1,5 @@
+#ifndef FAST_TA_DEBUG_TOOLS
+#define FAST_TA_DEBUG_TOOLS
 #include "Python.h"
 #include <stdlib.h>
 #include <math.h>
@@ -33,3 +35,5 @@ void print_int(int i) {
         print("0");
     }
 }
+
+#endif

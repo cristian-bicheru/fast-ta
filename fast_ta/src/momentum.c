@@ -123,9 +123,62 @@ static PyObject* AO(PyObject* self, PyObject* args) {
     }
 };
 
+static PyObject* KAMA(PyObject* self, PyObject* args) {
+    int n1;
+    int n2;
+    int n3;
+    PyObject* in1;
+
+    if (!PyArg_ParseTuple(args, "Oiii",
+                          &in1,
+                          &n1,
+                          &n2,
+                          &n3)) {
+        return NULL;
+    }
+
+    int type1 = PyArray_TYPE((PyArrayObject*) in1);
+
+    PyArrayObject* _close = (PyArrayObject*) PyArray_FROM_OTF(in1,
+                                                              type1,
+                                                              NPY_ARRAY_IN_ARRAY);
+    int len = PyArray_SIZE(_close);
+
+    switch(type1) {
+        case NPY_FLOAT64: {
+            double* close = PyArray_DATA(_close);
+            double* kama = _KAMA_DOUBLE(close, n1, n2, n3, len);
+            npy_intp dims[1] = {len-n1};
+
+            Py_DECREF(_close);
+            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
+            memcpy(PyArray_DATA((PyArrayObject*) ret), kama,
+                   (len-n1)*sizeof(double));
+            free(kama);
+            return ret;
+        }
+        case NPY_FLOAT32: {
+            float* close = PyArray_DATA(_close);
+            float* kama = _KAMA_FLOAT(close, n1, n2, n3, len);
+            npy_intp dims[1] = {len-n1};
+
+            Py_DECREF(_close);
+            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
+            memcpy(PyArray_DATA((PyArrayObject*) ret), kama,
+                   (len-n1)*sizeof(float));
+            free(kama);
+            return ret;
+        }
+        default:
+            raise_dtype_error();
+            return NULL;
+    }
+};
+
 static PyMethodDef MomentumMethods[] = {
         {"RSI", RSI, METH_VARARGS, "Compute RSI On Data"},
         {"AO", AO, METH_VARARGS, "Compute AO On Data"},
+        {"KAMA", KAMA, METH_VARARGS, "Compute KAMA On Data"},
         {NULL, NULL, 0, NULL}
 };
 

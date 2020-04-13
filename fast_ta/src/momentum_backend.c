@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "funcs.c"
+#include "debug_tools.c"
 
 /**
  * Computes Relative Strength Indicator On Data
@@ -150,11 +151,13 @@ float* _RSI_FLOAT(const float* close, int close_len, int _n) {
  * @param len   Time Series Length
  * @return      AO Indicator Time Series
  */
-double* _AO_DOUBLE(double*  high, double*  low, int n1, int n2, int len) {
+double* _AO_DOUBLE(double* high, double*  low, int n1, int n2, int len) {
     double* median = _double_pairwise_mean(high, low, len);
     double* sma1 = _double_sma(median, len, n1);
     double* sma2 = _double_sma(median, len, n2);
     _double_sub(sma1, sma2, median, len);
+    free(sma1);
+    free(sma2);
     return median;
 }
 
@@ -163,5 +166,54 @@ float* _AO_FLOAT(float* high, float* low, int n1, int n2, int len) {
     float* sma1 = _float_sma(median, len, n1);
     float* sma2 = _float_sma(median, len, n2);
     _float_sub(sma1, sma2, median, len);
+    free(sma1);
+    free(sma2);
     return median;
+}
+
+/**
+ * Computes KAMA Indicator On Data
+ * @param close     Close Time Series
+ * @param n1        Length
+ * @param n2        Fast Alpha
+ * @param n3        Slow Alpha
+ * @param len       Length of Close Time Series
+ * @return
+ */
+double* _KAMA_DOUBLE(double* close, int n1, int n2, int n3, int len) {
+    double* change = malloc((len-n1)*sizeof(double));
+    _double_sub(close+n1, close, change, len-n1);
+    _double_inplace_abs(change, len-n1);
+    double* vol_sum = _double_volatility_sum(close, n1, len);
+    double* sc = _double_div_arr(change, vol_sum, len-n1);
+    _double_inplace_mul(sc, len-n1, 2./(n2+1)-2./(n3+1));
+    _double_inplace_add(sc, len-n1, 2./(n3+1));
+    _double_inplace_square(sc, len-n1);
+    sc[0] = close[n1];
+
+    for (int i = 1; i < len-n1; i++) {
+        sc[i] = sc[i-1]+sc[i]*(close[i+n1] - sc[i-1]);
+    }
+    free(change);
+    free(vol_sum);
+    return sc;
+}
+
+float* _KAMA_FLOAT(float* close, int n1, int n2, int n3, int len) {
+    float* change = malloc((len-n1)*sizeof(float));
+    _float_sub(close+n1, close, change, len-n1);
+    _float_inplace_abs(change, len-n1);
+    float* vol_sum = _float_volatility_sum(close, n1, len);
+    float* sc = _float_div_arr(change, vol_sum, len-n1);
+    _float_inplace_mul(sc, len-n1, 2./(n2+1)-2./(n3+1));
+    _float_inplace_add(sc, len-n1, 2./(n3+1));
+    _float_inplace_square(sc, len-n1);
+    sc[0] = close[n1];
+
+    for (int i = 1; i < len-n1; i++) {
+        sc[i] = sc[i-1]+sc[i]*(close[i+n1] - sc[i-1]);
+    }
+    free(change);
+    free(vol_sum);
+    return sc;
 }
