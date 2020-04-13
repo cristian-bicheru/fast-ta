@@ -1,10 +1,11 @@
 #include "Python.h"
+
 #include <stdlib.h>
 
-const char* dtype_error_message = "Unsupported DType";
+#include "error_methods.h"
 
 void raise_dtype_error() {
-    PyErr_SetString(PyExc_TypeError, dtype_error_message);
+    PyErr_SetString(PyExc_TypeError, "Unsupported DType");
 }
 
 void raise_error(char* msg) {
