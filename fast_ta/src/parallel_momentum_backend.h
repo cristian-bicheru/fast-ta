@@ -18,3 +18,5 @@
  */
 double* _PARALLEL_RSI_DOUBLE(const double* close, int close_len,
                              int window_size, int thread_count);
+float* _PARALLEL_RSI_FLOAT(const float* close, int close_len,
+                             int window_size, int thread_count);

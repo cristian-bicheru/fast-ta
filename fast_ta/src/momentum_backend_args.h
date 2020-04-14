@@ -15,3 +15,14 @@ struct RsiDoubleArgs {
     int window_size;
     int prelim;
 };
+
+/**
+ * Contains the parameters to the _RSI_FLOAT backend functions.
+ */
+struct RsiFloatArgs {
+    const float* close;
+    float* out;
+    int close_len;
+    int window_size;
+    int prelim;
+};
