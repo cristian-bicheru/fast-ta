@@ -113,7 +113,109 @@ double* _RSI_DOUBLE(const double* close, double* out, int close_len, int _n,
 
 float* _RSI_FLOAT(const float* close, float* out, int close_len, int _n,
                   int prelim) {
-    // TODO: merge this function with the double version
+    // support the user mallocing themselves OR this function allocating the memory
+    float* rsi;
+    if (out == NULL) {
+        rsi = malloc(close_len * sizeof(float));
+    } else {
+        rsi = out;
+    }
+
+    float last_gain = 0;
+    float last_loss = 0;
+    // prelim == 0 is essentially just the normal behaviour of RSI
+    if (prelim == 0) {
+        for (int i = 0; i<_n; i++) {
+            float cd = close[i+1]-close[i];
+
+            float cgain;
+            float closs;
+            if (cd > 0) {
+                cgain = cd;
+                closs = 0;
+            } else if (cd < 0) {
+                cgain = 0;
+                closs = -cd;
+            } else {
+                cgain = 0;
+                closs = 0;
+            }
+
+            last_gain = (last_gain*i+cgain)/(i+1);
+            last_loss = (last_loss*i+closs)/(i+1);
+
+            if (last_loss == 0) {
+                if (last_gain == 0) {
+                    rsi[i+1] = 50;
+                } else {
+                    rsi[i+1] = 100;
+                }
+            } else {
+                rsi[i+1] = 100*(1-1/(1+last_gain/last_loss));
+            }
+        }
+    } else {
+        // some funky pointer math to move the close back the specified amount
+        // so we can get the moving averages to where they should be.
+        // NOTE: This is the dangerous part of the code.
+        float* reduced_close = close - prelim;
+        for (int i = 0; i<prelim + 1; i++) {
+            float cd = reduced_close[i+1]-reduced_close[i];
+
+            float cgain;
+            float closs;
+            if (cd > 0) {
+                cgain = cd;
+                closs = 0;
+            } else if (cd < 0) {
+                cgain = 0;
+                closs = -cd;
+            } else {
+                cgain = 0;
+                closs = 0;
+            }
+
+            last_gain = (last_gain*i+cgain)/(i+1);
+            last_loss = (last_loss*i+closs)/(i+1);
+        }
+    }
+
+    int start = prelim == 0 ? _n+1 : 1;
+    for (int i = start; i < close_len; i++) {
+        float cd = close[i]-close[i-1];
+
+        float cgain;
+        float closs;
+        if (cd > 0) {
+            cgain = cd;
+            closs = 0;
+        } else if (cd < 0) {
+            cgain = 0;
+            closs = -cd;
+        } else {
+            cgain = 0;
+            closs = 0;
+        }
+
+        last_gain = (last_gain*13+cgain)/14;
+        last_loss = (last_loss*13+closs)/14;
+
+        if (last_loss == 0) {
+            if (last_gain == 0) {
+                rsi[i] = 50;
+            } else {
+                rsi[i] = 100;
+            }
+        } else {
+            rsi[i] = 100*(1-1/(1+last_gain/last_loss));
+        }
+    }
+
+    if (prelim == 0) {
+        rsi[0] = rsi[1];
+    }
+
+    return rsi;
 }
 
 double* _AO_DOUBLE(double* high, double* low, int n1, int n2, int len) {
