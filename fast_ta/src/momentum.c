@@ -71,7 +71,7 @@ static PyObject* AO(PyObject* self, PyObject* args) {
     int type1 = PyArray_TYPE((PyArrayObject*) in1);
 
     if (type1 != PyArray_TYPE((PyArrayObject*) in2)) {
-        raise_error("Input Arrays Have Different DTypes");
+        raise_error("Input Array DType Mismatch");
         return NULL;
     }
 
@@ -175,10 +175,146 @@ static PyObject* KAMA(PyObject* self, PyObject* args) {
     }
 };
 
+static PyObject* ROC(PyObject* self, PyObject* args) {
+    int n;
+    PyObject* in;
+
+    if (!PyArg_ParseTuple(args, "Oi",
+                          &in,
+                          &n)) {
+        return NULL;
+    }
+
+    int type1 = PyArray_TYPE((PyArrayObject*) in);
+
+    PyArrayObject* _close = (PyArrayObject*) PyArray_FROM_OTF(in,
+                                                              type1,
+                                                              NPY_ARRAY_IN_ARRAY);
+    int len = PyArray_SIZE(_close);
+
+    switch(type1) {
+        case NPY_FLOAT64: {
+            double* close = PyArray_DATA(_close);
+            double* roc = _ROC_DOUBLE(close, n, len);
+            npy_intp dims[1] = {len-n};
+
+            Py_DECREF(_close);
+            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
+            memcpy(PyArray_DATA((PyArrayObject*) ret), roc,
+                   (len-n)*sizeof(double));
+            free(roc);
+            return ret;
+        }
+        case NPY_FLOAT32: {
+            float* close = PyArray_DATA(_close);
+            float* roc = _ROC_FLOAT(close, n, len);
+            npy_intp dims[1] = {len-n};
+
+            Py_DECREF(_close);
+            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
+            memcpy(PyArray_DATA((PyArrayObject*) ret), roc,
+                   (len-n)*sizeof(float));
+            free(roc);
+            return ret;
+        }
+        default:
+            raise_dtype_error();
+            return NULL;
+    }
+};
+
+static PyObject* STOCHASTIC_OSCILLATOR(PyObject* self, PyObject* args) {
+    int n;
+    int d;
+    PyObject* in1;
+    PyObject* in2;
+    PyObject* in3;
+
+    if (!PyArg_ParseTuple(args, "OOOii",
+                          &in1,
+                          &in2,
+                          &in3,
+                          &n,
+                          &d)) {
+        return NULL;
+    }
+
+    int type1 = PyArray_TYPE((PyArrayObject*) in1);
+
+    if (type1 != PyArray_TYPE((PyArrayObject*) in2) || type1 != PyArray_TYPE((PyArrayObject*) in3)) {
+        raise_error("Input Array DType Mismatch");
+        return NULL;
+    }
+
+    PyArrayObject* _high = (PyArrayObject*) PyArray_FROM_OTF(in1,
+                                                             type1,
+                                                             NPY_ARRAY_IN_ARRAY);
+    PyArrayObject* _low = (PyArrayObject*) PyArray_FROM_OTF(in2,
+                                                            type1,
+                                                            NPY_ARRAY_IN_ARRAY);
+    PyArrayObject* _close = (PyArrayObject*) PyArray_FROM_OTF(in3,
+                                                              type1,
+                                                              NPY_ARRAY_IN_ARRAY);
+    int len = PyArray_SIZE(_close);
+
+    if (len != PyArray_SIZE(_high) || len != PyArray_SIZE(_low)) {
+        raise_error("Input Array Dim Mismatch");
+        return NULL;
+    }
+
+    switch(type1) {
+        case NPY_FLOAT64: {
+            double* high = PyArray_DATA(_high);
+            double* low = PyArray_DATA(_low);
+            double* close = PyArray_DATA(_close);
+            struct double_array_pair so = _STOCHASTIC_OSCILLATOR_DOUBLE(high, low, close, n, d, len);
+            npy_intp dims[1] = {len-n};
+
+            PyObject* ret = PyTuple_New(2);
+            PyObject* arr1 = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
+            memcpy(PyArray_DATA((PyArrayObject*) arr1), so.arr1+n,
+                   (len-n)*sizeof(double));
+            PyObject* arr2 = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
+            memcpy(PyArray_DATA((PyArrayObject*) arr2), so.arr2,
+                   (len-n)*sizeof(double));
+            free(so.arr1);
+            free(so.arr2);
+            PyTuple_SetItem(ret, 0, arr1);
+            PyTuple_SetItem(ret, 1, arr2);
+            return ret;
+        }
+        case NPY_FLOAT32: {
+            float* high = PyArray_DATA(_high);
+            float* low = PyArray_DATA(_low);
+            float* close = PyArray_DATA(_close);
+            struct float_array_pair so = _STOCHASTIC_OSCILLATOR_FLOAT(high, low, close, n, d, len);
+            npy_intp dims[1] = {len-n};
+
+            PyObject* ret = PyTuple_New(2);
+            PyObject* arr1 = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
+            memcpy(PyArray_DATA((PyArrayObject*) arr1), so.arr1+n,
+                   (len-n)*sizeof(float));
+            PyObject* arr2 = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
+            memcpy(PyArray_DATA((PyArrayObject*) arr2), so.arr2,
+                   (len-n)*sizeof(float));
+            free(so.arr1);
+            free(so.arr2);
+            PyTuple_SetItem(ret, 0, arr1);
+            PyTuple_SetItem(ret, 1, arr2);
+            return ret;
+        }
+        default:
+            raise_dtype_error();
+            return NULL;
+    }
+};
+
 static PyMethodDef MomentumMethods[] = {
         {"RSI", RSI, METH_VARARGS, "Compute RSI On Data"},
         {"AO", AO, METH_VARARGS, "Compute AO On Data"},
         {"KAMA", KAMA, METH_VARARGS, "Compute KAMA On Data"},
+        {"ROC", ROC, METH_VARARGS, "Compute ROC On Data"},
+        {"StochasticOscillator", STOCHASTIC_OSCILLATOR, METH_VARARGS, "Compute Stochastic Oscillator On Data"},
         {NULL, NULL, 0, NULL}
 };
 

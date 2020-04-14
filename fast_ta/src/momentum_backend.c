@@ -2,6 +2,16 @@
 #include "funcs.c"
 #include "debug_tools.c"
 
+struct double_array_pair {
+    double* arr1;
+    double* arr2;
+};
+
+struct float_array_pair {
+    float* arr1;
+    float* arr2;
+};
+
 /**
  * Computes Relative Strength Indicator On Data
  * @param close     Close Time Series
@@ -178,7 +188,7 @@ float* _AO_FLOAT(float* high, float* low, int n1, int n2, int len) {
  * @param n2        Fast Alpha
  * @param n3        Slow Alpha
  * @param len       Length of Close Time Series
- * @return
+ * @return          KAMA Indicator Time Series
  */
 double* _KAMA_DOUBLE(double* close, int n1, int n2, int n3, int len) {
     double* change = malloc((len-n1)*sizeof(double));
@@ -216,4 +226,51 @@ float* _KAMA_FLOAT(float* close, int n1, int n2, int n3, int len) {
     free(change);
     free(vol_sum);
     return sc;
+}
+
+/**
+ * Compute ROC Indicator On Data
+ * @param close     Close Time Series
+ * @param n         Period
+ * @param len       Close Time Series Length
+ * @return          ROC Indicator Time Series
+ */
+double* _ROC_DOUBLE(double* close, int n, int len) {
+    double* roc = malloc((len-n)*sizeof(double));
+    _double_sub(close+n, close, roc, len-n);
+    _double_inplace_div_arr(roc, len-n, close);
+    _double_inplace_mul(roc, len-n, 100.);
+    return roc;
+}
+
+float* _ROC_FLOAT(float* close, int n, int len) {
+    float* roc = malloc((len-n)*sizeof(float));
+    _float_sub(close+n, close, roc, len-n);
+    _float_inplace_div_arr(roc, len-n, close);
+    _float_inplace_mul(roc, len-n, 100.f);
+    return roc;
+}
+
+struct double_array_pair _STOCHASTIC_OSCILLATOR_DOUBLE(double* high, double* low, double* close, int n, int d, int len) {
+    _double_inplace_running_max(high, len, n);
+    _double_inplace_running_min(low, len, n);
+    _double_sub(close+n, low+n, close+n, len-n);
+    _double_sub(high+n, low+n, high+n, len-n);
+    _double_inplace_div_arr(close+n, len-n, high+n);
+    _double_inplace_mul(close+n, len-n, 100.);
+
+    struct double_array_pair ret = {close, _double_sma(close+n, len-n, d)};
+    return ret;
+}
+
+struct float_array_pair _STOCHASTIC_OSCILLATOR_FLOAT(float* high, float* low, float* close, int n, int d, int len) {
+    _float_inplace_running_max(high, len, n);
+    _float_inplace_running_min(low, len, n);
+    _float_sub(close+n, low+n, close+n, len-n);
+    _float_sub(high+n, low+n, high+n, len-n);
+    _float_inplace_div_arr(close+n, len-n, high+n);
+    _float_inplace_mul(close+n, len-n, 100.f);
+
+    struct float_array_pair ret = {close, _float_sma(close+n, len-n, d)};
+    return ret;
 }
