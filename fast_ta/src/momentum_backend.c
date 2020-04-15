@@ -5,6 +5,42 @@
 #include "momentum_backend.h"
 #include "array_pair.h"
 
+#define COMPUTE_RSI_TEMPLATE(diff, last_gain, last_loss, window_size, TYPE) ({ \
+    TYPE gain;                                                                 \
+    TYPE loss;                                                                 \
+    if ((diff) > 0) {                                                          \
+        gain = (diff);                                                         \
+        loss = 0;                                                              \
+    } else if ((diff) < 0) {                                                   \
+        gain = 0;                                                              \
+        loss = -(diff);                                                        \
+    } else {                                                                   \
+        gain = 0;                                                              \
+        loss = 0;                                                              \
+    }                                                                          \
+                                                                               \
+    (*(last_gain)) =                                                           \
+        ((*last_gain) * ((window_size) - 1) + gain) / (window_size);           \
+    (*(last_loss)) =                                                           \
+        ((*last_loss) * ((window_size) - 1) + loss) / (window_size);           \
+                                                                               \
+    TYPE rsi;                                                                  \
+    if (*(last_loss) == 0) {                                                   \
+        if (*(last_gain) == 0) {                                               \
+            rsi = 50;                                                          \
+        } else {                                                               \
+            rsi = 100;                                                         \
+        }                                                                      \
+    } else {                                                                   \
+        rsi = 100 * (                                                          \
+                        1 -                                                    \
+                        1/( 1 + (*(last_gain))/(*(last_loss)) )                \
+                    );                                                         \
+    }                                                                          \
+                                                                               \
+    rsi;                                                                       \
+})
+
 double* _RSI_DOUBLE(const double* close, double* out, int close_len, int _n,
                     int prelim) {
     // support the user mallocing themselves OR this function allocating the memory
@@ -20,33 +56,9 @@ double* _RSI_DOUBLE(const double* close, double* out, int close_len, int _n,
     // prelim == 0 is essentially just the normal behaviour of RSI
     if (prelim == 0) {
         for (int i = 0; i<_n; i++) {
-            double cd = close[i+1]-close[i];
-
-            double cgain;
-            double closs;
-            if (cd > 0) {
-                cgain = cd;
-                closs = 0;
-            } else if (cd < 0) {
-                cgain = 0;
-                closs = -cd;
-            } else {
-                cgain = 0;
-                closs = 0;
-            }
-
-            last_gain = (last_gain*i+cgain)/(i+1);
-            last_loss = (last_loss*i+closs)/(i+1);
-
-            if (last_loss == 0) {
-                if (last_gain == 0) {
-                    rsi[i+1] = 50;
-                } else {
-                    rsi[i+1] = 100;
-                }
-            } else {
-                rsi[i+1] = 100*(1-1/(1+last_gain/last_loss));
-            }
+            double diff = close[i+1]-close[i];
+            rsi[i+1] = COMPUTE_RSI_TEMPLATE(diff, &last_gain, &last_loss, i+1,
+                                            double);
         }
     } else {
         // some funky pointer math to move the close back the specified amount
@@ -54,55 +66,16 @@ double* _RSI_DOUBLE(const double* close, double* out, int close_len, int _n,
         // NOTE: This is the dangerous part of the code.
         double* reduced_close = close - prelim;
         for (int i = 0; i<prelim + 1; i++) {
-            double cd = reduced_close[i+1]-reduced_close[i];
-
-            double cgain;
-            double closs;
-            if (cd > 0) {
-                cgain = cd;
-                closs = 0;
-            } else if (cd < 0) {
-                cgain = 0;
-                closs = -cd;
-            } else {
-                cgain = 0;
-                closs = 0;
-            }
-
-            last_gain = (last_gain*i+cgain)/(i+1);
-            last_loss = (last_loss*i+closs)/(i+1);
+            double diff = reduced_close[i+1]-reduced_close[i];
+            COMPUTE_RSI_TEMPLATE(diff, &last_gain, &last_loss, i+1, double);
         }
     }
 
     int start = prelim == 0 ? _n+1 : 1;
     for (int i = start; i < close_len; i++) {
-        double cd = close[i]-close[i-1];
-
-        double cgain;
-        double closs;
-        if (cd > 0) {
-            cgain = cd;
-            closs = 0;
-        } else if (cd < 0) {
-            cgain = 0;
-            closs = -cd;
-        } else {
-            cgain = 0;
-            closs = 0;
-        }
-
-        last_gain = (last_gain*13+cgain)/14;
-        last_loss = (last_loss*13+closs)/14;
-
-        if (last_loss == 0) {
-            if (last_gain == 0) {
-                rsi[i] = 50;
-            } else {
-                rsi[i] = 100;
-            }
-        } else {
-            rsi[i] = 100*(1-1/(1+last_gain/last_loss));
-        }
+        double diff = close[i]-close[i-1];
+        rsi[i] = COMPUTE_RSI_TEMPLATE(diff, &last_gain, &last_loss, _n,
+                                      double);
     }
 
     if (prelim == 0) {
@@ -127,33 +100,9 @@ float* _RSI_FLOAT(const float* close, float* out, int close_len, int _n,
     // prelim == 0 is essentially just the normal behaviour of RSI
     if (prelim == 0) {
         for (int i = 0; i<_n; i++) {
-            float cd = close[i+1]-close[i];
-
-            float cgain;
-            float closs;
-            if (cd > 0) {
-                cgain = cd;
-                closs = 0;
-            } else if (cd < 0) {
-                cgain = 0;
-                closs = -cd;
-            } else {
-                cgain = 0;
-                closs = 0;
-            }
-
-            last_gain = (last_gain*i+cgain)/(i+1);
-            last_loss = (last_loss*i+closs)/(i+1);
-
-            if (last_loss == 0) {
-                if (last_gain == 0) {
-                    rsi[i+1] = 50;
-                } else {
-                    rsi[i+1] = 100;
-                }
-            } else {
-                rsi[i+1] = 100*(1-1/(1+last_gain/last_loss));
-            }
+            float diff = close[i+1]-close[i];
+            rsi[i+1] = COMPUTE_RSI_TEMPLATE(diff, &last_gain, &last_loss, i+1,
+                                            float);
         }
     } else {
         // some funky pointer math to move the close back the specified amount
@@ -161,55 +110,16 @@ float* _RSI_FLOAT(const float* close, float* out, int close_len, int _n,
         // NOTE: This is the dangerous part of the code.
         float* reduced_close = close - prelim;
         for (int i = 0; i<prelim + 1; i++) {
-            float cd = reduced_close[i+1]-reduced_close[i];
-
-            float cgain;
-            float closs;
-            if (cd > 0) {
-                cgain = cd;
-                closs = 0;
-            } else if (cd < 0) {
-                cgain = 0;
-                closs = -cd;
-            } else {
-                cgain = 0;
-                closs = 0;
-            }
-
-            last_gain = (last_gain*i+cgain)/(i+1);
-            last_loss = (last_loss*i+closs)/(i+1);
+            float diff = reduced_close[i+1]-reduced_close[i];
+            COMPUTE_RSI_TEMPLATE(diff, &last_gain, &last_loss, i+1, float);
         }
     }
 
     int start = prelim == 0 ? _n+1 : 1;
     for (int i = start; i < close_len; i++) {
-        float cd = close[i]-close[i-1];
-
-        float cgain;
-        float closs;
-        if (cd > 0) {
-            cgain = cd;
-            closs = 0;
-        } else if (cd < 0) {
-            cgain = 0;
-            closs = -cd;
-        } else {
-            cgain = 0;
-            closs = 0;
-        }
-
-        last_gain = (last_gain*13+cgain)/14;
-        last_loss = (last_loss*13+closs)/14;
-
-        if (last_loss == 0) {
-            if (last_gain == 0) {
-                rsi[i] = 50;
-            } else {
-                rsi[i] = 100;
-            }
-        } else {
-            rsi[i] = 100*(1-1/(1+last_gain/last_loss));
-        }
+        float diff = close[i]-close[i-1];
+        rsi[i] = COMPUTE_RSI_TEMPLATE(diff, &last_gain, &last_loss, _n,
+                                      float);
     }
 
     if (prelim == 0) {
