@@ -41,8 +41,8 @@
     rsi;                                                                       \
 })
 
-double* _RSI_DOUBLE(const double* close, double* out, int close_len, int _n,
-                    int prelim) {
+double* _RSI_DOUBLE(const double* close, double* out, int close_len,
+                    int window_size, int prelim) {
     // support the user mallocing themselves OR this function allocating the memory
     double* rsi;
     if (out == NULL) {
@@ -55,7 +55,7 @@ double* _RSI_DOUBLE(const double* close, double* out, int close_len, int _n,
     double last_loss = 0;
     // prelim == 0 is essentially just the normal behaviour of RSI
     if (prelim == 0) {
-        for (int i = 0; i<_n; i++) {
+        for (int i = 0; i<window_size; i++) {
             double diff = close[i+1]-close[i];
             rsi[i+1] = COMPUTE_RSI_TEMPLATE(diff, &last_gain, &last_loss, i+1,
                                             double);
@@ -71,10 +71,10 @@ double* _RSI_DOUBLE(const double* close, double* out, int close_len, int _n,
         }
     }
 
-    int start = prelim == 0 ? _n+1 : 1;
+    int start = prelim == 0 ? window_size+1 : 1;
     for (int i = start; i < close_len; i++) {
         double diff = close[i]-close[i-1];
-        rsi[i] = COMPUTE_RSI_TEMPLATE(diff, &last_gain, &last_loss, _n,
+        rsi[i] = COMPUTE_RSI_TEMPLATE(diff, &last_gain, &last_loss, window_size,
                                       double);
     }
 
@@ -85,8 +85,8 @@ double* _RSI_DOUBLE(const double* close, double* out, int close_len, int _n,
     return rsi;
 }
 
-float* _RSI_FLOAT(const float* close, float* out, int close_len, int _n,
-                  int prelim) {
+float* _RSI_FLOAT(const float* close, float* out, int close_len,
+                  int window_size, int prelim) {
     // support the user mallocing themselves OR this function allocating the memory
     float* rsi;
     if (out == NULL) {
@@ -99,7 +99,7 @@ float* _RSI_FLOAT(const float* close, float* out, int close_len, int _n,
     float last_loss = 0;
     // prelim == 0 is essentially just the normal behaviour of RSI
     if (prelim == 0) {
-        for (int i = 0; i<_n; i++) {
+        for (int i = 0; i<window_size; i++) {
             float diff = close[i+1]-close[i];
             rsi[i+1] = COMPUTE_RSI_TEMPLATE(diff, &last_gain, &last_loss, i+1,
                                             float);
@@ -115,10 +115,10 @@ float* _RSI_FLOAT(const float* close, float* out, int close_len, int _n,
         }
     }
 
-    int start = prelim == 0 ? _n+1 : 1;
+    int start = prelim == 0 ? window_size+1 : 1;
     for (int i = start; i < close_len; i++) {
         float diff = close[i]-close[i-1];
-        rsi[i] = COMPUTE_RSI_TEMPLATE(diff, &last_gain, &last_loss, _n,
+        rsi[i] = COMPUTE_RSI_TEMPLATE(diff, &last_gain, &last_loss, window_size,
                                       float);
     }
 
