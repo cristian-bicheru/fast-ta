@@ -1,127 +1,84 @@
 #include <stdlib.h>
-#include "funcs.c"
-#include "debug_tools.c"
+#include <stdio.h>
 
-struct double_array_pair {
-    double* arr1;
-    double* arr2;
-};
+#include "funcs.h"
+#include "momentum_backend.h"
 
-struct float_array_pair {
-    float* arr1;
-    float* arr2;
-};
+double* _RSI_DOUBLE(const double* close, double* out, int close_len, int _n,
+                    int prelim) {
+    // support the user mallocing themselves OR this function allocating the memory
+    double* rsi;
+    if (out == NULL) {
+        rsi = malloc(close_len * sizeof(double));
+    } else {
+        rsi = out;
+    }
 
-/**
- * Computes Relative Strength Indicator On Data
- * @param close     Close Time Series
- * @param close_len Length of Close Time Series
- * @param _n        n-Value
- * @return          RSI Indicator Time Series
- */
-double* _RSI_DOUBLE(const double* close, int close_len, int _n) {
-    double last_gain, last_loss, cd, cgain, closs;
-    double* rsi = malloc(close_len * sizeof(double));
+    double last_gain = 0;
+    double last_loss = 0;
+    // prelim == 0 is essentially just the normal behaviour of RSI
+    if (prelim == 0) {
+        for (int i = 0; i<_n; i++) {
+            double cd = close[i+1]-close[i];
 
-    last_gain = 0;
-    last_loss = 0;
-
-    for (int i = 0; i<_n; i++) {
-        cd = close[i+1]-close[i];
-        if (cd > 0) {
-            cgain = cd;
-            closs = 0;
-        } else if (cd < 0) {
-            cgain = 0;
-            closs = -cd;
-        } else {
-            cgain = 0;
-            closs = 0;
-        }
-
-        last_gain = (last_gain*i+cgain)/(i+1);
-        last_loss = (last_loss*i+closs)/(i+1);
-
-        if (last_loss == 0) {
-            if (last_gain == 0) {
-                rsi[i+1] = 50;
+            double cgain;
+            double closs;
+            if (cd > 0) {
+                cgain = cd;
+                closs = 0;
+            } else if (cd < 0) {
+                cgain = 0;
+                closs = -cd;
             } else {
-                rsi[i+1] = 100;
+                cgain = 0;
+                closs = 0;
             }
-        } else {
-            rsi[i+1] = 100*(1-1/(1+last_gain/last_loss));
+
+            last_gain = (last_gain*i+cgain)/(i+1);
+            last_loss = (last_loss*i+closs)/(i+1);
+
+            if (last_loss == 0) {
+                if (last_gain == 0) {
+                    rsi[i+1] = 50;
+                } else {
+                    rsi[i+1] = 100;
+                }
+            } else {
+                rsi[i+1] = 100*(1-1/(1+last_gain/last_loss));
+            }
+        }
+    } else {
+        // some funky pointer math to move the close back the specified amount
+        // so we can get the moving averages to where they should be.
+        // NOTE: This is the dangerous part of the code.
+        double* reduced_close = close - prelim;
+        for (int i = 0; i<prelim + 1; i++) {
+            double cd = reduced_close[i+1]-reduced_close[i];
+
+            double cgain;
+            double closs;
+            if (cd > 0) {
+                cgain = cd;
+                closs = 0;
+            } else if (cd < 0) {
+                cgain = 0;
+                closs = -cd;
+            } else {
+                cgain = 0;
+                closs = 0;
+            }
+
+            last_gain = (last_gain*i+cgain)/(i+1);
+            last_loss = (last_loss*i+closs)/(i+1);
         }
     }
 
-    for (int i = _n+1; i < close_len; i++) {
-        cd = close[i]-close[i-1];
+    int start = prelim == 0 ? _n+1 : 1;
+    for (int i = start; i < close_len; i++) {
+        double cd = close[i]-close[i-1];
 
-        if (cd > 0) {
-            cgain = cd;
-            closs = 0;
-        } else if (cd < 0) {
-            cgain = 0;
-            closs = -cd;
-        } else {
-            cgain = 0;
-            closs = 0;
-        }
-
-        last_gain = (last_gain*13+cgain)/14;
-        last_loss = (last_loss*13+closs)/14;
-
-        if (last_loss == 0) {
-            if (last_gain == 0) {
-                rsi[i] = 50;
-            } else {
-                rsi[i] = 100;
-            }
-        } else {
-            rsi[i] = 100*(1-1/(1+last_gain/last_loss));
-        }
-    }
-
-    rsi[0] = rsi[1];
-    return rsi;
-}
-
-float* _RSI_FLOAT(const float* close, int close_len, int _n) {
-    float last_gain, last_loss, cd, cgain, closs;
-    float* rsi = malloc(close_len * sizeof(float));
-
-    last_gain = 0;
-    last_loss = 0;
-
-    for (int i = 0; i<_n; i++) {
-        cd = close[i+1]-close[i];
-        if (cd > 0) {
-            cgain = cd;
-            closs = 0;
-        } else if (cd < 0) {
-            cgain = 0;
-            closs = -cd;
-        } else {
-            cgain = 0;
-            closs = 0;
-        }
-
-        last_gain = (last_gain*i+cgain)/(i+1);
-        last_loss = (last_loss*i+closs)/(i+1);
-
-        if (last_loss == 0) {
-            if (last_gain == 0) {
-                rsi[i+1] = 50;
-            } else {
-                rsi[i+1] = 100;
-            }
-        } else {
-            rsi[i+1] = 100*(1-1/(1+last_gain/last_loss));
-        }
-    }
-
-    for (int i = _n+1; i < close_len; i++) {
-        cd = close[i]-close[i-1];
-
+        double cgain;
+        double closs;
         if (cd > 0) {
             cgain = cd;
             closs = 0;
@@ -147,20 +104,120 @@ float* _RSI_FLOAT(const float* close, int close_len, int _n) {
         }
     }
 
-    rsi[0] = rsi[1];
+    if (prelim == 0) {
+        rsi[0] = rsi[1];
+    }
+
     return rsi;
 }
 
-/**
- * Computes Awesome Oscillator Indicator On Data
- * @param high  High Time Series
- * @param low   Low Time Series  Note: high and low must have same lengths,
- *                                     his should be checked for before calling.
- * @param n1    High Time Series SMA Window Length
- * @param n2    Low Time Series SMA Window Length
- * @param len   Time Series Length
- * @return      AO Indicator Time Series
- */
+float* _RSI_FLOAT(const float* close, float* out, int close_len, int _n,
+                  int prelim) {
+    // support the user mallocing themselves OR this function allocating the memory
+    float* rsi;
+    if (out == NULL) {
+        rsi = malloc(close_len * sizeof(float));
+    } else {
+        rsi = out;
+    }
+
+    float last_gain = 0;
+    float last_loss = 0;
+    // prelim == 0 is essentially just the normal behaviour of RSI
+    if (prelim == 0) {
+        for (int i = 0; i<_n; i++) {
+            float cd = close[i+1]-close[i];
+
+            float cgain;
+            float closs;
+            if (cd > 0) {
+                cgain = cd;
+                closs = 0;
+            } else if (cd < 0) {
+                cgain = 0;
+                closs = -cd;
+            } else {
+                cgain = 0;
+                closs = 0;
+            }
+
+            last_gain = (last_gain*i+cgain)/(i+1);
+            last_loss = (last_loss*i+closs)/(i+1);
+
+            if (last_loss == 0) {
+                if (last_gain == 0) {
+                    rsi[i+1] = 50;
+                } else {
+                    rsi[i+1] = 100;
+                }
+            } else {
+                rsi[i+1] = 100*(1-1/(1+last_gain/last_loss));
+            }
+        }
+    } else {
+        // some funky pointer math to move the close back the specified amount
+        // so we can get the moving averages to where they should be.
+        // NOTE: This is the dangerous part of the code.
+        float* reduced_close = close - prelim;
+        for (int i = 0; i<prelim + 1; i++) {
+            float cd = reduced_close[i+1]-reduced_close[i];
+
+            float cgain;
+            float closs;
+            if (cd > 0) {
+                cgain = cd;
+                closs = 0;
+            } else if (cd < 0) {
+                cgain = 0;
+                closs = -cd;
+            } else {
+                cgain = 0;
+                closs = 0;
+            }
+
+            last_gain = (last_gain*i+cgain)/(i+1);
+            last_loss = (last_loss*i+closs)/(i+1);
+        }
+    }
+
+    int start = prelim == 0 ? _n+1 : 1;
+    for (int i = start; i < close_len; i++) {
+        float cd = close[i]-close[i-1];
+
+        float cgain;
+        float closs;
+        if (cd > 0) {
+            cgain = cd;
+            closs = 0;
+        } else if (cd < 0) {
+            cgain = 0;
+            closs = -cd;
+        } else {
+            cgain = 0;
+            closs = 0;
+        }
+
+        last_gain = (last_gain*13+cgain)/14;
+        last_loss = (last_loss*13+closs)/14;
+
+        if (last_loss == 0) {
+            if (last_gain == 0) {
+                rsi[i] = 50;
+            } else {
+                rsi[i] = 100;
+            }
+        } else {
+            rsi[i] = 100*(1-1/(1+last_gain/last_loss));
+        }
+    }
+
+    if (prelim == 0) {
+        rsi[0] = rsi[1];
+    }
+
+    return rsi;
+}
+
 double* _AO_DOUBLE(double* high, double*  low, int n1, int n2, int len) {
     double* median = _double_pairwise_mean(high, low, len);
     double* sma1 = _double_sma(median, len, n1);
