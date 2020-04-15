@@ -1,3 +1,0 @@
-/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug/CMakeFiles/fast_ta.dir
-/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug/CMakeFiles/edit_cache.dir
