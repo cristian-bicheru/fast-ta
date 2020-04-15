@@ -6,6 +6,7 @@
 #include <stdlib.h>
 
 #include "numpy/arrayobject.h"
+#include "array_pair.h"
 #include "momentum_backend.h"
 #include "parallel_momentum_backend.h"
 #include "error_methods.h"

@@ -2,21 +2,20 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdlib.h>
+
 #include "debug_tools.c"
+#include "funcs.h"
+
 
 #ifndef max
 #define max(a,b) ((a) > (b) ? (a) : (b))
 #endif
 
+#ifndef min
+#define min(a,b) ((a) < (b) ? (a) : (b))
+#endif
+
 // TODO: Replace inplace functions with functions that specify a storage destination.
-
-inline __m256 abs_ps(__m256 x, __m256 sign_mask) {
-    return _mm256_andnot_ps(sign_mask, x);
-}
-
-inline __m256d abs_pd(__m256d x, __m256d sign_mask) {
-    return _mm256_andnot_pd(sign_mask, x); // !sign_mask & x
-}
 
 void inplace_ema(double* arr, int len, double alpha) {
     for (int i = 1; i < len; i++) {
@@ -198,13 +197,6 @@ void _float_sub(float* arr1, float* arr2, float* arr3, int len) {
     }
 }
 
-/**
- * Periodic Volatility Sum
- * @param arr1
- * @param arr2
- * @param arr3
- * @param len
- */
 double* _double_volatility_sum(double *arr1, int period, int len) {
     double* vol_sum = malloc((len-period)*sizeof(double));
     double running_sum = 0;
@@ -243,12 +235,6 @@ float* _float_volatility_sum(float *arr1, int period, int len) {
     return vol_sum;
 }
 
-/**
- * Vectorized Array Division
- * @param arr
- * @param len
- * @param x
- */
 double* _double_div_arr(double* arr1, double* arr2, int len) {
     __m256d v1;
     __m256d v2;
@@ -285,12 +271,6 @@ float* _float_div_arr(float* arr1, float* arr2, int len) {
     return ret;
 }
 
-/**
- * Vectorized Inplace Multiplication
- * @param arr
- * @param len
- * @param x
- */
 void _double_inplace_mul(double* arr, int len, double x) {
     __m256d v;
     __m256d vx;
@@ -321,12 +301,6 @@ void _float_inplace_mul(float* arr, int len, float x) {
     }
 }
 
-/**
- * Vectorized Inplace Addition
- * @param arr
- * @param len
- * @param x
- */
 void _double_inplace_add(double* arr, int len, double x) {
     __m256d v;
     __m256d vx;
@@ -357,12 +331,6 @@ void _float_inplace_add(float* arr, int len, float x) {
     }
 }
 
-/**
- * Vectorized Inplace Square
- * @param arr
- * @param len
- * @param x
- */
 void _double_inplace_square(double* arr, int len) {
     __m256d v;
 
@@ -389,10 +357,6 @@ void _float_inplace_square(float* arr, int len) {
     }
 }
 
-/**
- * Vectorized Inplace Absolute Value
- * @param arr
- */
 void _double_inplace_abs(double* arr, int len) {
     __m256d v;
     const __m256d sign_mask = _mm256_set1_pd(-0.); // -0. = 1 << 63
@@ -421,12 +385,6 @@ void _float_inplace_abs(float* arr, int len) {
     }
 }
 
-/**
- * Vectorized Elementwise Inplace Division By Array
- * @param arr
- * @param len
- * @param x
- */
 void _double_inplace_div_arr(double* arr, int len, double* x) {
     __m256d v;
     __m256d vx;
@@ -457,12 +415,6 @@ void _float_inplace_div_arr(float* arr, int len, float* x) {
     }
 }
 
-/**
- * Vectorized Max of A Rolling Window Over An Array
- * @param arr
- * @param len
- * @param window
- */
 void _double_inplace_running_max(double* arr, int len, int window) {
     __m256d v;
     double m;
@@ -498,12 +450,6 @@ void _float_inplace_running_max(float* arr, int len, int window) {
     }
 }
 
-/**
- * Vectorized Min of A Rolling Window Over An Array
- * @param arr
- * @param len
- * @param window
- */
 void _double_inplace_running_min(double* arr, int len, int window) {
     __m256d v;
     double m;

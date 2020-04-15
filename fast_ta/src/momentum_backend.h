@@ -31,3 +31,32 @@ float* _RSI_FLOAT(const float* close, float* out, int close_len,
  */
 double* _AO_DOUBLE(double* high, double* low, int n1, int n2, int len);
 float* _AO_FLOAT(float * high, float * low, int n1, int n2, int len);
+
+/**
+ * Computes KAMA Indicator On Data
+ * @param close     Close Time Series
+ * @param n1        Length
+ * @param n2        Fast Alpha
+ * @param n3        Slow Alpha
+ * @param len       Length of Close Time Series
+ * @return          KAMA Indicator Time Series
+ */
+double* _KAMA_DOUBLE(double* close, int n1, int n2, int n3, int len);
+float* _KAMA_FLOAT(float* close, int n1, int n2, int n3, int len);
+
+/**
+ * Compute ROC Indicator On Data
+ * @param close     Close Time Series
+ * @param n         Period
+ * @param len       Close Time Series Length
+ * @return          ROC Indicator Time Series
+ */
+double* _ROC_DOUBLE(double* close, int n, int len);
+float* _ROC_FLOAT(float* close, int n, int len);
+
+struct double_array_pair
+_STOCHASTIC_OSCILLATOR_DOUBLE(double* high, double* low, double* close, int n,
+                              int d, int len);
+struct float_array_pair
+_STOCHASTIC_OSCILLATOR_FLOAT(float* high, float* low, float* close, int n,
+                             int d, int len);

@@ -3,6 +3,7 @@
 
 #include "funcs.h"
 #include "momentum_backend.h"
+#include "array_pair.h"
 
 double* _RSI_DOUBLE(const double* close, double* out, int close_len, int _n,
                     int prelim) {
@@ -238,15 +239,6 @@ float* _AO_FLOAT(float* high, float* low, int n1, int n2, int len) {
     return median;
 }
 
-/**
- * Computes KAMA Indicator On Data
- * @param close     Close Time Series
- * @param n1        Length
- * @param n2        Fast Alpha
- * @param n3        Slow Alpha
- * @param len       Length of Close Time Series
- * @return          KAMA Indicator Time Series
- */
 double* _KAMA_DOUBLE(double* close, int n1, int n2, int n3, int len) {
     double* change = malloc((len-n1)*sizeof(double));
     _double_sub(close+n1, close, change, len-n1);
@@ -285,13 +277,6 @@ float* _KAMA_FLOAT(float* close, int n1, int n2, int n3, int len) {
     return sc;
 }
 
-/**
- * Compute ROC Indicator On Data
- * @param close     Close Time Series
- * @param n         Period
- * @param len       Close Time Series Length
- * @return          ROC Indicator Time Series
- */
 double* _ROC_DOUBLE(double* close, int n, int len) {
     double* roc = malloc((len-n)*sizeof(double));
     _double_sub(close+n, close, roc, len-n);
