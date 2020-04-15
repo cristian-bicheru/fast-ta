@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdlib.h>
+#include <numpy/npy_math.h>
 
 #include "debug_tools.c"
 #include "funcs.h"
@@ -17,14 +18,19 @@
 
 // TODO: Replace inplace functions with functions that specify a storage destination.
 
-void inplace_ema(double* arr, int len, double alpha) {
+void _double_ema(const double* arr, int len, double alpha, double* outarr) {
     for (int i = 1; i < len; i++) {
-        arr[i] = arr[i-1] * (1-alpha) + arr[i] * alpha;
+        outarr[i] = arr[i-1] * (1-alpha) + arr[i] * alpha;
     }
 }
 
-double* _double_pairwise_mean(double* arr1, double* arr2, int len) {
-    double* median = aligned_alloc(256, len * sizeof(double));
+void _float_ema(const float* arr, int len, float alpha, float* outarr) {
+    for (int i = 1; i < len; i++) {
+        outarr[i] = arr[i-1] * (1-alpha) + arr[i] * alpha;
+    }
+}
+
+void _double_pairwise_mean(const double* arr1, const double* arr2, int len, double* outarr) {
     __m256d v1;
     __m256d v2;
     __m256d d2 = _mm256_set_pd(0.5, 0.5, 0.5, 0.5);
@@ -34,18 +40,15 @@ double* _double_pairwise_mean(double* arr1, double* arr2, int len) {
         v2 = _mm256_loadu_pd(&arr2[i]);
         v1 = _mm256_add_pd(v1, v2);
         v1 = _mm256_mul_pd(v1, d2);
-        _mm256_stream_pd(&median[i], v1);
+        _mm256_storeu_pd(&outarr[i], v1);
     }
 
     for (int i = len-len%4; i < len; i++) {
-        median[i] = (arr1[i]+arr2[i])/2;
+        outarr[i] = (arr1[i]+arr2[i])/2;
     }
-
-    return median;
 }
 
-float* _float_pairwise_mean(float* arr1, float* arr2, int len) {
-    float* median = aligned_alloc(256, len*sizeof(float));
+void _float_pairwise_mean(const float* arr1, const float* arr2, int len, float* outarr) {
     __m256 v1;
     __m256 v2;
     __m256 d2 = _mm256_set_ps(0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5);
@@ -55,48 +58,46 @@ float* _float_pairwise_mean(float* arr1, float* arr2, int len) {
         v2 = _mm256_loadu_ps(&arr2[i]);
         v1 = _mm256_add_ps(v1, v2);
         v1 = _mm256_mul_ps(v1, d2);
-        _mm256_stream_ps(&median[i], v1);
+        _mm256_storeu_ps(&outarr[i], v1);
     }
 
     for (int i = len-len%8; i < len; i++) {
-        median[i] = (arr1[i]+arr2[i])/2;
+        outarr[i] = (arr1[i]+arr2[i])/2;
     }
-
-    return median;
 }
 
 
-void _double_inplace_div(double* arr, int len, double x) {
+void _double_div(const double* arr, int len, double x, double* outarr) {
     __m256d v;
     __m256d vx;
     vx = _mm256_set_pd(x, x, x, x);
 
     for (int i = 0; i < len-len%4; i += 4) {
         v = _mm256_loadu_pd(&arr[i]);
-        _mm256_storeu_pd(&arr[i], _mm256_div_pd(v, vx));
+        _mm256_storeu_pd(&outarr[i], _mm256_div_pd(v, vx));
     }
 
     for (int i = len-len%4; i < len; i++) {
-        arr[i] = arr[i]/x;
+        outarr[i] = arr[i]/x;
     }
 }
 
-void _float_inplace_div(float* arr, int len, float x) {
+void _float_div(const float* arr, int len, float x, float* outarr) {
     __m256 v;
     __m256 vx;
     vx = _mm256_set_ps(x, x, x, x, x, x, x, x);
 
     for (int i = 0; i < len-len%8; i += 8) {
         v = _mm256_loadu_ps(&arr[i]);
-        _mm256_storeu_ps(&arr[i], _mm256_div_ps(v, vx));
+        _mm256_storeu_ps(&outarr[i], _mm256_div_ps(v, vx));
     }
 
     for (int i = len-len%8; i < len; i++) {
-        arr[i] = arr[i]/x;
+        outarr[i] = arr[i]/x;
     }
 }
 
-double _double_cumilative_sum(double* arr, int len) {
+double _double_cumilative_sum(const double* arr, int len) {
     __m256d v;
     __m256d _sum = _mm256_set_pd(0,0,0,0);
     double sum;
@@ -115,7 +116,7 @@ double _double_cumilative_sum(double* arr, int len) {
     return sum;
 }
 
-float _float_cumilative_sum(float* arr, int len) {
+float _float_cumilative_sum(const float* arr, int len) {
     __m256 v;
     __m256 _sum = _mm256_set_ps(0,0,0,0,0,0,0,0);
     float sum;
@@ -135,43 +136,42 @@ float _float_cumilative_sum(float* arr, int len) {
     return sum;
 }
 
-double* _double_sma(const double* arr, int len, int window) {
+void _double_sma(const double* arr, int len, int window, double* outarr) {
     double wsum = 0;
-    double* sma = malloc(len*sizeof(double));
 
     for (int i = 0; i < window; i++) {
         wsum += arr[i];
-        sma[i] = wsum/(i+1);
+        outarr[i] = wsum/(i+1);
     }
 
     for (int i = window; i < len; i++) {
         wsum += arr[i];
         wsum -= arr[i-window];
-        sma[i] = wsum;
+        outarr[i] = wsum;
     }
-    _double_inplace_div(sma + window, len - window, (double) window);
-    return sma;
+
+    _double_div(outarr + window, len - window, (double) window, outarr + window);
 }
 
-float* _float_sma(const float* arr, int len, int window) {
+void _float_sma(const float* arr, int len, int window, float* outarr) {
     float wsum = 0;
     float* sma = malloc(len*sizeof(float));
 
     for (int i = 0; i < window; i++) {
         wsum += arr[i];
-        sma[i] = wsum/(i+1);
+        outarr[i] = wsum/(i+1);
     }
 
     for (int i = window; i < len; i++) {
         wsum += arr[i];
         wsum -= arr[i-window];
-        sma[i] = wsum;
+        outarr[i] = wsum;
     }
-    _float_inplace_div(sma + window, len - window, (float) window);
-    return sma;
+
+    _float_div(outarr + window, len - window, (float) window, outarr + window);
 }
 
-void _double_sub(double *arr1, double *arr2, double *arr3, int len) {
+void _double_sub(const double *arr1, const double *arr2, double *arr3, int len) {
     __m256d v1;
     __m256d v2;
     for (int i = 0; i < len-len%4; i+=4) {
@@ -184,7 +184,7 @@ void _double_sub(double *arr1, double *arr2, double *arr3, int len) {
     }
 }
 
-void _float_sub(float* arr1, float* arr2, float* arr3, int len) {
+void _float_sub(const float* arr1, const float* arr2, float* arr3, int len) {
     __m256 v1;
     __m256 v2;
     for (int i = 0; i < len-len%8; i+=8) {
@@ -197,225 +197,183 @@ void _float_sub(float* arr1, float* arr2, float* arr3, int len) {
     }
 }
 
-double* _double_volatility_sum(double *arr1, int period, int len) {
-    double* vol_sum = malloc((len-period)*sizeof(double));
+void _double_volatility_sum(const double *arr1, int period, int len, double* outarr) {
     double running_sum = 0;
 
     for (int i = 1; i < period+1; i++) {
         running_sum += fabs(arr1[i]-arr1[i-1]);
     }
-    vol_sum[0] = running_sum;
+    outarr[0] = running_sum;
 
     for (int i = period+1; i < len; i++) {
         running_sum += fabs(arr1[i]-arr1[i-1]);
         running_sum -= fabs(arr1[i-period]-arr1[i-period-1]);
 
-        vol_sum[i-period] = running_sum;
+        outarr[i-period] = running_sum;
     }
-
-    return vol_sum;
 }
 
-float* _float_volatility_sum(float* arr1, int period, int len) {
-    float* vol_sum = malloc((len-period)*sizeof(float));
+void _float_volatility_sum(const float* arr1, int period, int len, float* outarr) {
     float running_sum = 0;
 
     for (int i = 1; i < period+1; i++) {
         running_sum += fabs(arr1[i]-arr1[i-1]);
     }
-    vol_sum[0] = running_sum;
+    outarr[0] = running_sum;
 
     for (int i = period+1; i < len; i++) {
         running_sum += fabs(arr1[i]-arr1[i-1]);
         running_sum -= fabs(arr1[i-period]-arr1[i-period-1]);
 
-        vol_sum[i-period] = running_sum;
+        outarr[i-period] = running_sum;
     }
-
-    return vol_sum;
 }
 
-double* _double_div_arr(double* arr1, double* arr2, int len) {
+void _double_div_arr(const double* arr1, const double* arr2, int len, double* outarr) {
     __m256d v1;
     __m256d v2;
-    double* ret = malloc(len*sizeof(double));
 
     for (int i = 0; i < len-len%4; i += 4) {
         v1 = _mm256_loadu_pd(&arr1[i]);
         v2 = _mm256_loadu_pd(&arr2[i]);
-        _mm256_storeu_pd(&ret[i], _mm256_div_pd(v1, v2));
+        _mm256_storeu_pd(&outarr[i], _mm256_div_pd(v1, v2));
     }
 
     for (int i = len-len%4; i < len; i++) {
-        ret[i] = arr1[i]/arr2[i];
+        outarr[i] = arr1[i]/arr2[i];
     }
-
-    return ret;
 }
 
-float* _float_div_arr(float* arr1, float* arr2, int len) {
+void _float_div_arr(const float* arr1, const float* arr2, int len, float* outarr) {
     __m256 v1;
     __m256 v2;
-    float* ret = malloc(len*sizeof(float));
 
     for (int i = 0; i < len-len%8; i += 8) {
         v1 = _mm256_loadu_ps(&arr1[i]);
         v2 = _mm256_loadu_ps(&arr2[i]);
-        _mm256_storeu_ps(&ret[i], _mm256_div_ps(v1, v2));
+        _mm256_storeu_ps(&outarr[i], _mm256_div_ps(v1, v2));
     }
 
     for (int i = len-len%8; i < len; i++) {
-        ret[i] = arr1[i]/arr2[i];
+        outarr[i] = arr1[i]/arr2[i];
     }
-
-    return ret;
 }
 
-void _double_inplace_mul(double* arr, int len, double x) {
+void _double_mul(const double* arr, int len, double x, double* outarr) {
     __m256d v;
     __m256d vx;
     vx = _mm256_set_pd(x, x, x, x);
 
     for (int i = 0; i < len-len%4; i += 4) {
         v = _mm256_loadu_pd(&arr[i]);
-        _mm256_storeu_pd(&arr[i], _mm256_mul_pd(v, vx));
+        _mm256_storeu_pd(&outarr[i], _mm256_mul_pd(v, vx));
     }
 
     for (int i = len-len%4; i < len; i++) {
-        arr[i] = arr[i]*x;
+        outarr[i] = arr[i]*x;
     }
 }
 
-void _float_inplace_mul(float* arr, int len, float x) {
+void _float_mul(const float* arr, int len, float x, float* outarr) {
     __m256 v;
     __m256 vx;
     vx = _mm256_set_ps(x, x, x, x, x, x, x, x);
 
     for (int i = 0; i < len-len%8; i += 8) {
         v = _mm256_loadu_ps(&arr[i]);
-        _mm256_storeu_ps(&arr[i], _mm256_mul_ps(v, vx));
+        _mm256_storeu_ps(&outarr[i], _mm256_mul_ps(v, vx));
     }
 
     for (int i = len-len%8; i < len; i++) {
-        arr[i] = arr[i]*x;
+        outarr[i] = arr[i]*x;
     }
 }
 
-void _double_inplace_add(double* arr, int len, double x) {
+void _double_add(const double* arr, int len, double x, double* outarr) {
     __m256d v;
     __m256d vx;
     vx = _mm256_set_pd(x, x, x, x);
 
     for (int i = 0; i < len-len%4; i += 4) {
         v = _mm256_loadu_pd(&arr[i]);
-        _mm256_storeu_pd(&arr[i], _mm256_add_pd(v, vx));
+        _mm256_storeu_pd(&outarr[i], _mm256_add_pd(v, vx));
     }
 
     for (int i = len-len%4; i < len; i++) {
-        arr[i] = arr[i]+x;
+        outarr[i] = arr[i]+x;
     }
 }
 
-void _float_inplace_add(float* arr, int len, float x) {
+void _float_add(const float* arr, int len, float x, float* outarr) {
     __m256 v;
     __m256 vx;
     vx = _mm256_set_ps(x, x, x, x, x, x, x, x);
 
     for (int i = 0; i < len-len%8; i += 8) {
         v = _mm256_loadu_ps(&arr[i]);
-        _mm256_storeu_ps(&arr[i], _mm256_add_ps(v, vx));
+        _mm256_storeu_ps(&outarr[i], _mm256_add_ps(v, vx));
     }
 
     for (int i = len-len%8; i < len; i++) {
-        arr[i] = arr[i]+x;
+        outarr[i] = arr[i]+x;
     }
 }
 
-void _double_inplace_square(double* arr, int len) {
+void _double_square(const double* arr, int len, double* outarr) {
     __m256d v;
 
     for (int i = 0; i < len-len%4; i += 4) {
         v = _mm256_loadu_pd(&arr[i]);
-        _mm256_storeu_pd(&arr[i], _mm256_mul_pd(v, v));
+        _mm256_storeu_pd(&outarr[i], _mm256_mul_pd(v, v));
     }
 
     for (int i = len-len%4; i < len; i++) {
-        arr[i] = arr[i]*arr[i];
+        outarr[i] = arr[i]*arr[i];
     }
 }
 
-void _float_inplace_square(float* arr, int len) {
+void _float_square(const float* arr, int len, float* outarr) {
     __m256 v;
 
     for (int i = 0; i < len-len%8; i += 8) {
         v = _mm256_loadu_ps(&arr[i]);
-        _mm256_storeu_ps(&arr[i], _mm256_mul_ps(v, v));
+        _mm256_storeu_ps(&outarr[i], _mm256_mul_ps(v, v));
     }
 
     for (int i = len-len%8; i < len; i++) {
-        arr[i] = arr[i]*arr[i];
+        outarr[i] = arr[i]*arr[i];
     }
 }
 
-void _double_inplace_abs(double* arr, int len) {
+void _double_abs(const double* arr, int len, double* outarr) {
     __m256d v;
     const __m256d sign_mask = _mm256_set1_pd(-0.); // -0. = 1 << 63
 
     for (int i = 0; i < len-len%4; i += 4) {
         v = _mm256_loadu_pd(&arr[i]);
-        _mm256_storeu_pd(&arr[i], abs_pd(v, sign_mask));
+        _mm256_storeu_pd(&outarr[i], abs_pd(v, sign_mask));
     }
 
     for (int i = len-len%4; i < len; i++) {
-        arr[i] = fabs(arr[i]);
+        outarr[i] = fabs(arr[i]);
     }
 }
 
-void _float_inplace_abs(float* arr, int len) {
+void _float_abs(const float* arr, int len, float* outarr) {
     __m256 v;
     const __m256 sign_mask = _mm256_set1_ps(-0.); // -0.f = 1 << 31
 
     for (int i = 0; i < len-len%8; i += 8) {
         v = _mm256_loadu_ps(&arr[i]);
-        _mm256_storeu_ps(&arr[i], abs_ps(v, sign_mask));
+        _mm256_storeu_ps(&outarr[i], abs_ps(v, sign_mask));
     }
 
     for (int i = len-len%8; i < len; i++) {
-        arr[i] = fabs(arr[i]);
+        outarr[i] = fabs(arr[i]);
     }
 }
 
-void _double_inplace_div_arr(double* arr, int len, double* x) {
-    __m256d v;
-    __m256d vx;
-
-    for (int i = 0; i < len-len%4; i += 4) {
-        vx = _mm256_loadu_pd(&x[i]);
-        v = _mm256_loadu_pd(&arr[i]);
-        _mm256_storeu_pd(&arr[i], _mm256_div_pd(v, vx));
-    }
-
-    for (int i = len-len%4; i < len; i++) {
-        arr[i] = arr[i]/x[i];
-    }
-}
-
-void _float_inplace_div_arr(float* arr, int len, float* x) {
-    __m256 v;
-    __m256 vx;
-
-    for (int i = 0; i < len-len%8; i += 8) {
-        vx = _mm256_loadu_ps(&x[i]);
-        v = _mm256_loadu_ps(&arr[i]);
-        _mm256_storeu_ps(&arr[i], _mm256_div_ps(v, vx));
-    }
-
-    for (int i = len-len%8; i < len; i++) {
-        arr[i] = arr[i]/x[i];
-    }
-}
-
-void _double_inplace_running_max(double* arr, int len, int window) {
+void _double_running_max(const double* arr, int len, int window, double* outarr) {
     __m256d v;
     double m;
     for (int i = 0; i < len-window; i++) {
@@ -428,11 +386,11 @@ void _double_inplace_running_max(double* arr, int len, int window) {
         for (int j = window-window%4; j < window; j++) {
             m = max(m, arr[i+j]);
         }
-        arr[i] = m;
+        outarr[i] = m;
     }
 }
 
-void _float_inplace_running_max(float* arr, int len, int window) {
+void _float_running_max(const float* arr, int len, int window, float* outarr) {
     __m256 v;
     float m;
     for (int i = 0; i < len-window; i++) {
@@ -446,11 +404,11 @@ void _float_inplace_running_max(float* arr, int len, int window) {
         for (int j = window-window%8; j < window; j++) {
             m = max(m, arr[i+j]);
         }
-        arr[i] = m;
+        outarr[i] = m;
     }
 }
 
-void _double_inplace_running_min(double* arr, int len, int window) {
+void _double_running_min(const double* arr, int len, int window, double* outarr) {
     __m256d v;
     double m;
     for (int i = 0; i < len-window; i++) {
@@ -463,11 +421,11 @@ void _double_inplace_running_min(double* arr, int len, int window) {
         for (int j = window-window%4; j < window; j++) {
             m = min(m, arr[i+j]);
         }
-        arr[i] = m;
+        outarr[i] = m;
     }
 }
 
-void _float_inplace_running_min(float* arr, int len, int window) {
+void _float_running_min(const float* arr, int len, int window, float* outarr) {
     __m256 v;
     float m;
     for (int i = 0; i < len-window; i++) {
@@ -481,6 +439,18 @@ void _float_inplace_running_min(float* arr, int len, int window) {
         for (int j = window-window%8; j < window; j++) {
             m = min(m, arr[i+j]);
         }
-        arr[i] = m;
+        outarr[i] = m;
+    }
+}
+
+void _double_set_nan(double* arr, int len) {
+    for (int i = 0; i < len; i++) {
+        arr[i] = NPY_NAN;
+    }
+}
+
+void _float_set_nan(float* arr, int len) {
+    for (int i = 0; i < len; i++) {
+        arr[i] = NPY_NANF;
     }
 }

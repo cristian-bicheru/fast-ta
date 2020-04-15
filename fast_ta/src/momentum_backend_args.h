@@ -8,7 +8,7 @@
 /**
  * Contains the parameters to the _RSI_DOUBLE backend functions.
  */
-struct RsiDoubleArgs {
+struct RSIDoubleArgs {
     const double* close;
     double* out;
     int close_len;
@@ -19,7 +19,7 @@ struct RsiDoubleArgs {
 /**
  * Contains the parameters to the _RSI_FLOAT backend functions.
  */
-struct RsiFloatArgs {
+struct RSIFloatArgs {
     const float* close;
     float* out;
     int close_len;

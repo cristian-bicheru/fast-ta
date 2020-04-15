@@ -1,0 +1,1 @@
+/usr/bin/cc -fPIC -g  -shared -Wl,-soname,libfast_ta.so -o libfast_ta.so CMakeFiles/fast_ta.dir/momentum.c.o CMakeFiles/fast_ta.dir/momentum_backend.c.o CMakeFiles/fast_ta.dir/funcs.c.o CMakeFiles/fast_ta.dir/debug_tools.c.o CMakeFiles/fast_ta.dir/error_methods.c.o 

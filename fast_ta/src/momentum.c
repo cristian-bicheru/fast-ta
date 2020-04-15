@@ -164,24 +164,24 @@ static PyObject* KAMA(PyObject* self, PyObject* args) {
         case NPY_FLOAT64: {
             double* close = PyArray_DATA(_close);
             double* kama = _KAMA_DOUBLE(close, n1, n2, n3, len);
-            npy_intp dims[1] = {len-n1};
+            npy_intp dims[1] = {len};
 
             Py_DECREF(_close);
             PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
             memcpy(PyArray_DATA((PyArrayObject*) ret), kama,
-                   (len-n1)*sizeof(double));
+                   len*sizeof(double));
             free(kama);
             return ret;
         }
         case NPY_FLOAT32: {
             float* close = PyArray_DATA(_close);
             float* kama = _KAMA_FLOAT(close, n1, n2, n3, len);
-            npy_intp dims[1] = {len-n1};
+            npy_intp dims[1] = {len};
 
             Py_DECREF(_close);
             PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
             memcpy(PyArray_DATA((PyArrayObject*) ret), kama,
-                   (len-n1)*sizeof(float));
+                   len*sizeof(float));
             free(kama);
             return ret;
         }
@@ -212,24 +212,24 @@ static PyObject* ROC(PyObject* self, PyObject* args) {
         case NPY_FLOAT64: {
             double* close = PyArray_DATA(_close);
             double* roc = _ROC_DOUBLE(close, n, len);
-            npy_intp dims[1] = {len-n};
+            npy_intp dims[1] = {len};
 
             Py_DECREF(_close);
             PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
             memcpy(PyArray_DATA((PyArrayObject*) ret), roc,
-                   (len-n)*sizeof(double));
+                   len*sizeof(double));
             free(roc);
             return ret;
         }
         case NPY_FLOAT32: {
             float* close = PyArray_DATA(_close);
             float* roc = _ROC_FLOAT(close, n, len);
-            npy_intp dims[1] = {len-n};
+            npy_intp dims[1] = {len};
 
             Py_DECREF(_close);
             PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
             memcpy(PyArray_DATA((PyArrayObject*) ret), roc,
-                   (len-n)*sizeof(float));
+                   len*sizeof(float));
             free(roc);
             return ret;
         }

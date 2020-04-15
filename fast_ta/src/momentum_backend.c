@@ -129,100 +129,132 @@ float* _RSI_FLOAT(const float* close, float* out, int close_len, int _n,
     return rsi;
 }
 
-double* _AO_DOUBLE(double* high, double*  low, int n1, int n2, int len) {
-    double* median = _double_pairwise_mean(high, low, len);
-    double* sma1 = _double_sma(median, len, n1);
-    double* sma2 = _double_sma(median, len, n2);
+double* _AO_DOUBLE(const double* high, const double*  low, int n1, int n2, int len) {
+    double* median = malloc(len*sizeof(double));
+    double* sma1 = malloc(len*sizeof(double));
+    double* sma2 = malloc(len*sizeof(double));
+    _double_pairwise_mean(high, low, len, median);
+    _double_sma(median, len, n1, sma1);
+    _double_sma(median, len, n2, sma2);
     _double_sub(sma1, sma2, median, len);
     free(sma1);
     free(sma2);
     return median;
 }
 
-float* _AO_FLOAT(float* high, float* low, int n1, int n2, int len) {
-    float* median = _float_pairwise_mean(high, low, len);
-    float* sma1 = _float_sma(median, len, n1);
-    float* sma2 = _float_sma(median, len, n2);
+float* _AO_FLOAT(const float* high, const float* low, int n1, int n2, int len) {
+    float* median = malloc(len*sizeof(float));
+    float* sma1 = malloc(len*sizeof(float));
+    float* sma2 = malloc(len*sizeof(float));
+    _float_pairwise_mean(high, low, len, median);
+    _float_sma(median, len, n1, sma1);
+    _float_sma(median, len, n2, sma2);
     _float_sub(sma1, sma2, median, len);
     free(sma1);
     free(sma2);
     return median;
 }
 
-double* _KAMA_DOUBLE(double* close, int n1, int n2, int n3, int len) {
+double* _KAMA_DOUBLE(const double* close, int n1, int n2, int n3, int len) {
     double* change = malloc((len-n1)*sizeof(double));
+    double* vol_sum = malloc(len*sizeof(double));
+    double* sc = malloc(len*sizeof(double));
     _double_sub(close+n1, close, change, len-n1);
-    _double_inplace_abs(change, len-n1);
-    double* vol_sum = _double_volatility_sum(close, n1, len);
-    double* sc = _double_div_arr(change, vol_sum, len-n1);
-    _double_inplace_mul(sc, len-n1, 2./(n2+1)-2./(n3+1));
-    _double_inplace_add(sc, len-n1, 2./(n3+1));
-    _double_inplace_square(sc, len-n1);
-    sc[0] = close[n1];
+    _double_abs(change, len-n1, change);
+    _double_volatility_sum(close, n1, len, vol_sum);
+    _double_div_arr(change, vol_sum, len-n1, sc+n1);
+    _double_mul(sc+n1, len-n1, 2./(n2+1)-2./(n3+1), sc+n1);
+    _double_add(sc+n1, len-n1, 2./(n3+1), sc+n1);
+    _double_square(sc+n1, len-n1, sc+n1);
+    sc[n1] = close[n1];
 
     for (int i = 1; i < len-n1; i++) {
-        sc[i] = sc[i-1]+sc[i]*(close[i+n1] - sc[i-1]);
+        sc[i+n1] = sc[i+n1-1]+sc[i+n1]*(close[i+n1] - sc[i+n1-1]);
     }
+
+    _double_set_nan(sc, n1);
+
     free(change);
     free(vol_sum);
     return sc;
 }
 
-float* _KAMA_FLOAT(float* close, int n1, int n2, int n3, int len) {
+float* _KAMA_FLOAT(const float* close, int n1, int n2, int n3, int len) {
     float* change = malloc((len-n1)*sizeof(float));
+    float* vol_sum = malloc(len*sizeof(float));
+    float* sc = malloc(len*sizeof(float));
     _float_sub(close+n1, close, change, len-n1);
-    _float_inplace_abs(change, len-n1);
-    float* vol_sum = _float_volatility_sum(close, n1, len);
-    float* sc = _float_div_arr(change, vol_sum, len-n1);
-    _float_inplace_mul(sc, len-n1, 2./(n2+1)-2./(n3+1));
-    _float_inplace_add(sc, len-n1, 2./(n3+1));
-    _float_inplace_square(sc, len-n1);
-    sc[0] = close[n1];
+    _float_abs(change, len-n1, change);
+    _float_volatility_sum(close, n1, len, vol_sum);
+    _float_div_arr(change, vol_sum, len-n1, sc+n1);
+    _float_mul(sc+n1, len-n1, 2./(n2+1)-2./(n3+1), sc+n1);
+    _float_add(sc+n1, len-n1, 2./(n3+1), sc+n1);
+    _float_square(sc+n1, len-n1, sc+n1);
+    sc[n1] = close[n1];
 
     for (int i = 1; i < len-n1; i++) {
-        sc[i] = sc[i-1]+sc[i]*(close[i+n1] - sc[i-1]);
+        sc[i+n1] = sc[i+n1-1]+sc[i+n1]*(close[i+n1] - sc[i+n1-1]);
     }
+
+    _float_set_nan(sc, n1);
+
     free(change);
     free(vol_sum);
     return sc;
 }
 
-double* _ROC_DOUBLE(double* close, int n, int len) {
-    double* roc = malloc((len-n)*sizeof(double));
-    _double_sub(close+n, close, roc, len-n);
-    _double_inplace_div_arr(roc, len-n, close);
-    _double_inplace_mul(roc, len-n, 100.);
+double* _ROC_DOUBLE(const double* close, int n, int len) {
+    double* roc = malloc(len*sizeof(double));
+    _double_sub(close+n, close, roc+n, len-n);
+    _double_div_arr(roc+n, close, len-n, roc+n);
+    _double_mul(roc+n, len-n, 100., roc+n);
+    _double_set_nan(roc, n);
     return roc;
 }
 
-float* _ROC_FLOAT(float* close, int n, int len) {
-    float* roc = malloc((len-n)*sizeof(float));
-    _float_sub(close+n, close, roc, len-n);
-    _float_inplace_div_arr(roc, len-n, close);
-    _float_inplace_mul(roc, len-n, 100.f);
+float* _ROC_FLOAT(const float* close, int n, int len) {
+    float* roc = malloc(len*sizeof(float));
+    _float_sub(close+n, close, roc+n, len-n);
+    _float_div_arr(roc+n, close, len-n, roc+n);
+    _float_mul(roc+n, len-n, 100.f, roc+n);
+    _float_set_nan(roc, n);
     return roc;
 }
 
-struct double_array_pair _STOCHASTIC_OSCILLATOR_DOUBLE(double* high, double* low, double* close, int n, int d, int len) {
-    _double_inplace_running_max(high, len, n);
-    _double_inplace_running_min(low, len, n);
-    _double_sub(close+n, low+n, close+n, len-n);
-    _double_sub(high+n, low+n, high+n, len-n);
-    _double_inplace_div_arr(close+n, len-n, high+n);
-    _double_inplace_mul(close+n, len-n, 100.);
+struct double_array_pair _STOCHASTIC_OSCILLATOR_DOUBLE(const double* high, const double* low, double* close, int n, int d, int len) {
+    // NOTE: While running_max and running_min are initially running maxes and minimums,
+    //       they are reused later on save memory.
+    double* running_max = malloc((len-n)*sizeof(double));
+    double* running_min = malloc((len-n)*sizeof(double));
 
-    struct double_array_pair ret = {close, _double_sma(close+n, len-n, d)};
+    _double_running_max(high, len, n, running_max);
+    _double_running_min(low, len, n, running_min);
+    _double_sub(running_max, running_min, running_max, len-n);
+    _double_sub(close+n, running_min, running_min, len-n);
+
+    _double_div_arr(running_min, running_max, len-n, running_min);
+    _double_mul(running_min, len-n, 100., running_min);
+    _double_sma(running_min, len-n, d, running_max);
+
+    struct double_array_pair ret = {running_min, running_max};
     return ret;
 }
 
-struct float_array_pair _STOCHASTIC_OSCILLATOR_FLOAT(float* high, float* low, float* close, int n, int d, int len) {
-    _float_inplace_running_max(high, len, n);
-    _float_inplace_running_min(low, len, n);
-    _float_sub(close+n, low+n, close+n, len-n);
-    _float_sub(high+n, low+n, high+n, len-n);
-    _float_inplace_div_arr(close+n, len-n, high+n);
-    _float_inplace_mul(close+n, len-n, 100.f);
+struct float_array_pair _STOCHASTIC_OSCILLATOR_FLOAT(const float* high, const float* low, float* close, int n, int d, int len) {
+    // NOTE: While running_max and running_min are initially running maxes and minimums,
+    //       they are reused later on save memory.
+    float* running_max = malloc((len-n)*sizeof(float));
+    float* running_min = malloc((len-n)*sizeof(float));
 
-    struct float_array_pair ret = {close, _float_sma(close+n, len-n, d)};
+    _float_running_max(high, len, n, running_max);
+    _float_running_min(low, len, n, running_min);
+    _float_sub(running_max, running_min, running_max, len-n);
+    _float_sub(close+n, running_min, running_min, len-n);
+
+    _float_div_arr(running_min, running_max, len-n, running_min);
+    _float_mul(running_min, len-n, 100.f, running_min);
+    _float_sma(running_min, len-n, d, running_max);
+
+    struct float_array_pair ret = {running_min, running_max};
     return ret;
 }

@@ -14,7 +14,7 @@
  * Only meant as a private helper. Not defined in header.
  */
 void* _rsi_double_helper(void* _args) {
-    struct RsiDoubleArgs* args = (struct RsiDoubleArgs*)_args;
+    struct RSIDoubleArgs* args = (struct RSIDoubleArgs*)_args;
     _RSI_DOUBLE(args->close, args->out, args->close_len, args->window_size,
                 args->prelim);
 
@@ -30,7 +30,7 @@ double* _PARALLEL_RSI_DOUBLE(const double* close, int close_len,
     }
 
     pthread_t threads[thread_count];
-    struct RsiDoubleArgs args[thread_count];
+    struct RSIDoubleArgs args[thread_count];
 
     // the +1 here is to accomodate for uneven division of the Close Time Series.
     int chunk_size = close_len/thread_count + 1;
@@ -79,7 +79,7 @@ double* _PARALLEL_RSI_DOUBLE(const double* close, int close_len,
  * Only meant as a private helper. Not defined in header.
  */
 void* _rsi_float_helper(void* _args) {
-    struct RsiFloatArgs* args = (struct RsiFloatArgs*)_args;
+    struct RSIDoubleArgs* args = (struct RSIDoubleArgs*)_args;
     _RSI_FLOAT(args->close, args->out, args->close_len, args->window_size,
                 args->prelim);
 
@@ -95,7 +95,7 @@ float* _PARALLEL_RSI_FLOAT(const float* close, int close_len,
     }
 
     pthread_t threads[thread_count];
-    struct RsiFloatArgs args[thread_count];
+    struct RSIDoubleArgs args[thread_count];
 
     // the +1 here is to accomodate for uneven division of the Close Time Series.
     int chunk_size = close_len/thread_count + 1;

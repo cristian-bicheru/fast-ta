@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="fast_ta"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j16 -f &quot;/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j16 -f &quot;/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j16 -f &quot;/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j16 -f &quot;/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j16 -f &quot;/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j16 -f &quot;/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j16 -f &quot;/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j16 -f &quot;/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="fast_ta">
+				<Option output="/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug/libfast_ta.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/include/python3.7"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j16 -f &quot;/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 fast_ta"/>
+					<CompileFile command="/usr/bin/make -j16 -f &quot;/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j16 -f &quot;/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j16 -f &quot;/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="fast_ta/fast">
+				<Option output="/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug/libfast_ta.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/include/python3.7"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j16 -f &quot;/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 fast_ta/fast"/>
+					<CompileFile command="/usr/bin/make -j16 -f &quot;/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j16 -f &quot;/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j16 -f &quot;/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j16 -f &quot;/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j16 -f &quot;/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j16 -f &quot;/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j16 -f &quot;/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/debug_tools.c">
+			<Option target="fast_ta"/>
+		</Unit>
+		<Unit filename="/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/error_methods.c">
+			<Option target="fast_ta"/>
+		</Unit>
+		<Unit filename="/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/funcs.c">
+			<Option target="fast_ta"/>
+		</Unit>
+		<Unit filename="/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/momentum.c">
+			<Option target="fast_ta"/>
+		</Unit>
+		<Unit filename="/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/momentum_backend.c">
+			<Option target="fast_ta"/>
+		</Unit>
+		<Unit filename="/home/biscuit/Desktop/ai-lab/fast-ta/fast_ta/src/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

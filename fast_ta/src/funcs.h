@@ -4,6 +4,13 @@
 #include <stdlib.h>
 
 /**
+ * AVX Alligned Malloc
+ */
+#ifndef avx_malloc
+#define avx_malloc(size) (alligned_malloc(256, size))
+#endif
+
+/**
  * AVX Absolute Value
  * @param x
  * @param sign_mask
@@ -14,35 +21,46 @@ inline __m256 abs_ps(__m256 x, __m256 sign_mask) {
 }
 
 inline __m256d abs_pd(__m256d x, __m256d sign_mask) {
-    return _mm256_andnot_pd(sign_mask, x); // !sign_mask & x
+    return _mm256_andnot_pd(sign_mask, x);
 }
 
 /**
- * Inplace Exponential Moving Average
+ * Exponential Moving Average
  * @param arr
  * @param len
  * @param alpha
  */
-void inplace_ema(double* arr, int len, double alpha);
+void _double_ema(const double* arr, int len, double alpha, double* outarr);
+void _float_ema(const float* arr, int len, float alpha, float* outarr);
 
 /**
  * Vectorized Pairwise Mean Between Two Arrays
  * @param arr1
  * @param arr2
  * @param len
- * @return
+ * @param outarr
  */
-double* _double_pairwise_mean(double* arr1, double* arr2, int len);
-float* _float_pairwise_mean(float* arr1, float* arr2, int len);
+void _double_pairwise_mean(const double* arr1, const double* arr2, int len, double* outarr);
+void _float_pairwise_mean(const float* arr1, const float* arr2, int len, float* outarr);
 
 /**
- * Vectorized Inplace Division
+ * Vectorized Division By Constant
  * @param arr
  * @param len
  * @param x
+ * @param outarr
  */
-void double_inplace_div(double* arr, int len, double x);
-void float_inplace_div(float* arr, int len, float x);
+void _double_div(const double* arr, int len, double x, double* outarr);
+void _float_div(const float* arr, int len, float x, float* outarr);
+
+/**
+ * Vectorized Sum of Array
+ * @param arr
+ * @param len
+ * @return sum
+ */
+double _double_cumilative_sum(const double* arr, int len);
+float _float_cumilative_sum(const float* arr, int len);
 
 /**
  * Compute the Simple Moving Average on an array.
@@ -51,8 +69,8 @@ void float_inplace_div(float* arr, int len, float x);
  * @param window
  * @return sma
  */
-double* _double_sma(const double* arr, int len, int window);
-float* _float_sma(const float* arr, int len, int window);
+void _double_sma(const double* arr, int len, int window, double* outarr);
+void _float_sma(const float* arr, int len, int window, float* outarr);
 
 /**
  * Subtract two arrays, store the result in a third array
@@ -61,8 +79,8 @@ float* _float_sma(const float* arr, int len, int window);
  * @param arr3
  * @param len
  */
-void _double_sub(double *arr1, double *arr2, double *arr3, int len);
-void _float_sub(float* arr1, float* arr2, float* arr3, int len);
+void _double_sub(const double *arr1, const double *arr2, double *arr3, int len);
+void _float_sub(const float* arr1, const float* arr2, float* arr3, int len);
 
 /**
  * Periodic Volatility Sum
@@ -71,8 +89,8 @@ void _float_sub(float* arr1, float* arr2, float* arr3, int len);
  * @param arr3
  * @param len
  */
-double* _double_volatility_sum(double *arr1, int period, int len);
-float* _float_volatility_sum(float *arr1, int period, int len);
+void _double_volatility_sum(const double *arr1, int period, int len, double* outarr);
+void _float_volatility_sum(const float *arr1, int period, int len, float* outarr);
 
 /**
  * Vectorized Array Division
@@ -80,8 +98,8 @@ float* _float_volatility_sum(float *arr1, int period, int len);
  * @param len
  * @param x
  */
-double* _double_div_arr(double* arr1, double* arr2, int len);
-float* _float_div_arr(float* arr1, float* arr2, int len);
+void _double_div_arr(const double* arr1, const double* arr2, int len, double* outarr);
+void _float_div_arr(const float* arr1, const float* arr2, int len, float* outarr);
 
 /**
  * Vectorized Inplace Multiplication
@@ -89,8 +107,8 @@ float* _float_div_arr(float* arr1, float* arr2, int len);
  * @param len
  * @param x
  */
-void _double_inplace_mul(double* arr, int len, double x);
-void _float_inplace_mul(float* arr, int len, float x);
+void _double_mul(const double* arr, int len, double x, double* outarr);
+void _float_mul(const float* arr, int len, float x, float* outarr);
 
 /**
  * Vectorized Inplace Addition
@@ -98,8 +116,8 @@ void _float_inplace_mul(float* arr, int len, float x);
  * @param len
  * @param x
  */
-void _double_inplace_add(double* arr, int len, double x);
-void _float_inplace_add(float* arr, int len, float x);
+void _double_add(const double* arr, int len, double x, double* outarr);
+void _float_add(const float* arr, int len, float x, float* outarr);
 
 /**
  * Vectorized Inplace Square
@@ -107,24 +125,15 @@ void _float_inplace_add(float* arr, int len, float x);
  * @param len
  * @param x
  */
-void _double_inplace_square(double* arr, int len);
-void _float_inplace_square(float* arr, int len);
+void _double_square(const double* arr, int len, double* outarr);
+void _float_square(const float* arr, int len, float* outarr);
 
 /**
  * Vectorized Inplace Absolute Value
  * @param arr
  */
-void _double_inplace_abs(double* arr, int len);
-void _float_inplace_abs(float* arr, int len);
-
-/**
- * Vectorized Elementwise Inplace Division By Array
- * @param arr
- * @param len
- * @param x
- */
-void _double_inplace_div_arr(double* arr, int len, double* x);
-void _float_inplace_div_arr(float* arr, int len, float* x);
+void _double_abs(const double* arr, int len, double* outarr);
+void _float_abs(const float* arr, int len, float* outarr);
 
 /**
  * Vectorized Max of A Rolling Window Over An Array
@@ -132,8 +141,8 @@ void _float_inplace_div_arr(float* arr, int len, float* x);
  * @param len
  * @param window
  */
-void _double_inplace_running_max(double* arr, int len, int window);
-void _float_inplace_running_max(float* arr, int len, int window);
+void _double_running_max(const double* arr, int len, int window, double* outarr);
+void _float_running_max(const float* arr, int len, int window, float* outarr);
 
 /**
  * Vectorized Min of A Rolling Window Over An Array
@@ -141,5 +150,13 @@ void _float_inplace_running_max(float* arr, int len, int window);
  * @param len
  * @param window
  */
-void _double_inplace_running_min(double* arr, int len, int window);
-void _float_inplace_running_min(float* arr, int len, int window);
+void _double_running_min(const double* arr, int len, int window, double* outarr);
+void _float_running_min(const float* arr, int len, int window, float* outarr);
+
+/**
+ * Set Values to NaN
+ * @param arr
+ * @param len
+ */
+void _double_set_nan(double* arr, int len);
+void _float_set_nan(float* arr, int len);
