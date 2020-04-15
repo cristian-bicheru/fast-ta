@@ -8,7 +8,7 @@ import sys
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 import fast_ta
 
-with open('AAPL.csv', 'r') as dataset:
+with open('tests/AAPL.csv', 'r') as dataset:
     csv_data = list(csv.reader(dataset))[1:]
 
 close_data = []
@@ -22,6 +22,11 @@ for row in csv_data:
     low_data.append(row[3])
     open_data.append(row[4])
 
+while 'null' in close_data: close_data.remove('null')
+while 'null' in high_data: high_data.remove('null')
+while 'null' in low_data: low_data.remove('null')
+while 'null' in open_data: open_data.remove('null')
+
 close_data = np.array(close_data, dtype=np.double)
 high_data = np.array(high_data, dtype=np.double)
 low_data = np.array(low_data, dtype=np.double)
@@ -33,28 +38,28 @@ def rsi():
     plt.title("RSI "+str(close_data.dtype))
     plt.plot(fast_ta.momentum.RSI(close_data, 14))
     plt.plot(ta.momentum.RSIIndicator(pandas.Series(close_data), n=14).rsi())
-    plt.show()
+    plt.savefig("rsi " + str(close_data.dtype) + ".svg")
     
 def ao():
     plt.clf()
     plt.title("AO "+str(high_data.dtype))
     plt.plot(ta.momentum.AwesomeOscillatorIndicator(pandas.Series(high_data), pandas.Series(low_data)).ao())
     plt.plot(fast_ta.momentum.AO(high_data, low_data, 5, 34))
-    plt.show()
+    plt.savefig("AO " + str(high_data.dtype) + ".svg")
     
 def kama():
     plt.clf()
     plt.title("KAMA "+str(close_data.dtype))
     plt.plot(fast_ta.momentum.KAMA(close_data, 10, 2, 30))
     plt.plot(list(ta.momentum.KAMAIndicator(pandas.Series(close_data)).kama())[9:])
-    plt.show()
+    plt.savefig("KAMA " + str(close_data.dtype) + ".svg")
 
 def roc():
     plt.clf()
     plt.title("ROC "+str(close_data.dtype))
     plt.plot(fast_ta.momentum.ROC(close_data, 12))
     plt.plot(list(ta.momentum.ROCIndicator(pandas.Series(close_data), n=12).roc())[12:])
-    plt.show()
+    plt.savefig("ROC " + str(close_data.dtype) + ".svg")
 
 def stoch():
     plt.clf()
@@ -63,21 +68,22 @@ def stoch():
     plt.plot(so[0])
     sot = ta.momentum.StochasticOscillator(pandas.Series(high_data), pandas.Series(low_data), pandas.Series(close_data))
     plt.plot(sot.stoch())
-    plt.show()
+    plt.savefig("STOCH " + str(close_data.dtype) + ".svg")
 
     plt.clf()
     plt.title("Stochastic Oscillator Signal "+str(close_data.dtype))
     plt.plot(so[1])
     plt.plot(sot.stoch_signal())
-    plt.show()
+    plt.savefig("STOCH " + str(close_data.dtype) + ".svg")
     
 def run_tests():
-    #rsi()
-    #ao()
-    #kama()
-    #roc()
-    stoch()
+    rsi()
+    ao()
+    kama()
+    roc()
+    #stoch()
 
+plt.figure(figsize=[25, 5])
 run_tests()
 close_data = np.array(close_data, dtype=np.float32)
 high_data = np.array(high_data, dtype=np.float32)
