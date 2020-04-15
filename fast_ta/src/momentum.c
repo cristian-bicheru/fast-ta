@@ -11,13 +11,23 @@
 #include "parallel_momentum_backend.h"
 #include "error_methods.h"
 
-static PyObject* RSI(PyObject* self, PyObject* args) {
-    int _n;
+static PyObject* RSI(PyObject* self, PyObject* args, PyObject* kwargs) {
     PyObject* in;
+    int window_size;
+    int thread_count = 1;
 
-    if (!PyArg_ParseTuple(args, "Oi",
+    static char *kwlist[] = {
+        "",
+        "",
+        "threads",
+        NULL
+    };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Oi|i:RSI", kwlist,
                           &in,
-                          &_n)) {
+                          &window_size,
+                          &thread_count)) {
+        printf("Exception\n");
         return NULL;
     }
 
@@ -30,7 +40,8 @@ static PyObject* RSI(PyObject* self, PyObject* args) {
     switch(type) {
         case NPY_FLOAT64: {
             double* close = PyArray_DATA(arr);
-            double* rsi = _PARALLEL_RSI_DOUBLE(close, close_len, _n, 1);
+            double* rsi = _PARALLEL_RSI_DOUBLE(close, close_len, window_size,
+                                               thread_count);
             npy_intp dims[1] = {close_len};
 
             Py_DECREF(arr);
@@ -42,7 +53,8 @@ static PyObject* RSI(PyObject* self, PyObject* args) {
         }
         case NPY_FLOAT32: {
             float* close = PyArray_DATA(arr);
-            float* rsi = _PARALLEL_RSI_FLOAT(close, close_len, _n, 1);
+            float* rsi = _PARALLEL_RSI_FLOAT(close, close_len, window_size,
+                                             thread_count);
             npy_intp dims[1] = {close_len};
 
             Py_DECREF(arr);
@@ -314,7 +326,7 @@ static PyObject* STOCHASTIC_OSCILLATOR(PyObject* self, PyObject* args) {
 };
 
 static PyMethodDef MomentumMethods[] = {
-        {"RSI", RSI, METH_VARARGS, "Compute RSI On Data"},
+        {"RSI", RSI, METH_VARARGS | METH_KEYWORDS, "Compute RSI On Data"},
         {"AO", AO, METH_VARARGS, "Compute AO On Data"},
         {"KAMA", KAMA, METH_VARARGS, "Compute KAMA On Data"},
         {"ROC", ROC, METH_VARARGS, "Compute ROC On Data"},
