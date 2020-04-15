@@ -16,12 +16,12 @@ def bench(n, dtype):
     data = np.array(range(n), dtype=dtype)
 
     s = time.perf_counter()
-    fast_ta.momentum.RSI(data, 14)
+    fast_ta.momentum.ROC(data, 12)
     times[0] = time.perf_counter()-s
     
     data = pandas.Series(data)
     s = time.perf_counter()
-    ta.momentum.RSIIndicator(data, n=14).rsi()
+    ta.momentum.ROCIndicator(data, n=12).roc()
     times[1] = time.perf_counter()-s
     
     return times
@@ -39,6 +39,6 @@ for dtype in [np.float32, np.float64]:
 plt.xticks([x*t_max/t_del/num_label for x in range(1, num_label+1)], [x*t_max/t_del/num_label for x in range(1, num_label+1)])
 plt.xlabel('n')
 plt.ylabel('speedup')
-plt.title('RSI Speedup')
+plt.title('ROC Speedup')
 plt.legend(loc='upper right')
-plt.savefig('results/rsi.svg')
+plt.savefig('results/roc.svg')

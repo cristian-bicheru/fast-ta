@@ -8,7 +8,7 @@ import sys
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 import fast_ta
 
-with open('tests/AAPL.csv', 'r') as dataset:
+with open('AAPL.csv', 'r') as dataset:
     csv_data = list(csv.reader(dataset))[1:]
 
 close_data = []
@@ -17,16 +17,10 @@ low_data = []
 open_data = []
 
 for row in csv_data:
-    """
     close_data.append(row[1])
     high_data.append(row[2])
     low_data.append(row[3])
     open_data.append(row[4])
-    """
-    open_data.append(row[1])
-    high_data.append(row[2])
-    low_data.append(row[3])
-    close_data.append(row[4])
 
 close_data = np.array(close_data, dtype=np.double)
 high_data = np.array(high_data, dtype=np.double)
@@ -52,19 +46,41 @@ def kama():
     plt.clf()
     plt.title("KAMA "+str(close_data.dtype))
     plt.plot(fast_ta.momentum.KAMA(close_data, 10, 2, 30))
-    plt.plot(list(ta.momentum.KAMAIndicator(pandas.Series(close_data)).kama()[9:]))
+    plt.plot(list(ta.momentum.KAMAIndicator(pandas.Series(close_data)).kama())[9:])
     plt.show()
 
+def roc():
+    plt.clf()
+    plt.title("ROC "+str(close_data.dtype))
+    plt.plot(fast_ta.momentum.ROC(close_data, 12))
+    plt.plot(list(ta.momentum.ROCIndicator(pandas.Series(close_data), n=12).roc())[12:])
+    plt.show()
+
+def stoch():
+    plt.clf()
+    plt.title("Stochastic Oscillator "+str(close_data.dtype))
+    so = fast_ta.momentum.StochasticOscillator(high_data, low_data, close_data, 14, 3)
+    plt.plot(so[0])
+    sot = ta.momentum.StochasticOscillator(pandas.Series(high_data), pandas.Series(low_data), pandas.Series(close_data))
+    plt.plot(sot.stoch())
+    plt.show()
+
+    plt.clf()
+    plt.title("Stochastic Oscillator Signal "+str(close_data.dtype))
+    plt.plot(so[1])
+    plt.plot(sot.stoch_signal())
+    plt.show()
+    
 def run_tests():
-    rsi()
+    #rsi()
     #ao()
     #kama()
+    #roc()
+    stoch()
 
 run_tests()
-"""
 close_data = np.array(close_data, dtype=np.float32)
 high_data = np.array(high_data, dtype=np.float32)
 low_data = np.array(low_data, dtype=np.float32)
 open_data = np.array(open_data, dtype=np.float32)
 run_tests()
-"""
