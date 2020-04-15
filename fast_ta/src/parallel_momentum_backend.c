@@ -72,8 +72,6 @@ double* _PARALLEL_RSI_DOUBLE(const double* close, int close_len,
         }
     }
 
-    printf("done\n");
-
     return rsi;
 }
 
@@ -138,8 +136,6 @@ float* _PARALLEL_RSI_FLOAT(const float* close, int close_len,
             return NULL;
         }
     }
-
-    printf("done\n");
 
     return rsi;
 }

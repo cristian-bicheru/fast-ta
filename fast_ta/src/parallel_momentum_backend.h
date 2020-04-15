@@ -1,8 +1,8 @@
-#pragma once
 /**
  * This file uses the functions defined in momentum_backend.c and calls them
  * in parallel.
  */
+#pragma once
 
 #include "momentum_backend_args.h"
 #include "momentum_backend.h"

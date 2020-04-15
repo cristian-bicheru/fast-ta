@@ -216,7 +216,7 @@ double* _double_volatility_sum(double *arr1, int period, int len) {
     return vol_sum;
 }
 
-float* _float_volatility_sum(float *arr1, int period, int len) {
+float* _float_volatility_sum(float* arr1, int period, int len) {
     float* vol_sum = malloc((len-period)*sizeof(float));
     float running_sum = 0;
 
