@@ -109,13 +109,24 @@ def stoch():
         plt.show()
     if args.save_plots:
         plt.savefig("tests/plots/STOCH SIGNAL " + str(close_data.dtype) + ".svg")
-    
+
+def tsi():
+    plt.clf()
+    plt.title("TSI "+str(close_data.dtype))
+    plt.plot(fast_ta.momentum.TSI(close_data, 25, 13))
+    plt.plot(list(ta.momentum.TSIIndicator(pandas.Series(close_data)).tsi()))
+    if args.show_plots:
+        plt.show()
+    if args.save_plots:
+        plt.savefig("tests/plots/TSI " + str(close_data.dtype) + ".svg")
+        
 def run_tests():
-    #rsi()
-    #ao()
-    #kama()
-    #roc()
+    rsi()
+    ao()
+    kama()
+    roc()
     stoch()
+    tsi()
 
 plt.figure(figsize=[25, 5])
 run_tests()

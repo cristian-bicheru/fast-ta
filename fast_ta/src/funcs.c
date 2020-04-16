@@ -453,3 +453,82 @@ void _float_set_nan(float* arr, int len) {
         arr[i] = NPY_NANF;
     }
 }
+
+void _double_consecutive_diff(const double* arr, int len, double* outarr) {
+    __m256d v1;
+    __m256d v2;
+
+    for (int i = 0; i < (len-1)-(len-1)%4; i+=4) {
+        v1 = _mm256_loadu_pd(&arr[i]);
+        v2 = _mm256_loadu_pd(&arr[i+1]);
+        _mm256_storeu_pd(&outarr[i], _mm256_sub_pd(v2, v1));
+    }
+
+    for (int i = len-len%4; i < len-1; i++) {
+        outarr[i] = arr[i+1]-arr[i];
+    }
+}
+
+void _float_consecutive_diff(const float* arr, int len, float* outarr) {
+    __m256 v1;
+    __m256 v2;
+
+    for (int i = 0; i < (len-1)-(len-1)%8; i+=8) {
+        v1 = _mm256_loadu_ps(&arr[i]);
+        v2 = _mm256_loadu_ps(&arr[i+1]);
+        _mm256_storeu_ps(&outarr[i], _mm256_sub_ps(v2, v1));
+    }
+
+    for (int i = len-len%8; i < len-1; i++) {
+        outarr[i] = arr[i+1]-arr[i];
+    }
+}
+
+void _double_tsi_fast_ema(double* pc, double* apc, int len, int r, int s) {
+    __m256d v;
+    double alpha1 = 2./(r+1);
+    double alpha2 = 2./(s+1);
+
+    const __m256d a = _mm256_set_pd(alpha2, alpha1, alpha2, alpha1);
+    const __m256d am = _mm256_set_pd(1.-alpha2, 1.-alpha1, 1.-alpha2, 1.-alpha1);
+
+    __m256d ema = _mm256_loadu2_pd(&pc[0], &apc[0]);
+
+    for (int i = 1; i < len-1; i++) {
+        v = _mm256_loadu2_pd(&pc[i-1], &apc[i-1]);
+        v = _mm256_mul_pd(v, a);
+        ema = _mm256_mul_pd(ema, am);
+        ema = _mm256_add_pd(v, ema);
+
+        pc[i-1] = ema[0];
+        pc[i] = ema[1];
+        apc[i-1] = ema[2];
+        apc[i] = ema[3];
+    }
+}
+
+
+void _float_tsi_fast_ema(float* pc, float* apc, int len, int r, int s) {
+    __m256d v;
+    double alpha1 = 2./(r+1);
+    double alpha2 = 2./(s+1);
+
+    const __m256d a = _mm256_set_pd(alpha2, alpha1, alpha2, alpha1);
+    const __m256d am = _mm256_set_pd(1.f-alpha2, 1.f-alpha1, 1.f-alpha2, 1.f-alpha1);
+
+    __m256d ema = _mm256_loadu2_ps4(&pc[0],
+                                   &apc[0]);
+
+    for (int i = 1; i < len-1; i++) {
+        v = _mm256_loadu2_ps4(&pc[i-1],
+                             &apc[i-1]);
+        v = _mm256_mul_pd(v, a);
+        ema = _mm256_mul_pd(ema, am);
+        ema = _mm256_add_pd(v, ema);
+
+        pc[i-1] = ema[0];
+        pc[i] = ema[1];
+        apc[i-1] = ema[2];
+        apc[i] = ema[3];
+    }
+}

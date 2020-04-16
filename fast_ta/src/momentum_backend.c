@@ -264,3 +264,35 @@ struct float_array_pair _STOCHASTIC_OSCILLATOR_FLOAT(const float* high, const fl
     struct float_array_pair ret = {running_min, running_max};
     return ret;
 }
+
+double* _TSI_DOUBLE(const double* close, int r, int s, int len) {
+    double* pc = malloc(len*sizeof(double));
+    double* apc = malloc(len*sizeof(double));
+    _double_consecutive_diff(close, len-1, pc+1);
+    _double_abs(pc+1, len-1, apc);
+    _double_tsi_fast_ema(pc+1, apc, len-1, r, s);
+
+    _double_div_arr(pc+1, apc, len-1, pc+1);
+    _double_mul(pc+1, len-1, 100., pc+1);
+
+    _double_set_nan(pc, 1);
+
+    free(apc);
+    return pc;
+}
+
+float* _TSI_FLOAT(const float* close, int r, int s, int len) {
+    float* pc = malloc(len*sizeof(float));
+    float* apc = malloc(len*sizeof(float));
+    _float_consecutive_diff(close, len-1, pc+1);
+    _float_abs(pc+1, len-1, apc);
+    _float_tsi_fast_ema(pc+1, apc, len-1, r, s);
+
+    _float_div_arr(pc+1, apc, len-1, pc+1);
+    _float_mul(pc+1, len-1, 100.f, pc+1);
+
+    _float_set_nan(pc, 1);
+
+    free(apc);
+    return pc;
+}

@@ -54,9 +54,30 @@ float* _KAMA_FLOAT(const float* close, int n1, int n2, int n3, int len);
 double* _ROC_DOUBLE(const double* close, int n, int len);
 float* _ROC_FLOAT(const float* close, int n, int len);
 
+/**
+ * Compute Stochastic Oscillator On Data
+ * @param high      High Time Series
+ * @param low       Low Time Series
+ * @param close     Close Time Series
+ * @param n         n Value
+ * @param d         d Value
+ * @param len       Time Series Length
+ * @return          Stochastic Oscillator Indicator Time Series
+ */
 struct double_array_pair
 _STOCHASTIC_OSCILLATOR_DOUBLE(const double* high, const double* low, double* close, int n,
                               int d, int len);
 struct float_array_pair
 _STOCHASTIC_OSCILLATOR_FLOAT(const float* high, const float* low, float* close, int n,
                              int d, int len);
+
+/**
+ * Compute True Strength Index On Data
+ * @param close     Close Time Series
+ * @param r         R Value
+ * @param s         S Value
+ * @param len       Close Time Series Length
+ * @return          TSI Indicator Time Series
+ */
+double* _TSI_DOUBLE(const double* close, int r, int s, int len);
+float* _TSI_FLOAT(const float* close, int r, int s, int len);

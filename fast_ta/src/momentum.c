@@ -325,12 +325,63 @@ static PyObject* STOCHASTIC_OSCILLATOR(PyObject* self, PyObject* args) {
     }
 };
 
+static PyObject* TSI(PyObject* self, PyObject* args) {
+    int r;
+    int s;
+    PyObject* in;
+
+    if (!PyArg_ParseTuple(args, "Oii",
+                          &in,
+                          &r,
+                          &s)) {
+        return NULL;
+    }
+
+    int type1 = PyArray_TYPE((PyArrayObject*) in);
+
+    PyArrayObject* _close = (PyArrayObject*) PyArray_FROM_OTF(in,
+                                                              type1,
+                                                              NPY_ARRAY_IN_ARRAY);
+    int len = PyArray_SIZE(_close);
+
+    switch(type1) {
+        case NPY_FLOAT64: {
+            double* close = PyArray_DATA(_close);
+            double* tsi = _TSI_DOUBLE(close, r, s, len);
+            npy_intp dims[1] = {len};
+
+            Py_DECREF(_close);
+            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
+            memcpy(PyArray_DATA((PyArrayObject*) ret), tsi,
+                   len*sizeof(double));
+            free(tsi);
+            return ret;
+        }
+        case NPY_FLOAT32: {
+            float* close = PyArray_DATA(_close);
+            float* tsi = _TSI_FLOAT(close, r, s, len);
+            npy_intp dims[1] = {len};
+
+            Py_DECREF(_close);
+            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
+            memcpy(PyArray_DATA((PyArrayObject*) ret), tsi,
+                   len*sizeof(float));
+            free(tsi);
+            return ret;
+        }
+        default:
+            raise_dtype_error();
+            return NULL;
+    }
+};
+
 static PyMethodDef MomentumMethods[] = {
         {"RSI", RSI, METH_VARARGS | METH_KEYWORDS, "Compute RSI On Data"},
         {"AO", AO, METH_VARARGS, "Compute AO On Data"},
         {"KAMA", KAMA, METH_VARARGS, "Compute KAMA On Data"},
         {"ROC", ROC, METH_VARARGS, "Compute ROC On Data"},
         {"StochasticOscillator", STOCHASTIC_OSCILLATOR, METH_VARARGS, "Compute Stochastic Oscillator On Data"},
+        {"TSI", TSI, METH_VARARGS, "Compute TSI On Data"},
         {NULL, NULL, 0, NULL}
 };
 

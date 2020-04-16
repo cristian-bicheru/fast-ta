@@ -25,6 +25,21 @@ inline __m256d abs_pd(__m256d x, __m256d sign_mask) {
 }
 
 /**
+ * AVX Load Four Single Or Double Precision Numbers From Arrays
+ * @param A
+ * @param B
+ * @return
+ */
+#ifndef _mm256_loadu2_pd
+inline __m256d _mm256_loadu2_pd(const double* A, const double* B) {
+    return _mm256_insertf128_pd(_mm256_castpd128_pd256(_mm_loadu_pd(A)), _mm_loadu_pd(B), 1);
+}
+#endif
+inline __m256d _mm256_loadu2_ps4(const float* A, const float* B) {
+    return _mm256_loadu_pd((double[4]) {A[0], A[1], B[0], B[1]});
+}
+;
+/**
  * Exponential Moving Average
  * @param arr
  * @param len
@@ -160,3 +175,23 @@ void _float_running_min(const float* arr, int len, int window, float* outarr);
  */
 void _double_set_nan(double* arr, int len);
 void _float_set_nan(float* arr, int len);
+
+/**
+ * Calculate Difference Between Consecutive Elements
+ * @param arr
+ * @param len
+ * @param outarr
+ */
+void _double_consecutive_diff(const double* arr, int len, double* outarr);
+void _float_consecutive_diff(const float* arr, int len, float* outarr);
+
+/**
+ * TSI-Specific Vectorized EMA Algorithm
+ * @param pc
+ * @param apc
+ * @param len
+ * @param r
+ * @param s
+ */
+void _double_tsi_fast_ema(double* pc, double* apc, int len, int r, int s);
+void _float_tsi_fast_ema(float* pc, float* apc, int len, int r, int s);
