@@ -111,10 +111,10 @@ def stoch():
         plt.savefig("tests/plots/STOCH SIGNAL " + str(close_data.dtype) + ".svg")
     
 def run_tests():
-    rsi()
-    ao()
-    kama()
-    roc()
+    #rsi()
+    #ao()
+    #kama()
+    #roc()
     stoch()
 
 plt.figure(figsize=[25, 5])

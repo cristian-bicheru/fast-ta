@@ -155,7 +155,6 @@ void _double_sma(const double* arr, int len, int window, double* outarr) {
 
 void _float_sma(const float* arr, int len, int window, float* outarr) {
     float wsum = 0;
-    float* sma = malloc(len*sizeof(float));
 
     for (int i = 0; i < window; i++) {
         wsum += arr[i];
@@ -376,7 +375,7 @@ void _float_abs(const float* arr, int len, float* outarr) {
 void _double_running_max(const double* arr, int len, int window, double* outarr) {
     __m256d v;
     double m;
-    for (int i = 0; i < len-window; i++) {
+    for (int i = 0; i < len-window+1; i++) {
         v = _mm256_loadu_pd(&arr[i]);
         for (int j = 4; j < window-window%4; j += 4) {
             v = _mm256_max_pd(v, _mm256_loadu_pd(&arr[i+j]));
@@ -393,7 +392,7 @@ void _double_running_max(const double* arr, int len, int window, double* outarr)
 void _float_running_max(const float* arr, int len, int window, float* outarr) {
     __m256 v;
     float m;
-    for (int i = 0; i < len-window; i++) {
+    for (int i = 0; i < len-window+1; i++) {
         v = _mm256_loadu_ps(&arr[i]);
         for (int j = 8; j < window-window%8; j += 8) {
             v = _mm256_max_ps(v, _mm256_loadu_ps(&arr[i+j]));
@@ -411,7 +410,7 @@ void _float_running_max(const float* arr, int len, int window, float* outarr) {
 void _double_running_min(const double* arr, int len, int window, double* outarr) {
     __m256d v;
     double m;
-    for (int i = 0; i < len-window; i++) {
+    for (int i = 0; i < len-window+1; i++) {
         v = _mm256_loadu_pd(&arr[i]);
         for (int j = 4; j < window-window%4; j += 4) {
             v = _mm256_min_pd(v, _mm256_loadu_pd(&arr[i+j]));
@@ -428,7 +427,7 @@ void _double_running_min(const double* arr, int len, int window, double* outarr)
 void _float_running_min(const float* arr, int len, int window, float* outarr) {
     __m256 v;
     float m;
-    for (int i = 0; i < len-window; i++) {
+    for (int i = 0; i < len-window+1; i++) {
         v = _mm256_loadu_ps(&arr[i]);
         for (int j = 8; j < window-window%8; j += 8) {
             v = _mm256_min_ps(v, _mm256_loadu_ps(&arr[i+j]));

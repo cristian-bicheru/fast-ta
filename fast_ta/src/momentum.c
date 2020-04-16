@@ -284,15 +284,15 @@ static PyObject* STOCHASTIC_OSCILLATOR(PyObject* self, PyObject* args) {
             double* low = PyArray_DATA(_low);
             double* close = PyArray_DATA(_close);
             struct double_array_pair so = _STOCHASTIC_OSCILLATOR_DOUBLE(high, low, close, n, d, len);
-            npy_intp dims[1] = {len-n};
+            npy_intp dims[1] = {len};
 
             PyObject* ret = PyTuple_New(2);
             PyObject* arr1 = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) arr1), so.arr1+n,
-                   (len-n)*sizeof(double));
+            memcpy(PyArray_DATA((PyArrayObject*) arr1), so.arr1,
+                   len*sizeof(double));
             PyObject* arr2 = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
             memcpy(PyArray_DATA((PyArrayObject*) arr2), so.arr2,
-                   (len-n)*sizeof(double));
+                   len*sizeof(double));
             free(so.arr1);
             free(so.arr2);
             PyTuple_SetItem(ret, 0, arr1);
@@ -304,15 +304,15 @@ static PyObject* STOCHASTIC_OSCILLATOR(PyObject* self, PyObject* args) {
             float* low = PyArray_DATA(_low);
             float* close = PyArray_DATA(_close);
             struct float_array_pair so = _STOCHASTIC_OSCILLATOR_FLOAT(high, low, close, n, d, len);
-            npy_intp dims[1] = {len-n};
+            npy_intp dims[1] = {len};
 
             PyObject* ret = PyTuple_New(2);
             PyObject* arr1 = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) arr1), so.arr1+n,
-                   (len-n)*sizeof(float));
+            memcpy(PyArray_DATA((PyArrayObject*) arr1), so.arr1,
+                   len*sizeof(float));
             PyObject* arr2 = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
             memcpy(PyArray_DATA((PyArrayObject*) arr2), so.arr2,
-                   (len-n)*sizeof(float));
+                   len*sizeof(float));
             free(so.arr1);
             free(so.arr2);
             PyTuple_SetItem(ret, 0, arr1);

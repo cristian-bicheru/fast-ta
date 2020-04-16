@@ -224,17 +224,20 @@ float* _ROC_FLOAT(const float* close, int n, int len) {
 struct double_array_pair _STOCHASTIC_OSCILLATOR_DOUBLE(const double* high, const double* low, double* close, int n, int d, int len) {
     // NOTE: While running_max and running_min are initially running maxes and minimums,
     //       they are reused later on save memory.
-    double* running_max = malloc((len-n)*sizeof(double));
-    double* running_min = malloc((len-n)*sizeof(double));
+    double* running_max = malloc(len*sizeof(double));
+    double* running_min = malloc(len*sizeof(double));
 
-    _double_running_max(high, len, n, running_max);
-    _double_running_min(low, len, n, running_min);
-    _double_sub(running_max, running_min, running_max, len-n);
-    _double_sub(close+n, running_min, running_min, len-n);
+    _double_running_max(high, len, n, running_max+n-1);
+    _double_running_min(low, len, n, running_min+n-1);
+    _double_sub(running_max+n-1, running_min+n-1, running_max+n-1, len-n+1);
+    _double_sub(close+n-1, running_min+n-1, running_min+n-1, len-n+1);
 
-    _double_div_arr(running_min, running_max, len-n, running_min);
-    _double_mul(running_min, len-n, 100., running_min);
-    _double_sma(running_min, len-n, d, running_max);
+    _double_div_arr(running_min+n-1, running_max+n-1, len-n+1, running_min+n-1);
+    _double_mul(running_min+n-1, len-n+1, 100., running_min+n-1);
+    _double_sma(running_min+n-1, len-n+1, d, running_max+n-1);
+
+    _double_set_nan(running_min, n-1);
+    _double_set_nan(running_max, n-1);
 
     struct double_array_pair ret = {running_min, running_max};
     return ret;
@@ -243,17 +246,20 @@ struct double_array_pair _STOCHASTIC_OSCILLATOR_DOUBLE(const double* high, const
 struct float_array_pair _STOCHASTIC_OSCILLATOR_FLOAT(const float* high, const float* low, float* close, int n, int d, int len) {
     // NOTE: While running_max and running_min are initially running maxes and minimums,
     //       they are reused later on save memory.
-    float* running_max = malloc((len-n)*sizeof(float));
-    float* running_min = malloc((len-n)*sizeof(float));
+    float* running_max = malloc(len*sizeof(float));
+    float* running_min = malloc(len*sizeof(float));
 
-    _float_running_max(high, len, n, running_max);
-    _float_running_min(low, len, n, running_min);
-    _float_sub(running_max, running_min, running_max, len-n);
-    _float_sub(close+n, running_min, running_min, len-n);
+    _float_running_max(high, len, n, running_max+n-1);
+    _float_running_min(low, len, n, running_min+n-1);
+    _float_sub(running_max+n-1, running_min+n-1, running_max+n-1, len-n+1);
+    _float_sub(close+n-1, running_min+n-1, running_min+n-1, len-n+1);
 
-    _float_div_arr(running_min, running_max, len-n, running_min);
-    _float_mul(running_min, len-n, 100.f, running_min);
-    _float_sma(running_min, len-n, d, running_max);
+    _float_div_arr(running_min+n-1, running_max+n-1, len-n+1, running_min+n-1);
+    _float_mul(running_min+n-1, len-n+1, 100., running_min+n-1);
+    _float_sma(running_min+n-1, len-n+1, d, running_max+n-1);
+
+    _float_set_nan(running_min, n-1);
+    _float_set_nan(running_max, n-1);
 
     struct float_array_pair ret = {running_min, running_max};
     return ret;
