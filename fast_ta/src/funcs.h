@@ -3,6 +3,14 @@
 #include <immintrin.h>
 #include <stdlib.h>
 
+#ifndef max
+#define max(a,b) ((a) > (b) ? (a) : (b))
+#endif
+
+#ifndef min
+#define min(a,b) ((a) < (b) ? (a) : (b))
+#endif
+
 /**
  * AVX Alligned Malloc
  */
@@ -94,8 +102,8 @@ void _float_sma(const float* arr, int len, int window, float* outarr);
  * @param arr3
  * @param len
  */
-void _double_sub(const double *arr1, const double *arr2, double *arr3, int len);
-void _float_sub(const float* arr1, const float* arr2, float* arr3, int len);
+void _double_sub_arr(const double *arr1, const double *arr2, int len, double *arr3);
+void _float_sub_arr(const float *arr1, const float *arr2, int len, float *arr3);
 
 /**
  * Periodic Volatility Sum
@@ -195,3 +203,35 @@ void _float_consecutive_diff(const float* arr, int len, float* outarr);
  */
 void _double_tsi_fast_ema(double* pc, double* apc, int len, int r, int s);
 void _float_tsi_fast_ema(float* pc, float* apc, int len, int r, int s);
+
+/**
+ * Vectorized Pairwise Min/Max
+ * @param arr1
+ * @param arr2
+ * @param len
+ * @param outarr
+ */
+void _double_pairwise_max(const double* arr1, const double* arr2, int len, double* outarr);
+void _float_pairwise_max(const float* arr1, const float* arr2, int len, float* outarr);
+void _double_pairwise_min(const double* arr1, const double* arr2, int len, double* outarr);
+void _float_pairwise_min(const float* arr1, const float* arr2, int len, float* outarr);
+
+/**
+ * Running Sum
+ * @param arr
+ * @param len
+ * @param window
+ * @param outarr
+ */
+void _double_running_sum(const double* arr, int len, int window, double* outarr);
+void _float_running_sum(const float* arr, int len, int window, float* outarr);
+
+/**
+ * Vectorized Array Addition
+ * @param arr1
+ * @param arr2
+ * @param len
+ * @param outarr
+ */
+void _double_add_arr(const double* arr1, const double* arr2, int len, double* outarr);
+void _float_add_arr(const float* arr1, const float* arr2, int len, float* outarr);

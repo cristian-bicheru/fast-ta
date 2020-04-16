@@ -7,17 +7,6 @@
 #include "debug_tools.c"
 #include "funcs.h"
 
-
-#ifndef max
-#define max(a,b) ((a) > (b) ? (a) : (b))
-#endif
-
-#ifndef min
-#define min(a,b) ((a) < (b) ? (a) : (b))
-#endif
-
-// TODO: Replace inplace functions with functions that specify a storage destination.
-
 void _double_ema(const double* arr, int len, double alpha, double* outarr) {
     for (int i = 1; i < len; i++) {
         outarr[i] = arr[i-1] * (1-alpha) + arr[i] * alpha;
@@ -170,7 +159,8 @@ void _float_sma(const float* arr, int len, int window, float* outarr) {
     _float_div(outarr + window, len - window, (float) window, outarr + window);
 }
 
-void _double_sub(const double *arr1, const double *arr2, double *arr3, int len) {
+void
+_double_sub_arr(const double *arr1, const double *arr2, int len, double *arr3) {
     __m256d v1;
     __m256d v2;
     for (int i = 0; i < len-len%4; i+=4) {
@@ -183,7 +173,8 @@ void _double_sub(const double *arr1, const double *arr2, double *arr3, int len) 
     }
 }
 
-void _float_sub(const float* arr1, const float* arr2, float* arr3, int len) {
+void
+_float_sub_arr(const float *arr1, const float *arr2, int len, float *arr3) {
     __m256 v1;
     __m256 v2;
     for (int i = 0; i < len-len%8; i+=8) {
@@ -507,7 +498,6 @@ void _double_tsi_fast_ema(double* pc, double* apc, int len, int r, int s) {
     }
 }
 
-
 void _float_tsi_fast_ema(float* pc, float* apc, int len, int r, int s) {
     __m256d v;
     double alpha1 = 2./(r+1);
@@ -530,5 +520,107 @@ void _float_tsi_fast_ema(float* pc, float* apc, int len, int r, int s) {
         pc[i] = ema[1];
         apc[i-1] = ema[2];
         apc[i] = ema[3];
+    }
+}
+
+void _double_pairwise_max(const double* arr1, const double* arr2, int len, double* outarr) {
+    __m256d v;
+    for (int i = 0; i < len-len%4; i += 4) {
+        v = _mm256_max_pd(_mm256_loadu_pd(&arr1[i]), _mm256_loadu_pd(&arr2[i]));
+        _mm256_storeu_pd(&outarr[i], v);
+    }
+
+    for (int i = len-len%4; i < len; i++) {
+        outarr[i] = max(arr1[i], arr2[i]);
+    }
+}
+
+void _float_pairwise_max(const float* arr1, const float* arr2, int len, float* outarr) {
+    __m256 v;
+    for (int i = 0; i < len-len%8; i += 8) {
+        v = _mm256_max_ps(_mm256_loadu_ps(&arr1[i]), _mm256_loadu_ps(&arr2[i]));
+        _mm256_storeu_ps(&outarr[i], v);
+    }
+
+    for (int i = len-len%8; i < len; i++) {
+        outarr[i] = max(arr1[i], arr2[i]);
+    }
+}
+
+void _double_pairwise_min(const double* arr1, const double* arr2, int len, double* outarr) {
+    __m256d v;
+    for (int i = 0; i < len-len%4; i += 4) {
+        v = _mm256_min_pd(_mm256_loadu_pd(&arr1[i]), _mm256_loadu_pd(&arr2[i]));
+        _mm256_storeu_pd(&outarr[i], v);
+    }
+
+    for (int i = len-len%4; i < len; i++) {
+        outarr[i] = min(arr1[i], arr2[i]);
+    }
+}
+
+void _float_pairwise_min(const float* arr1, const float* arr2, int len, float* outarr) {
+    __m256 v;
+    for (int i = 0; i < len-len%8; i += 8) {
+        v = _mm256_min_ps(_mm256_loadu_ps(&arr1[i]), _mm256_loadu_ps(&arr2[i]));
+        _mm256_storeu_ps(&outarr[i], v);
+    }
+
+    for (int i = len-len%8; i < len; i++) {
+        outarr[i] = max(arr1[i], arr2[i]);
+    }
+}
+
+void _double_running_sum(const double* arr, int len, int window, double* outarr) {
+    double wsum = 0;
+
+    for (int i = 0; i < window; i++) {
+        wsum += arr[i];
+        outarr[i] = wsum/(i+1);
+    }
+
+    for (int i = window; i < len; i++) {
+        wsum += arr[i];
+        wsum -= arr[i-window];
+        outarr[i] = wsum;
+    }
+}
+
+void _float_running_sum(const float* arr, int len, int window, float* outarr) {
+    float wsum = 0;
+
+    for (int i = 0; i < window; i++) {
+        wsum += arr[i];
+        outarr[i] = wsum/(i+1);
+    }
+
+    for (int i = window; i < len; i++) {
+        wsum += arr[i];
+        wsum -= arr[i-window];
+        outarr[i] = wsum;
+    }
+}
+
+void _double_add_arr(const double* arr1, const double* arr2, int len, double* outarr) {
+    __m256d v;
+    for (int i = 0; i < len-len%4; i += 4) {
+        v = _mm256_add_pd(_mm256_loadu_pd(&arr1[i]), _mm256_loadu_pd(&arr2[i]));
+        _mm256_storeu_pd(&outarr[i], v);
+    }
+
+    for (int i = len-len%4; i < len; i++) {
+        outarr[i] = max(arr1[i], arr2[i]);
+    }
+}
+
+void _float_add_arr(const float* arr1, const float* arr2, int len, float* outarr) {
+    __m256 v;
+    for (int i = 0; i < len-len%8; i += 8) {
+        v = _mm256_add_ps(_mm256_loadu_ps(&arr1[i]), _mm256_loadu_ps(&arr2[i]));
+        _mm256_storeu_ps(&outarr[i], v);
+    }
+
+    for (int i = len-len%8; i < len; i++) {
+        outarr[i] = max(arr1[i], arr2[i]);
     }
 }

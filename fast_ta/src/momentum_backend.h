@@ -81,3 +81,6 @@ _STOCHASTIC_OSCILLATOR_FLOAT(const float* high, const float* low, float* close, 
  */
 double* _TSI_DOUBLE(const double* close, int r, int s, int len);
 float* _TSI_FLOAT(const float* close, int r, int s, int len);
+
+double* _ULTIMATE_OSCILLATOR_DOUBLE(const double* high, const double* low, const double* close, int s, int m, int l, double ws, double wm, double wl, int len);
+float* _ULTIMATE_OSCILLATOR_FLOAT(const float* high, const float* low, const float* close, int s, int m, int l, double ws, double wm, double wl, int len);

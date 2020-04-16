@@ -136,7 +136,7 @@ double* _AO_DOUBLE(const double* high, const double*  low, int n1, int n2, int l
     _double_pairwise_mean(high, low, len, median);
     _double_sma(median, len, n1, sma1);
     _double_sma(median, len, n2, sma2);
-    _double_sub(sma1, sma2, median, len);
+    _double_sub_arr(sma1, sma2, len, median);
     free(sma1);
     free(sma2);
     return median;
@@ -149,7 +149,7 @@ float* _AO_FLOAT(const float* high, const float* low, int n1, int n2, int len) {
     _float_pairwise_mean(high, low, len, median);
     _float_sma(median, len, n1, sma1);
     _float_sma(median, len, n2, sma2);
-    _float_sub(sma1, sma2, median, len);
+    _float_sub_arr(sma1, sma2, len, median);
     free(sma1);
     free(sma2);
     return median;
@@ -159,7 +159,7 @@ double* _KAMA_DOUBLE(const double* close, int n1, int n2, int n3, int len) {
     double* change = malloc((len-n1)*sizeof(double));
     double* vol_sum = malloc(len*sizeof(double));
     double* sc = malloc(len*sizeof(double));
-    _double_sub(close+n1, close, change, len-n1);
+    _double_sub_arr(close + n1, close, len - n1, change);
     _double_abs(change, len-n1, change);
     _double_volatility_sum(close, n1, len, vol_sum);
     _double_div_arr(change, vol_sum, len-n1, sc+n1);
@@ -183,7 +183,7 @@ float* _KAMA_FLOAT(const float* close, int n1, int n2, int n3, int len) {
     float* change = malloc((len-n1)*sizeof(float));
     float* vol_sum = malloc(len*sizeof(float));
     float* sc = malloc(len*sizeof(float));
-    _float_sub(close+n1, close, change, len-n1);
+    _float_sub_arr(close + n1, close, len - n1, change);
     _float_abs(change, len-n1, change);
     _float_volatility_sum(close, n1, len, vol_sum);
     _float_div_arr(change, vol_sum, len-n1, sc+n1);
@@ -205,7 +205,7 @@ float* _KAMA_FLOAT(const float* close, int n1, int n2, int n3, int len) {
 
 double* _ROC_DOUBLE(const double* close, int n, int len) {
     double* roc = malloc(len*sizeof(double));
-    _double_sub(close+n, close, roc+n, len-n);
+    _double_sub_arr(close + n, close, len - n, roc + n);
     _double_div_arr(roc+n, close, len-n, roc+n);
     _double_mul(roc+n, len-n, 100., roc+n);
     _double_set_nan(roc, n);
@@ -214,7 +214,7 @@ double* _ROC_DOUBLE(const double* close, int n, int len) {
 
 float* _ROC_FLOAT(const float* close, int n, int len) {
     float* roc = malloc(len*sizeof(float));
-    _float_sub(close+n, close, roc+n, len-n);
+    _float_sub_arr(close + n, close, len - n, roc + n);
     _float_div_arr(roc+n, close, len-n, roc+n);
     _float_mul(roc+n, len-n, 100.f, roc+n);
     _float_set_nan(roc, n);
@@ -229,8 +229,10 @@ struct double_array_pair _STOCHASTIC_OSCILLATOR_DOUBLE(const double* high, const
 
     _double_running_max(high, len, n, running_max+n-1);
     _double_running_min(low, len, n, running_min+n-1);
-    _double_sub(running_max+n-1, running_min+n-1, running_max+n-1, len-n+1);
-    _double_sub(close+n-1, running_min+n-1, running_min+n-1, len-n+1);
+    _double_sub_arr(running_max + n - 1, running_min + n - 1, len - n + 1,
+                    running_max + n - 1);
+    _double_sub_arr(close + n - 1, running_min + n - 1,
+                    len - n + 1, running_min + n - 1);
 
     _double_div_arr(running_min+n-1, running_max+n-1, len-n+1, running_min+n-1);
     _double_mul(running_min+n-1, len-n+1, 100., running_min+n-1);
@@ -251,8 +253,10 @@ struct float_array_pair _STOCHASTIC_OSCILLATOR_FLOAT(const float* high, const fl
 
     _float_running_max(high, len, n, running_max+n-1);
     _float_running_min(low, len, n, running_min+n-1);
-    _float_sub(running_max+n-1, running_min+n-1, running_max+n-1, len-n+1);
-    _float_sub(close+n-1, running_min+n-1, running_min+n-1, len-n+1);
+    _float_sub_arr(running_max + n - 1, running_min + n - 1, len - n + 1,
+                   running_max + n - 1);
+    _float_sub_arr(close + n - 1, running_min + n - 1,
+                   len - n + 1, running_min + n - 1);
 
     _float_div_arr(running_min+n-1, running_max+n-1, len-n+1, running_min+n-1);
     _float_mul(running_min+n-1, len-n+1, 100., running_min+n-1);
@@ -295,4 +299,88 @@ float* _TSI_FLOAT(const float* close, int r, int s, int len) {
 
     free(apc);
     return pc;
+}
+
+double* _ULTIMATE_OSCILLATOR_DOUBLE(const double* high, const double* low, const double* close, int s, int m, int l, double ws, double wm, double wl, int len) {
+    int nan_range = min(max(s, m), l);
+    double* bp = malloc(len*sizeof(double));
+    double* tr = malloc(len*sizeof(double));
+    double* avgbp = malloc((len-nan_range+1)*sizeof(double));
+    double* avgtr = malloc((len-nan_range+1)*sizeof(double));
+    double* uo = malloc(len*sizeof(double));
+
+    _double_pairwise_min(low+1, close, len-1, bp+1);
+    _double_pairwise_max(high+1, close, len-1, tr+1);
+    _double_sub_arr(tr + 1, bp + 1, len - 1, tr + 1);
+    _double_sub_arr(close + 1, bp + 1, len - 1, bp + 1);
+
+    _double_running_sum(bp+1, len-s-1, s, avgbp);
+    _double_running_sum(tr+1, len-s-1, s, avgtr);
+    _double_div_arr(avgbp, avgtr, len-s-1, uo+1);
+    _double_mul(uo+1, len-1, ws, uo+1);
+
+    _double_running_sum(bp+1, len-m-1, m, avgbp);
+    _double_running_sum(tr+1, len-m-1, m, avgtr);
+    _double_div_arr(avgbp, avgtr, len-m-1, avgbp);
+    _double_mul(avgbp, len-m-1, wm, avgbp);
+    _double_add_arr(avgbp, uo+1, len-m-1, uo+1);
+
+    _double_running_sum(bp+1, len-l-1, l, avgbp);
+    _double_running_sum(tr+1, len-l-1, l, avgtr);
+    _double_div_arr(avgbp, avgtr, len-l-1, avgbp);
+    _double_mul(avgbp, len-l-1, wl, avgbp);
+    _double_add_arr(avgbp, uo+1, len-l-1, uo+1);
+
+    _double_mul(uo+1, len-1, 100./(ws+wm+wl), uo+1);
+
+    _double_set_nan(uo, 1);
+
+    free(bp);
+    free(tr);
+    free(avgbp);
+    free(avgtr);
+
+    return uo;
+}
+
+float* _ULTIMATE_OSCILLATOR_FLOAT(const float* high, const float* low, const float* close, int s, int m, int l, double ws, double wm, double wl, int len) {
+    int nan_range = max(max(s, m), l);
+    float* bp = malloc(len*sizeof(float));
+    float* tr = malloc(len*sizeof(float));
+    float* avgbp = malloc((len-nan_range)*sizeof(float));
+    float* avgtr = malloc((len-nan_range)*sizeof(float));
+    float* uo = malloc(len*sizeof(float));
+
+    _float_pairwise_min(low+1, close, len-1, bp+1);
+    _float_pairwise_max(high+1, close, len-1, tr+1);
+    _float_sub_arr(tr + 1, bp + 1, len - 1, tr + 1);
+    _float_sub_arr(close + 1, bp + 1, len - 1, bp + 1);
+
+    _float_running_sum(bp+1, len-nan_range, s, avgbp);
+    _float_running_sum(tr+1, len-nan_range, s, avgtr);
+    _float_div_arr(avgbp, avgtr, len-nan_range, uo+1);
+    _float_mul(uo+1, len-1, ws, uo+1);
+
+    _float_running_sum(bp+1, len-nan_range, m, avgbp);
+    _float_running_sum(tr+1, len-nan_range, m, avgtr);
+    _float_div_arr(avgbp, avgtr, len-nan_range, avgbp);
+    _float_mul(avgbp, len-nan_range, wm, avgbp);
+    _float_add_arr(avgbp, uo+1, len-nan_range, uo+1);
+
+    _float_running_sum(bp+1, len-nan_range, l, avgbp);
+    _float_running_sum(tr+1, len-nan_range, l, avgtr);
+    _float_div_arr(avgbp, avgtr, len-nan_range, avgbp);
+    _float_mul(avgbp, len-nan_range, wl, avgbp);
+    _float_add_arr(avgbp, uo+1, len-nan_range, uo+1);
+
+    _float_mul(uo+1, len-nan_range, 100.f/(ws+wm+wl), uo+1);
+
+    _float_set_nan(uo, 1);
+
+    free(bp);
+    free(tr);
+    free(avgbp);
+    free(avgtr);
+
+    return uo;
 }

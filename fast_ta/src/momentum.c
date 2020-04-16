@@ -375,6 +375,92 @@ static PyObject* TSI(PyObject* self, PyObject* args) {
     }
 };
 
+static PyObject* ULTIMATE_OSCILLATOR(PyObject* self, PyObject* args) {
+    int s;
+    int m;
+    int l;
+    double ws;
+    double wm;
+    double wl;
+    PyObject* in1;
+    PyObject* in2;
+    PyObject* in3;
+
+    if (!PyArg_ParseTuple(args, "OOOiiiddd",
+                          &in1,
+                          &in2,
+                          &in3,
+                          &s,
+                          &m,
+                          &l,
+                          &ws,
+                          &wm,
+                          &wl)) {
+        return NULL;
+    }
+
+    int type1 = PyArray_TYPE((PyArrayObject*) in1);
+
+    if (type1 != PyArray_TYPE((PyArrayObject*) in2) || type1 != PyArray_TYPE((PyArrayObject*) in3)) {
+        raise_error("Input Array DType Mismatch");
+        return NULL;
+    }
+
+    PyArrayObject* _high = (PyArrayObject*) PyArray_FROM_OTF(in1,
+                                                             type1,
+                                                             NPY_ARRAY_IN_ARRAY);
+    PyArrayObject* _low = (PyArrayObject*) PyArray_FROM_OTF(in2,
+                                                            type1,
+                                                            NPY_ARRAY_IN_ARRAY);
+    PyArrayObject* _close = (PyArrayObject*) PyArray_FROM_OTF(in3,
+                                                            type1,
+                                                            NPY_ARRAY_IN_ARRAY);
+    int len = PyArray_SIZE(_high);
+
+    if (len != PyArray_SIZE(_low) || len != PyArray_SIZE(_close)) {
+        raise_error("Input Array Dim Mismatch");
+        return NULL;
+    }
+
+    switch(type1) {
+        case NPY_FLOAT64: {
+            double* high = PyArray_DATA(_high);
+            double* low = PyArray_DATA(_low);
+            double* close = PyArray_DATA(_close);
+            double* uo = _ULTIMATE_OSCILLATOR_DOUBLE(high, low, close, s, m, l, ws, wm, wl, len);
+            npy_intp dims[1] = {len};
+
+            Py_DECREF(_high);
+            Py_DECREF(_low);
+            Py_DECREF(_close);
+            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
+            memcpy(PyArray_DATA((PyArrayObject*) ret), uo,
+                   len*sizeof(double));
+            free(uo);
+            return ret;
+        }
+        case NPY_FLOAT32: {
+            float* high = PyArray_DATA(_high);
+            float* low = PyArray_DATA(_low);
+            float* close = PyArray_DATA(_close);
+            float* uo = _ULTIMATE_OSCILLATOR_FLOAT(high, low, close, s, m, l, ws, wm, wl, len);
+            npy_intp dims[1] = {len};
+
+            Py_DECREF(_high);
+            Py_DECREF(_low);
+            Py_DECREF(_close);
+            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
+            memcpy(PyArray_DATA((PyArrayObject*) ret), uo,
+                   len*sizeof(float));
+            free(uo);
+            return ret;
+        }
+        default:
+            raise_dtype_error();
+            return NULL;
+    }
+};
+
 static PyMethodDef MomentumMethods[] = {
         {"RSI", RSI, METH_VARARGS | METH_KEYWORDS, "Compute RSI On Data"},
         {"AO", AO, METH_VARARGS, "Compute AO On Data"},
@@ -382,6 +468,7 @@ static PyMethodDef MomentumMethods[] = {
         {"ROC", ROC, METH_VARARGS, "Compute ROC On Data"},
         {"StochasticOscillator", STOCHASTIC_OSCILLATOR, METH_VARARGS, "Compute Stochastic Oscillator On Data"},
         {"TSI", TSI, METH_VARARGS, "Compute TSI On Data"},
+        {"UltimateOscillator", ULTIMATE_OSCILLATOR, METH_VARARGS, "Compute Ultimate Oscillator On Data"},
         {NULL, NULL, 0, NULL}
 };
 

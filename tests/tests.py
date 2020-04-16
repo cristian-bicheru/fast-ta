@@ -24,7 +24,7 @@ if not args.save_plots and not args.show_plots:
     exit()
 #
 
-with open('tests/AAPL.csv', 'r') as dataset:
+with open('tests/AAPL_small.csv', 'r') as dataset:
     csv_data = list(csv.reader(dataset))[1:]
 
 close_data = []
@@ -119,14 +119,27 @@ def tsi():
         plt.show()
     if args.save_plots:
         plt.savefig("tests/plots/TSI " + str(close_data.dtype) + ".svg")
+
+def uo():
+    plt.clf()
+    plt.title("Ultimate Oscillator "+str(close_data.dtype))
+    so = fast_ta.momentum.UltimateOscillator(high_data, low_data, close_data, 7, 14, 28, 4, 2, 1)
+    plt.plot(so)
+    sot = ta.momentum.UltimateOscillator(pandas.Series(high_data), pandas.Series(low_data), pandas.Series(close_data))
+    #plt.plot(sot.uo())
+    if args.show_plots:
+        plt.show()
+    if args.save_plots:
+        plt.savefig("tests/plots/UO " + str(close_data.dtype) + ".svg")
         
 def run_tests():
-    rsi()
-    ao()
-    kama()
-    roc()
-    stoch()
-    tsi()
+    #rsi()
+    #ao()
+    #kama()
+    #roc()
+    #stoch()
+    #tsi()
+    uo()
 
 plt.figure(figsize=[25, 5])
 run_tests()
