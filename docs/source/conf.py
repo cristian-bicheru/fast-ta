@@ -20,8 +20,8 @@ import sphinx_rtd_theme
 # -- Project information -----------------------------------------------------
 
 project = 'Fast TA'
-copyright = '2020, Cristian Bicheru'
-author = 'Cristian Bicheru'
+copyright = '2020, Cristian Bicheru, Calder White'
+author = 'Cristian Bicheru, Calder White'
 
 # The full version, including alpha/beta/rc tags
 release = '0.1.0'
