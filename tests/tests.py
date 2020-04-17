@@ -17,31 +17,48 @@ parser.add_argument('--show-plots', dest='show_plots', action='store_const',
 parser.add_argument('--save-plots', dest='save_plots', action='store_const',
                      const=True, default=False,
                      help='save matplotlib plots')
+parser.add_argument('--use-large-dataset', dest='large_dataset', action='store_const',
+                     const=True, default=False,
+                     help='save matplotlib plots')
 args = parser.parse_args()
 
 if not args.save_plots and not args.show_plots:
     parser.print_help()
     exit()
 #
+if not args.large_dataset:
+    with open('tests/AAPL_small.csv', 'r') as dataset:
+        csv_data = list(csv.reader(dataset))[1:]
 
-with open('tests/AAPL_small.csv', 'r') as dataset:
-    csv_data = list(csv.reader(dataset))[1:]
+    close_data = []
+    high_data = []
+    low_data = []
+    open_data = []
 
-close_data = []
-high_data = []
-low_data = []
-open_data = []
+    for row in csv_data:
+        close_data.append(row[4])
+        high_data.append(row[2])
+        low_data.append(row[3])
+        open_data.append(row[1])
+else:
+    with open('tests/AAPL.csv', 'r') as dataset:
+        csv_data = list(csv.reader(dataset))[1:]
 
-for row in csv_data:
-    close_data.append(row[1])
-    high_data.append(row[2])
-    low_data.append(row[3])
-    open_data.append(row[4])
+    close_data = []
+    high_data = []
+    low_data = []
+    open_data = []
 
-while 'null' in close_data: close_data.remove('null')
-while 'null' in high_data: high_data.remove('null')
-while 'null' in low_data: low_data.remove('null')
-while 'null' in open_data: open_data.remove('null')
+    for row in csv_data:
+        close_data.append(row[1])
+        high_data.append(row[2])
+        low_data.append(row[3])
+        open_data.append(row[4])
+
+    while 'null' in close_data: close_data.remove('null')
+    while 'null' in high_data: high_data.remove('null')
+    while 'null' in low_data: low_data.remove('null')
+    while 'null' in open_data: open_data.remove('null')
 
 close_data = np.array(close_data, dtype=np.float64)
 high_data = np.array(high_data, dtype=np.float64)
@@ -122,10 +139,10 @@ def tsi():
 
 def uo():
     plt.clf()
-    plt.title("Ultimate Oscillator "+str(close_data.dtype))
+    plt.title("Ultimate Oscillator (NOTE: TA'S IMPLEMENTATION IS BROKEN, USE TRADINGVIEW TO VALIDATE) "+str(close_data.dtype))
     so = fast_ta.momentum.UltimateOscillator(high_data, low_data, close_data, 7, 14, 28, 4, 2, 1)
     plt.plot(so)
-    sot = ta.momentum.UltimateOscillator(pandas.Series(high_data), pandas.Series(low_data), pandas.Series(close_data))
+    #sot = ta.momentum.UltimateOscillator(pandas.Series(high_data), pandas.Series(low_data), pandas.Series(close_data))
     #plt.plot(sot.uo())
     if args.show_plots:
         plt.show()
@@ -133,12 +150,12 @@ def uo():
         plt.savefig("tests/plots/UO " + str(close_data.dtype) + ".svg")
         
 def run_tests():
-    #rsi()
-    #ao()
-    #kama()
-    #roc()
-    #stoch()
-    #tsi()
+    rsi()
+    ao()
+    kama()
+    roc()
+    stoch()
+    tsi()
     uo()
 
 plt.figure(figsize=[25, 5])

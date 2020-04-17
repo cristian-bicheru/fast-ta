@@ -567,7 +567,7 @@ void _float_pairwise_min(const float* arr1, const float* arr2, int len, float* o
     }
 
     for (int i = len-len%8; i < len; i++) {
-        outarr[i] = max(arr1[i], arr2[i]);
+        outarr[i] = min(arr1[i], arr2[i]);
     }
 }
 
@@ -576,7 +576,7 @@ void _double_running_sum(const double* arr, int len, int window, double* outarr)
 
     for (int i = 0; i < window; i++) {
         wsum += arr[i];
-        outarr[i] = wsum/(i+1);
+        outarr[i] = wsum;
     }
 
     for (int i = window; i < len; i++) {
@@ -591,7 +591,7 @@ void _float_running_sum(const float* arr, int len, int window, float* outarr) {
 
     for (int i = 0; i < window; i++) {
         wsum += arr[i];
-        outarr[i] = wsum/(i+1);
+        outarr[i] = wsum;
     }
 
     for (int i = window; i < len; i++) {
@@ -609,7 +609,7 @@ void _double_add_arr(const double* arr1, const double* arr2, int len, double* ou
     }
 
     for (int i = len-len%4; i < len; i++) {
-        outarr[i] = max(arr1[i], arr2[i]);
+        outarr[i] = arr1[i]+arr2[i];
     }
 }
 
@@ -621,6 +621,6 @@ void _float_add_arr(const float* arr1, const float* arr2, int len, float* outarr
     }
 
     for (int i = len-len%8; i < len; i++) {
-        outarr[i] = max(arr1[i], arr2[i]);
+        outarr[i] =arr1[i]+arr2[i];
     }
 }

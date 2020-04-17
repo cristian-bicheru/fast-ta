@@ -302,38 +302,38 @@ float* _TSI_FLOAT(const float* close, int r, int s, int len) {
 }
 
 double* _ULTIMATE_OSCILLATOR_DOUBLE(const double* high, const double* low, const double* close, int s, int m, int l, double ws, double wm, double wl, int len) {
-    int nan_range = min(max(s, m), l);
-    double* bp = malloc(len*sizeof(double));
-    double* tr = malloc(len*sizeof(double));
-    double* avgbp = malloc((len-nan_range+1)*sizeof(double));
-    double* avgtr = malloc((len-nan_range+1)*sizeof(double));
+    int nan_range = max(max(s, m), l);
+    double* bp = malloc((len-1)*sizeof(double));
+    double* tr = malloc((len-1)*sizeof(double));
+    double* avgbp = malloc(len*sizeof(double));
+    double* avgtr = malloc(len*sizeof(double));
     double* uo = malloc(len*sizeof(double));
 
-    _double_pairwise_min(low+1, close, len-1, bp+1);
-    _double_pairwise_max(high+1, close, len-1, tr+1);
-    _double_sub_arr(tr + 1, bp + 1, len - 1, tr + 1);
-    _double_sub_arr(close + 1, bp + 1, len - 1, bp + 1);
+    _double_pairwise_min(low+1, close, len-1, bp);
+    _double_pairwise_max(high+1, close, len-1, tr);
+    _double_sub_arr(tr, bp, len - 1, tr);
+    _double_sub_arr(close+1, bp, len-1, bp);
 
-    _double_running_sum(bp+1, len-s-1, s, avgbp);
-    _double_running_sum(tr+1, len-s-1, s, avgtr);
-    _double_div_arr(avgbp, avgtr, len-s-1, uo+1);
+    _double_running_sum(bp, len-1, s, avgbp);
+    _double_running_sum(tr, len-1, s, avgtr);
+    _double_div_arr(avgbp, avgtr, len-1, uo+1);
     _double_mul(uo+1, len-1, ws, uo+1);
 
-    _double_running_sum(bp+1, len-m-1, m, avgbp);
-    _double_running_sum(tr+1, len-m-1, m, avgtr);
-    _double_div_arr(avgbp, avgtr, len-m-1, avgbp);
-    _double_mul(avgbp, len-m-1, wm, avgbp);
-    _double_add_arr(avgbp, uo+1, len-m-1, uo+1);
+    _double_running_sum(bp, len-1, m, avgbp);
+    _double_running_sum(tr, len-1, m, avgtr);
+    _double_div_arr(avgbp, avgtr, len, avgbp);
+    _double_mul(avgbp, len, wm, avgbp);
+    _double_add_arr(avgbp, uo+1, len-1, uo+1);
 
-    _double_running_sum(bp+1, len-l-1, l, avgbp);
-    _double_running_sum(tr+1, len-l-1, l, avgtr);
-    _double_div_arr(avgbp, avgtr, len-l-1, avgbp);
-    _double_mul(avgbp, len-l-1, wl, avgbp);
-    _double_add_arr(avgbp, uo+1, len-l-1, uo+1);
+    _double_running_sum(bp, len-1, l, avgbp);
+    _double_running_sum(tr, len-1, l, avgtr);
+    _double_div_arr(avgbp, avgtr, len, avgbp);
+    _double_mul(avgbp, len, wl, avgbp);
+    _double_add_arr(avgbp, uo+1, len-1, uo+1);
 
     _double_mul(uo+1, len-1, 100./(ws+wm+wl), uo+1);
 
-    _double_set_nan(uo, 1);
+    _double_set_nan(uo, nan_range);
 
     free(bp);
     free(tr);
@@ -345,37 +345,37 @@ double* _ULTIMATE_OSCILLATOR_DOUBLE(const double* high, const double* low, const
 
 float* _ULTIMATE_OSCILLATOR_FLOAT(const float* high, const float* low, const float* close, int s, int m, int l, double ws, double wm, double wl, int len) {
     int nan_range = max(max(s, m), l);
-    float* bp = malloc(len*sizeof(float));
-    float* tr = malloc(len*sizeof(float));
-    float* avgbp = malloc((len-nan_range)*sizeof(float));
-    float* avgtr = malloc((len-nan_range)*sizeof(float));
+    float* bp = malloc((len-1)*sizeof(float));
+    float* tr = malloc((len-1)*sizeof(float));
+    float* avgbp = malloc(len*sizeof(float));
+    float* avgtr = malloc(len*sizeof(float));
     float* uo = malloc(len*sizeof(float));
 
-    _float_pairwise_min(low+1, close, len-1, bp+1);
-    _float_pairwise_max(high+1, close, len-1, tr+1);
-    _float_sub_arr(tr + 1, bp + 1, len - 1, tr + 1);
-    _float_sub_arr(close + 1, bp + 1, len - 1, bp + 1);
+    _float_pairwise_min(low+1, close, len-1, bp);
+    _float_pairwise_max(high+1, close, len-1, tr);
+    _float_sub_arr(tr, bp, len - 1, tr);
+    _float_sub_arr(close+1, bp, len-1, bp);
 
-    _float_running_sum(bp+1, len-nan_range, s, avgbp);
-    _float_running_sum(tr+1, len-nan_range, s, avgtr);
-    _float_div_arr(avgbp, avgtr, len-nan_range, uo+1);
+    _float_running_sum(bp, len-1, s, avgbp);
+    _float_running_sum(tr, len-1, s, avgtr);
+    _float_div_arr(avgbp, avgtr, len-1, uo+1);
     _float_mul(uo+1, len-1, ws, uo+1);
 
-    _float_running_sum(bp+1, len-nan_range, m, avgbp);
-    _float_running_sum(tr+1, len-nan_range, m, avgtr);
-    _float_div_arr(avgbp, avgtr, len-nan_range, avgbp);
-    _float_mul(avgbp, len-nan_range, wm, avgbp);
-    _float_add_arr(avgbp, uo+1, len-nan_range, uo+1);
+    _float_running_sum(bp, len-1, m, avgbp);
+    _float_running_sum(tr, len-1, m, avgtr);
+    _float_div_arr(avgbp, avgtr, len, avgbp);
+    _float_mul(avgbp, len, wm, avgbp);
+    _float_add_arr(avgbp, uo+1, len-1, uo+1);
 
-    _float_running_sum(bp+1, len-nan_range, l, avgbp);
-    _float_running_sum(tr+1, len-nan_range, l, avgtr);
-    _float_div_arr(avgbp, avgtr, len-nan_range, avgbp);
-    _float_mul(avgbp, len-nan_range, wl, avgbp);
-    _float_add_arr(avgbp, uo+1, len-nan_range, uo+1);
+    _float_running_sum(bp, len-1, l, avgbp);
+    _float_running_sum(tr, len-1, l, avgtr);
+    _float_div_arr(avgbp, avgtr, len, avgbp);
+    _float_mul(avgbp, len, wl, avgbp);
+    _float_add_arr(avgbp, uo+1, len-1, uo+1);
 
-    _float_mul(uo+1, len-nan_range, 100.f/(ws+wm+wl), uo+1);
+    _float_mul(uo+1, len-1, 100.f/(ws+wm+wl), uo+1);
 
-    _float_set_nan(uo, 1);
+    _float_set_nan(uo, nan_range);
 
     free(bp);
     free(tr);
