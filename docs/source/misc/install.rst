@@ -5,11 +5,14 @@ Fast TA |version| Installation Guide
 Installing Fast TA
 ==================
 
-Fast Ta runs on Python 3.x under CPython.
-NOTE: Fast Ta requires `NumPy`_.
+Fast TA runs on Python 3.x under CPython.
+NOTE: Fast TA requires `NumPy`_.
 
 To install Fast TA, run::
+
    pip install fast-ta
+
+**PYPI UPSTREAM NOT SET UP YET**
 
 Report any installation issues in our `issue tracker`_.
 
