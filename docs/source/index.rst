@@ -1,5 +1,5 @@
 ===============================
-Fast TA |version| documentation
+Fast TA |version| Documentation
 ===============================
 
 Fast TA is an optimized, high-level technical analysis library used to 
