@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <numpy/npy_math.h>
 
-#include "debug_tools.c"
+#include "debug_tools.h"
 #include "funcs.h"
 
 void _double_ema(const double* arr, int len, double alpha, double* outarr) {
