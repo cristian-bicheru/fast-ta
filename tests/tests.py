@@ -19,7 +19,7 @@ parser.add_argument('--save-plots', dest='save_plots', action='store_const',
                      help='save matplotlib plots')
 parser.add_argument('--use-large-dataset', dest='large_dataset', action='store_const',
                      const=True, default=False,
-                     help='save matplotlib plots')
+                     help='use a larger dataset for testing')
 args = parser.parse_args()
 
 if not args.save_plots and not args.show_plots:
