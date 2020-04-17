@@ -56,3 +56,22 @@ Contributing
 
 :doc:`contributing/testing`
    Learn how to test and benchmark the Fast TA library.
+
+
+License
+=======
+.. toctree::
+   :maxdepth: 2
+   :caption: License
+   :hidden:
+
+   misc/license
+
+:doc:`misc/license`
+   The Fast TA Library is licensed under the MIT License.
+
+Credits
+=======
+Developed with passion by the `Fast TA Team`_.
+
+.. _Fast TA Team: https://github.com/cristian-bicheru/fast-ta/graphs/contributors
