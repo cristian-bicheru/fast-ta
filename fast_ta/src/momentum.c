@@ -13,17 +13,17 @@
 
 static PyObject* RSI(PyObject* self, PyObject* args, PyObject* kwargs) {
     PyObject* in;
-    int window_size;
+    int window_size = 14;
     int thread_count = 1;
 
     static char *kwlist[] = {
-        "",
-        "",
+        "close",
+        "n",
         "threads",
         NULL
     };
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Oi|i:RSI", kwlist,
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|ii:RSI", kwlist,
                           &in,
                           &window_size,
                           &thread_count)) {
@@ -70,13 +70,21 @@ static PyObject* RSI(PyObject* self, PyObject* args, PyObject* kwargs) {
     }
 };
 
-static PyObject* AO(PyObject* self, PyObject* args) {
-    int n1;
-    int n2;
+static PyObject* AO(PyObject* self, PyObject* args, PyObject* kwargs) {
+    int n1 = 5;
+    int n2 = 34;
     PyObject* in1;
     PyObject* in2;
 
-    if (!PyArg_ParseTuple(args, "OOii",
+    static char *kwlist[] = {
+            "high",
+            "low",
+            "s",
+            "l",
+            NULL
+    };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|ii:AO", kwlist,
                           &in1,
                           &in2,
                           &n1,
@@ -139,13 +147,21 @@ static PyObject* AO(PyObject* self, PyObject* args) {
     }
 };
 
-static PyObject* KAMA(PyObject* self, PyObject* args) {
-    int n1;
-    int n2;
-    int n3;
+static PyObject* KAMA(PyObject* self, PyObject* args, PyObject* kwargs) {
+    int n1 = 10;
+    int n2 = 2;
+    int n3 = 30;
     PyObject* in1;
 
-    if (!PyArg_ParseTuple(args, "Oiii",
+    static char *kwlist[] = {
+            "close",
+            "n",
+            "f",
+            "s",
+            NULL
+    };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|iii:KAMA", kwlist,
                           &in1,
                           &n1,
                           &n2,
@@ -191,11 +207,17 @@ static PyObject* KAMA(PyObject* self, PyObject* args) {
     }
 };
 
-static PyObject* ROC(PyObject* self, PyObject* args) {
-    int n;
+static PyObject* ROC(PyObject* self, PyObject* args, PyObject* kwargs) {
+    int n = 12;
     PyObject* in;
 
-    if (!PyArg_ParseTuple(args, "Oi",
+    static char *kwlist[] = {
+            "close",
+            "n",
+            NULL
+    };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|i:ROC", kwlist,
                           &in,
                           &n)) {
         return NULL;
@@ -239,14 +261,23 @@ static PyObject* ROC(PyObject* self, PyObject* args) {
     }
 };
 
-static PyObject* STOCHASTIC_OSCILLATOR(PyObject* self, PyObject* args) {
-    int n;
-    int d;
+static PyObject* STOCHASTIC_OSCILLATOR(PyObject* self, PyObject* args, PyObject* kwargs) {
+    int n = 14;
+    int d = 3;
     PyObject* in1;
     PyObject* in2;
     PyObject* in3;
 
-    if (!PyArg_ParseTuple(args, "OOOii",
+    static char *kwlist[] = {
+            "high",
+            "low",
+            "close",
+            "n",
+            "d_n",
+            NULL
+    };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOO|ii:StochasticOscillator", kwlist,
                           &in1,
                           &in2,
                           &in3,
@@ -283,7 +314,7 @@ static PyObject* STOCHASTIC_OSCILLATOR(PyObject* self, PyObject* args) {
             double* high = PyArray_DATA(_high);
             double* low = PyArray_DATA(_low);
             double* close = PyArray_DATA(_close);
-            struct double_array_pair so = _STOCHASTIC_OSCILLATOR_DOUBLE(high, low, close, n, d, len);
+            struct double_array_pair so = _STOCHASTIC_OSCILLATOR_DOUBLE(high, low, close, n, d, len, Normal);
             npy_intp dims[1] = {len};
 
             PyObject* ret = PyTuple_New(2);
@@ -303,7 +334,7 @@ static PyObject* STOCHASTIC_OSCILLATOR(PyObject* self, PyObject* args) {
             float* high = PyArray_DATA(_high);
             float* low = PyArray_DATA(_low);
             float* close = PyArray_DATA(_close);
-            struct float_array_pair so = _STOCHASTIC_OSCILLATOR_FLOAT(high, low, close, n, d, len);
+            struct float_array_pair so = _STOCHASTIC_OSCILLATOR_FLOAT(high, low, close, n, d, len, Normal);
             npy_intp dims[1] = {len};
 
             PyObject* ret = PyTuple_New(2);
@@ -325,12 +356,19 @@ static PyObject* STOCHASTIC_OSCILLATOR(PyObject* self, PyObject* args) {
     }
 };
 
-static PyObject* TSI(PyObject* self, PyObject* args) {
-    int r;
-    int s;
+static PyObject* TSI(PyObject* self, PyObject* args, PyObject* kwargs) {
+    int r = 25;
+    int s = 13;
     PyObject* in;
 
-    if (!PyArg_ParseTuple(args, "Oii",
+    static char *kwlist[] = {
+            "close",
+            "r",
+            "s",
+            NULL
+    };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|ii:TSI", kwlist,
                           &in,
                           &r,
                           &s)) {
@@ -375,18 +413,31 @@ static PyObject* TSI(PyObject* self, PyObject* args) {
     }
 };
 
-static PyObject* ULTIMATE_OSCILLATOR(PyObject* self, PyObject* args) {
-    int s;
-    int m;
-    int l;
-    double ws;
-    double wm;
-    double wl;
+static PyObject* ULTIMATE_OSCILLATOR(PyObject* self, PyObject* args, PyObject* kwargs) {
+    int s = 7;
+    int m = 14;
+    int l = 28;
+    double ws = 4.f;
+    double wm = 2.f;
+    double wl = 1.f;
     PyObject* in1;
     PyObject* in2;
     PyObject* in3;
 
-    if (!PyArg_ParseTuple(args, "OOOiiiddd",
+    static char *kwlist[] = {
+            "high",
+            "low",
+            "close",
+            "s",
+            "m",
+            "l",
+            "ws",
+            "wm",
+            "wl",
+            NULL
+    };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOO|iiiddd:UltimateOscillator", kwlist,
                           &in1,
                           &in2,
                           &in3,
@@ -461,14 +512,95 @@ static PyObject* ULTIMATE_OSCILLATOR(PyObject* self, PyObject* args) {
     }
 };
 
+static PyObject* WILLIAMS_R(PyObject* self, PyObject* args, PyObject* kwargs) {
+    int n = 14;
+    PyObject* in1;
+    PyObject* in2;
+    PyObject* in3;
+
+    static char *kwlist[] = {
+            "high",
+            "low",
+            "close",
+            "n",
+            NULL
+    };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOO|i:WilliamsR", kwlist,
+                          &in1,
+                          &in2,
+                          &in3,
+                          &n)) {
+        return NULL;
+    }
+
+    int type1 = PyArray_TYPE((PyArrayObject*) in1);
+
+    if (type1 != PyArray_TYPE((PyArrayObject*) in2) || type1 != PyArray_TYPE((PyArrayObject*) in3)) {
+        raise_error("Input Array DType Mismatch");
+        return NULL;
+    }
+
+    PyArrayObject* _high = (PyArrayObject*) PyArray_FROM_OTF(in1,
+                                                             type1,
+                                                             NPY_ARRAY_IN_ARRAY);
+    PyArrayObject* _low = (PyArrayObject*) PyArray_FROM_OTF(in2,
+                                                            type1,
+                                                            NPY_ARRAY_IN_ARRAY);
+    PyArrayObject* _close = (PyArrayObject*) PyArray_FROM_OTF(in3,
+                                                              type1,
+                                                              NPY_ARRAY_IN_ARRAY);
+    int len = PyArray_SIZE(_close);
+
+    if (len != PyArray_SIZE(_high) || len != PyArray_SIZE(_low)) {
+        raise_error("Input Array Dim Mismatch");
+        return NULL;
+    }
+
+    switch(type1) {
+        case NPY_FLOAT64: {
+            double* high = PyArray_DATA(_high);
+            double* low = PyArray_DATA(_low);
+            double* close = PyArray_DATA(_close);
+            double* wr = _WILLIAMS_R_DOUBLE(high, low, close, n, len);
+            npy_intp dims[1] = {len};
+
+            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
+            memcpy(PyArray_DATA((PyArrayObject*) ret), wr,
+                   len*sizeof(double));
+            free(wr);
+            return ret;
+        }
+        case NPY_FLOAT32: {
+            float* high = PyArray_DATA(_high);
+            float* low = PyArray_DATA(_low);
+            float* close = PyArray_DATA(_close);
+            float* wr = _WILLIAMS_R_FLOAT(high, low, close, n, len);
+            npy_intp dims[1] = {len};
+
+            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
+            memcpy(PyArray_DATA((PyArrayObject*) ret), wr,
+                   len*sizeof(float));
+            free(wr);
+            return ret;
+        }
+        default:
+            raise_dtype_error();
+            return NULL;
+    }
+};
+
+#define pyargflag METH_VARARGS | METH_KEYWORDS
+
 static PyMethodDef MomentumMethods[] = {
-        {"RSI", RSI, METH_VARARGS | METH_KEYWORDS, "Compute RSI On Data"},
-        {"AO", AO, METH_VARARGS, "Compute AO On Data"},
-        {"KAMA", KAMA, METH_VARARGS, "Compute KAMA On Data"},
-        {"ROC", ROC, METH_VARARGS, "Compute ROC On Data"},
-        {"StochasticOscillator", STOCHASTIC_OSCILLATOR, METH_VARARGS, "Compute Stochastic Oscillator On Data"},
-        {"TSI", TSI, METH_VARARGS, "Compute TSI On Data"},
-        {"UltimateOscillator", ULTIMATE_OSCILLATOR, METH_VARARGS, "Compute Ultimate Oscillator On Data"},
+        {"RSI", (PyCFunction) RSI, pyargflag, "Compute RSI On Data"},
+        {"AO", (PyCFunction) AO, pyargflag, "Compute AO On Data"},
+        {"KAMA", (PyCFunction) KAMA, pyargflag, "Compute KAMA On Data"},
+        {"ROC", (PyCFunction) ROC, pyargflag, "Compute ROC On Data"},
+        {"StochasticOscillator", (PyCFunction) STOCHASTIC_OSCILLATOR, pyargflag, "Compute Stochastic Oscillator On Data"},
+        {"TSI", (PyCFunction) TSI, pyargflag, "Compute TSI On Data"},
+        {"UltimateOscillator", (PyCFunction) ULTIMATE_OSCILLATOR, pyargflag, "Compute Ultimate Oscillator On Data"},
+        {"WilliamsR", (PyCFunction) WILLIAMS_R, pyargflag, "Compute Williams %R On Data"},
         {NULL, NULL, 0, NULL}
 };
 

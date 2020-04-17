@@ -64,7 +64,7 @@ double* _RSI_DOUBLE(const double* close, double* out, int close_len,
         // some funky pointer math to move the close back the specified amount
         // so we can get the moving averages to where they should be.
         // NOTE: This is the dangerous part of the code.
-        double* reduced_close = close - prelim;
+        const double* reduced_close = close - prelim;
         for (int i = 0; i<prelim + 1; i++) {
             double diff = reduced_close[i+1]-reduced_close[i];
             COMPUTE_RSI_TEMPLATE(diff, &last_gain, &last_loss, i+1, double);
@@ -108,7 +108,7 @@ float* _RSI_FLOAT(const float* close, float* out, int close_len,
         // some funky pointer math to move the close back the specified amount
         // so we can get the moving averages to where they should be.
         // NOTE: This is the dangerous part of the code.
-        float* reduced_close = close - prelim;
+        const float* reduced_close = close - prelim;
         for (int i = 0; i<prelim + 1; i++) {
             float diff = reduced_close[i+1]-reduced_close[i];
             COMPUTE_RSI_TEMPLATE(diff, &last_gain, &last_loss, i+1, float);
@@ -221,7 +221,7 @@ float* _ROC_FLOAT(const float* close, int n, int len) {
     return roc;
 }
 
-struct double_array_pair _STOCHASTIC_OSCILLATOR_DOUBLE(const double* high, const double* low, double* close, int n, int d, int len) {
+struct double_array_pair _STOCHASTIC_OSCILLATOR_DOUBLE(const double* high, const double* low, double* close, int n, int d, int len, enum stoch_mode mode) {
     // NOTE: While running_max and running_min are initially running maxes and minimums,
     //       they are reused later on save memory.
     double* running_max = malloc(len*sizeof(double));
@@ -229,23 +229,35 @@ struct double_array_pair _STOCHASTIC_OSCILLATOR_DOUBLE(const double* high, const
 
     _double_running_max(high, len, n, running_max+n-1);
     _double_running_min(low, len, n, running_min+n-1);
-    _double_sub_arr(running_max + n - 1, running_min + n - 1, len - n + 1,
-                    running_max + n - 1);
-    _double_sub_arr(close + n - 1, running_min + n - 1,
-                    len - n + 1, running_min + n - 1);
 
-    _double_div_arr(running_min+n-1, running_max+n-1, len-n+1, running_min+n-1);
-    _double_mul(running_min+n-1, len-n+1, 100., running_min+n-1);
-    _double_sma(running_min+n-1, len-n+1, d, running_max+n-1);
+    if (mode == Normal) {
+        _double_sub_arr(running_max + n - 1, running_min + n - 1, len - n + 1,
+                        running_max + n - 1);
+        _double_sub_arr(close + n - 1, running_min + n - 1,
+                        len - n + 1, running_min + n - 1);
+        _double_div_arr(running_min+n-1, running_max+n-1, len-n+1, running_min+n-1);
+        _double_mul(running_min+n-1, len-n+1, 100., running_min+n-1);
+        _double_sma(running_min+n-1, len-n+1, d, running_max+n-1);
+        _double_set_nan(running_max, n-1);
+
+    } else if (mode == Williams) {
+        _double_sub_arr(running_max + n - 1, running_min + n - 1, len - n + 1,
+                        running_min + n - 1);
+        _double_sub_arr(running_max + n - 1, close + n - 1,
+                        len - n + 1, running_max + n - 1);
+        _double_div_arr(running_max+n-1, running_min+n-1, len-n+1, running_min+n-1);
+        _double_mul(running_min+n-1, len-n+1, -100., running_min+n-1);
+        free(running_max);
+        running_max = NULL;
+    }
 
     _double_set_nan(running_min, n-1);
-    _double_set_nan(running_max, n-1);
 
     struct double_array_pair ret = {running_min, running_max};
     return ret;
 }
 
-struct float_array_pair _STOCHASTIC_OSCILLATOR_FLOAT(const float* high, const float* low, float* close, int n, int d, int len) {
+struct float_array_pair _STOCHASTIC_OSCILLATOR_FLOAT(const float* high, const float* low, float* close, int n, int d, int len, enum stoch_mode mode) {
     // NOTE: While running_max and running_min are initially running maxes and minimums,
     //       they are reused later on save memory.
     float* running_max = malloc(len*sizeof(float));
@@ -253,17 +265,29 @@ struct float_array_pair _STOCHASTIC_OSCILLATOR_FLOAT(const float* high, const fl
 
     _float_running_max(high, len, n, running_max+n-1);
     _float_running_min(low, len, n, running_min+n-1);
-    _float_sub_arr(running_max + n - 1, running_min + n - 1, len - n + 1,
-                   running_max + n - 1);
-    _float_sub_arr(close + n - 1, running_min + n - 1,
-                   len - n + 1, running_min + n - 1);
 
-    _float_div_arr(running_min+n-1, running_max+n-1, len-n+1, running_min+n-1);
-    _float_mul(running_min+n-1, len-n+1, 100., running_min+n-1);
-    _float_sma(running_min+n-1, len-n+1, d, running_max+n-1);
+    if (mode == Normal) {
+        _float_sub_arr(running_max + n - 1, running_min + n - 1, len - n + 1,
+                        running_max + n - 1);
+        _float_sub_arr(close + n - 1, running_min + n - 1,
+                        len - n + 1, running_min + n - 1);
+        _float_div_arr(running_min+n-1, running_max+n-1, len-n+1, running_min+n-1);
+        _float_mul(running_min+n-1, len-n+1, 100.f, running_min+n-1);
+        _float_sma(running_min+n-1, len-n+1, d, running_max+n-1);
+        _float_set_nan(running_max, n-1);
+
+    } else if (mode == Williams) {
+        _float_sub_arr(running_max + n - 1, running_min + n - 1, len - n + 1,
+                        running_min + n - 1);
+        _float_sub_arr(running_max + n - 1, close + n - 1,
+                        len - n + 1, running_max + n - 1);
+        _float_div_arr(running_max+n-1, running_min+n-1, len-n+1, running_min+n-1);
+        _float_mul(running_min+n-1, len-n+1, -100.f, running_min+n-1);
+        free(running_max);
+        running_max = NULL;
+    }
 
     _float_set_nan(running_min, n-1);
-    _float_set_nan(running_max, n-1);
 
     struct float_array_pair ret = {running_min, running_max};
     return ret;
@@ -383,4 +407,14 @@ float* _ULTIMATE_OSCILLATOR_FLOAT(const float* high, const float* low, const flo
     free(avgtr);
 
     return uo;
+}
+
+double* _WILLIAMS_R_DOUBLE(const double* high, const double* low, double* close, int n,
+                           int len) {
+    return _STOCHASTIC_OSCILLATOR_DOUBLE(high, low, close, n, -1, len, Williams).arr1;
+}
+
+float* _WILLIAMS_R_FLOAT(const float* high, const float* low, float* close, int n,
+                         int len) {
+    return _STOCHASTIC_OSCILLATOR_FLOAT(high, low, close, n, -1, len, Williams).arr1;
 }

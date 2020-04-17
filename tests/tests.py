@@ -69,7 +69,7 @@ open_data = np.array(open_data, dtype=np.float64)
 def rsi():
     plt.clf()
     plt.title("RSI "+str(close_data.dtype))
-    plt.plot(fast_ta.momentum.RSI(close_data, 14))
+    plt.plot(fast_ta.momentum.RSI(close=close_data, n = 14))
     plt.plot(ta.momentum.RSIIndicator(pandas.Series(close_data), n=14).rsi())
     if args.show_plots:
         plt.show()
@@ -80,7 +80,7 @@ def ao():
     plt.clf()
     plt.title("AO "+str(high_data.dtype))
     plt.plot(ta.momentum.AwesomeOscillatorIndicator(pandas.Series(high_data), pandas.Series(low_data)).ao())
-    plt.plot(fast_ta.momentum.AO(high_data, low_data, 5, 34))
+    plt.plot(fast_ta.momentum.AO(high=high_data, low=low_data, s = 5, l = 34))
     if args.show_plots:
         plt.show()
     if args.save_plots:
@@ -89,7 +89,7 @@ def ao():
 def kama():
     plt.clf()
     plt.title("KAMA "+str(close_data.dtype))
-    plt.plot(fast_ta.momentum.KAMA(close_data, 10, 2, 30))
+    plt.plot(fast_ta.momentum.KAMA(close=close_data, n = 10, f = 2, s = 30))
     plt.plot(list(ta.momentum.KAMAIndicator(pandas.Series(close_data)).kama()))
     if args.show_plots:
         plt.show()
@@ -99,7 +99,7 @@ def kama():
 def roc():
     plt.clf()
     plt.title("ROC "+str(close_data.dtype))
-    plt.plot(fast_ta.momentum.ROC(close_data, 12))
+    plt.plot(fast_ta.momentum.ROC(close = close_data, n = 12))
     plt.plot(list(ta.momentum.ROCIndicator(pandas.Series(close_data), n=12).roc()))
     if args.show_plots:
         plt.show()
@@ -109,7 +109,7 @@ def roc():
 def stoch():
     plt.clf()
     plt.title("Stochastic Oscillator "+str(close_data.dtype))
-    so = fast_ta.momentum.StochasticOscillator(high_data, low_data, close_data, 14, 3)
+    so = fast_ta.momentum.StochasticOscillator(high = high_data, low = low_data, close = close_data, n = 14, d_n = 3)
     plt.plot(so[0])
     sot = ta.momentum.StochasticOscillator(pandas.Series(high_data), pandas.Series(low_data), pandas.Series(close_data))
     plt.plot(sot.stoch())
@@ -130,7 +130,7 @@ def stoch():
 def tsi():
     plt.clf()
     plt.title("TSI "+str(close_data.dtype))
-    plt.plot(fast_ta.momentum.TSI(close_data, 25, 13))
+    plt.plot(fast_ta.momentum.TSI(close=close_data, r = 25, s = 13))
     plt.plot(list(ta.momentum.TSIIndicator(pandas.Series(close_data)).tsi()))
     if args.show_plots:
         plt.show()
@@ -140,7 +140,7 @@ def tsi():
 def uo():
     plt.clf()
     plt.title("Ultimate Oscillator (NOTE: TA'S IMPLEMENTATION IS BROKEN, USE TRADINGVIEW TO VALIDATE) "+str(close_data.dtype))
-    so = fast_ta.momentum.UltimateOscillator(high_data, low_data, close_data, 7, 14, 28, 4, 2, 1)
+    so = fast_ta.momentum.UltimateOscillator(high=high_data, low=low_data, close=close_data, s = 7, m = 14, l = 28, ws = 4, wm = 2, wl = 1)
     plt.plot(so)
     #sot = ta.momentum.UltimateOscillator(pandas.Series(high_data), pandas.Series(low_data), pandas.Series(close_data))
     #plt.plot(sot.uo())
@@ -148,6 +148,18 @@ def uo():
         plt.show()
     if args.save_plots:
         plt.savefig("tests/plots/UO " + str(close_data.dtype) + ".svg")
+
+def wr():
+    plt.clf()
+    plt.title("Williams %R "+str(close_data.dtype))
+    so = fast_ta.momentum.WilliamsR(high=high_data, low=low_data, close=close_data, n=14)
+    plt.plot(so)
+    sot = ta.momentum.WilliamsRIndicator(pandas.Series(high_data), pandas.Series(low_data), pandas.Series(close_data))
+    plt.plot(sot.wr())
+    if args.show_plots:
+        plt.show()
+    if args.save_plots:
+        plt.savefig("tests/plots/WR " + str(close_data.dtype) + ".svg")
         
 def run_tests():
     rsi()
@@ -157,8 +169,9 @@ def run_tests():
     stoch()
     tsi()
     uo()
+    wr()
 
-plt.figure(figsize=[25, 5])
+plt.rcParams['figure.figsize'] = (20.0, 10.0)
 run_tests()
 close_data = np.array(close_data, dtype=np.float32)
 high_data = np.array(high_data, dtype=np.float32)

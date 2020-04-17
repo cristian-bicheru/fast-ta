@@ -9,7 +9,7 @@ import os
 import sys
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 import fast_ta
-
+plt.rcParams['figure.figsize'] = (20.0, 10.0)
 
 def bench(n, dtype):
     times = [0,0]

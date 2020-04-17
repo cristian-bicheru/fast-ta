@@ -1,5 +1,7 @@
 #pragma once
 
+enum stoch_mode {Normal, Williams};
+
 /**
  * Computes Relative Strength Indicator On Data
  * @param close     Close Time Series
@@ -62,14 +64,16 @@ float* _ROC_FLOAT(const float* close, int n, int len);
  * @param n         n Value
  * @param d         d Value
  * @param len       Time Series Length
- * @return          Stochastic Oscillator Indicator Time Series
+ * @param mode      Compute SMA Flag
+ * @return          Stochastic Oscillator Indicator Time Series And Signal If
+ *                  Specified
  */
 struct double_array_pair
 _STOCHASTIC_OSCILLATOR_DOUBLE(const double* high, const double* low, double* close, int n,
-                              int d, int len);
+                              int d, int len, enum stoch_mode mode);
 struct float_array_pair
 _STOCHASTIC_OSCILLATOR_FLOAT(const float* high, const float* low, float* close, int n,
-                             int d, int len);
+                             int d, int len, enum stoch_mode mode);
 
 /**
  * Compute True Strength Index On Data
@@ -82,5 +86,34 @@ _STOCHASTIC_OSCILLATOR_FLOAT(const float* high, const float* low, float* close, 
 double* _TSI_DOUBLE(const double* close, int r, int s, int len);
 float* _TSI_FLOAT(const float* close, int r, int s, int len);
 
+/**
+ * Compute Ultimate Oscillator On Data
+ * @param high      High Time Series
+ * @param low       Low Time Series
+ * @param close     Close Time Series
+ * @param s         Short Period
+ * @param m         Medium Period
+ * @param l         Long Period
+ * @param ws        Short Period Weight
+ * @param wm        Medium Period Weight
+ * @param wl        Long Period Weight
+ * @param len       Time Series Length
+ * @return          Ultimate Oscillator Time Series
+ */
 double* _ULTIMATE_OSCILLATOR_DOUBLE(const double* high, const double* low, const double* close, int s, int m, int l, double ws, double wm, double wl, int len);
 float* _ULTIMATE_OSCILLATOR_FLOAT(const float* high, const float* low, const float* close, int s, int m, int l, double ws, double wm, double wl, int len);
+
+/**
+ * Compute Williams %R
+ * @param high      High Time Series
+ * @param low       Low Time Series
+ * @param close     Close Time Series
+ * @param n         n Value
+ * @param d         d Value
+ * @param len       Time Series Length
+ * @return          Williams %R Time Series
+ */
+double* _WILLIAMS_R_DOUBLE(const double* high, const double* low, double* close, int n,
+                           int len);
+float* _WILLIAMS_R_FLOAT(const float* high, const float* low, float* close, int n,
+                           int len);
