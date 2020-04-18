@@ -31,7 +31,7 @@ setup(name = 'fast_ta',
       maintainer = "Cristian Bicheru, Calder White",
       maintainer_email ="c.bicheru0@gmail.com, calderwhite1@gmail.com",
       url = 'https://fast-ta.readthedocs.io/',
-      download_url = 'RELEASE URL HERE',
+      download_url = 'https://github.com/cristian-bicheru/fast-ta/archive/v0.1.tar.gz',
       keywords = ['technical analysis', 'python3', 'numpy'],
       install_requires = [
           'numpy'
