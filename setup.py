@@ -8,18 +8,21 @@ class FastTABuild(build_ext):
     def run(self):
         import numpy
         self.include_dirs.append(numpy.get_include())
-        self.include_dirs.append('fast_ta/src/')
         build_ext.run(self)
 
 momentum_ext = Extension('fast_ta/momentum',
                    sources=['fast_ta/src/momentum.c', 'fast_ta/src/momentum_backend.c',
                             'fast_ta/src/parallel_momentum_backend.c',
-                            'fast_ta/src/error_methods.c', 'fast_ta/src/funcs.c'],
+                            'fast_ta/src/error_methods.c', 'fast_ta/src/funcs.c',
+                            'fast_ta/src/momentum_backend.h', 'fast_ta/src/momentum_backend_args.h',
+                            'fast_ta/src/parallel_momentum_backend.h',
+                            'fast_ta/src/error_methods.h', 'fast_ta/src/funcs.h',
+                            'fast_ta/src/array_pair.h'],
                    extra_compile_args=['-mavx'])
 
 setup(name = 'fast_ta',
       packages = ["fast_ta"],
-      version = 0.1,
+      version = '0.1.2',
       license = 'MIT',
       license_file = "LICENSE.md",
       description = "Fast Technical Analysis Library Written In C",
@@ -32,7 +35,7 @@ setup(name = 'fast_ta',
       maintainer = "Cristian Bicheru, Calder White",
       maintainer_email ="c.bicheru0@gmail.com, calderwhite1@gmail.com",
       url = 'https://fast-ta.readthedocs.io/',
-      download_url = 'https://github.com/cristian-bicheru/fast-ta/archive/v0.1.tar.gz',
+      download_url = 'https://github.com/cristian-bicheru/fast-ta/archive/v0.1.2.tar.gz',
       keywords = ['technical analysis', 'python3', 'numpy'],
       install_requires = [
           'numpy'
