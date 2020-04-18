@@ -18,7 +18,7 @@ momentum_ext = Extension('fast_ta/momentum',
 
 setup(name = 'fast_ta',
       packages = ["fast_ta"],
-      version = '0.1.2',
+      version = '0.1.3',
       license = 'MIT',
       license_file = "LICENSE.md",
       description = "Fast Technical Analysis Library Written In C",
@@ -31,7 +31,7 @@ setup(name = 'fast_ta',
       maintainer = "Cristian Bicheru, Calder White",
       maintainer_email ="c.bicheru0@gmail.com, calderwhite1@gmail.com",
       url = 'https://fast-ta.readthedocs.io/',
-      download_url = 'https://github.com/cristian-bicheru/fast-ta/archive/v0.1.2.tar.gz',
+      download_url = 'https://github.com/cristian-bicheru/fast-ta/archive/v0.1.3.tar.gz',
       keywords = ['technical analysis', 'python3', 'numpy'],
       install_requires = [
           'numpy'
