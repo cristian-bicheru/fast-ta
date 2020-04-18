@@ -12,8 +12,6 @@ To install Fast TA, run::
 
    pip install fast-ta
 
-**PYPI UPSTREAM NOT SET UP YET**
-
 Report any installation issues in our `issue tracker`_.
 
 .. _issue tracker: https://github.com/cristian-bicheru/fast-ta/issues
