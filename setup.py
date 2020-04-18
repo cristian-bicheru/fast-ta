@@ -13,11 +13,7 @@ class FastTABuild(build_ext):
 momentum_ext = Extension('fast_ta/momentum',
                    sources=['fast_ta/src/momentum.c', 'fast_ta/src/momentum_backend.c',
                             'fast_ta/src/parallel_momentum_backend.c',
-                            'fast_ta/src/error_methods.c', 'fast_ta/src/funcs.c',
-                            'fast_ta/src/momentum_backend.h', 'fast_ta/src/momentum_backend_args.h',
-                            'fast_ta/src/parallel_momentum_backend.h',
-                            'fast_ta/src/error_methods.h', 'fast_ta/src/funcs.h',
-                            'fast_ta/src/array_pair.h'],
+                            'fast_ta/src/error_methods.c', 'fast_ta/src/funcs.c'],
                    extra_compile_args=['-mavx'])
 
 setup(name = 'fast_ta',
