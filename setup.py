@@ -8,6 +8,7 @@ class FastTABuild(build_ext):
     def run(self):
         import numpy
         self.include_dirs.append(numpy.get_include())
+        self.include_dirs.append('fast_ta/src/')
         build_ext.run(self)
 
 momentum_ext = Extension('fast_ta/momentum',
@@ -39,7 +40,7 @@ setup(name = 'fast_ta',
       classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Financial and Insurance Industry',
-        'Topic :: Software Development :: Build Tools',
+        'Topic :: Office/Business :: Financial :: Investment',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
