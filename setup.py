@@ -20,7 +20,7 @@ setup(name = 'fast_ta',
       packages = ["fast_ta"],
       version = 0.1,
       license = 'MIT',
-      license_file = "LICENSE.md"
+      license_file = "LICENSE.md",
       description = "Fast Technical Analysis Library Written In C",
       long_description = ("Fast TA is an optimized, high-level technical analysis library "
                           "used to compute technical indicators on financial datasets. "
