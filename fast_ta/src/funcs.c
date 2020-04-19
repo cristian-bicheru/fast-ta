@@ -624,3 +624,87 @@ void _float_add_arr(const float* arr1, const float* arr2, int len, float* outarr
         outarr[i] =arr1[i]+arr2[i];
     }
 }
+
+void _double_memcpy(const double* src, int len, double* outarr) {
+    for (int i = 0; i < len-len%4; i += 4) {
+        _mm256_storeu_pd(&outarr[i], _mm256_loadu_pd(&src[i]));
+    }
+
+    for (int i = len-len%4; i < len; i++) {
+        outarr[i] = src[i];
+    }
+}
+
+void _float_memcpy(const float* src, int len, float* outarr) {
+    for (int i = 0; i < len-len%8; i += 8) {
+        _mm256_storeu_ps(&outarr[i], _mm256_loadu_ps(&src[i]));
+    }
+
+    for (int i = len-len%8; i < len; i++) {
+        outarr[i] = src[i];
+    }
+}
+
+void _double_div_diff(const double* arr1, const double* arr2, const double* arr3, int len, double* outarr) {
+    for (int i = 0; i < len-len%4; i += 4) {
+        _mm256_storeu_pd(&outarr[i], _mm256_div_pd(_mm256_loadu_pd(&arr1[i]),
+                _mm256_sub_pd(_mm256_loadu_pd(&arr2[i]),
+                        _mm256_loadu_pd(&arr3[i]))));
+    }
+
+    for (int i = len-len%4; i < len; i++) {
+        outarr[i] = arr1[i]/(arr2[i]-arr3[i]);
+    }
+}
+
+void _float_div_diff(const float* arr1, const float* arr2, const float* arr3, int len, float* outarr) {
+    for (int i = 0; i < len-len%8; i += 8) {
+        _mm256_storeu_ps(&outarr[i], _mm256_div_ps(_mm256_loadu_ps(&arr1[i]),
+                                                   _mm256_sub_ps(_mm256_loadu_ps(&arr2[i]),
+                                                                 _mm256_loadu_ps(&arr3[i]))));
+    }
+
+    for (int i = len-len%8; i < len; i++) {
+        outarr[i] = arr1[i]/(arr2[i]-arr3[i]);
+    }
+}
+
+void _double_mul_arr(const double* arr1, const double* arr2, int len, double* outarr) {
+    for (int i = 0; i < len-len%4; i += 4) {
+        _mm256_storeu_pd(&outarr[i],
+                _mm256_mul_pd(_mm256_loadu_pd(&arr1[i]),
+                        _mm256_loadu_pd(&arr2[i])));
+    }
+
+    for (int i = len-len%4; i < len; i++) {
+        outarr[i] = arr1[i]*arr2[i];
+    }
+}
+
+void _float_mul_arr(const float* arr1, const float* arr2, int len, float* outarr) {
+    for (int i = 0; i < len-len%8; i += 8) {
+        _mm256_storeu_ps(&outarr[i],
+                         _mm256_mul_ps(_mm256_loadu_ps(&arr1[i]),
+                                       _mm256_loadu_ps(&arr2[i])));
+    }
+
+    for (int i = len-len%8; i < len; i++) {
+        outarr[i] = arr1[i]*arr2[i];
+    }
+}
+
+void _double_cumsum(const double* arr1, int len, double* outarr) {
+    double sum = 0;
+    for (int i = 0; i < len; i++) {
+        sum += arr1[i];
+        outarr[i] = sum;
+    }
+}
+
+void _float_cumsum(const float* arr1, int len, float* outarr) {
+    float sum = 0;
+    for (int i = 0; i < len; i++) {
+        sum += arr1[i];
+        outarr[i] = sum;
+    }
+}

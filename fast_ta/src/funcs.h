@@ -235,3 +235,41 @@ void _float_running_sum(const float* arr, int len, int window, float* outarr);
  */
 void _double_add_arr(const double* arr1, const double* arr2, int len, double* outarr);
 void _float_add_arr(const float* arr1, const float* arr2, int len, float* outarr);
+
+/**
+ * Vectorized memcpy
+ * @param src
+ * @param len
+ * @param outarr
+ */
+void _double_memcpy(const double* src, int len, double* outarr);
+void _float_memcpy(const float* src, int len, float* outarr);
+
+/**
+ * Vectorized Division of Array By Difference of Two Other Arrays
+ * @param arr1
+ * @param arr2
+ * @param len
+ * @param outarr
+ */
+void _double_div_diff(const double* arr1, const double* arr2, const double* arr3, int len, double* outarr);
+void _float_div_diff(const float* arr1, const float* arr2, const float* arr3, int len, float* outarr);
+
+/**
+ * Vectorized Elementwise Array Multiplication
+ * @param arr1
+ * @param arr2
+ * @param len
+ * @param outarr
+ */
+void _double_mul_arr(const double* arr1, const double* arr2, int len, double* outarr);
+void _float_mul_arr(const float* arr1, const float* arr2, int len, float* outarr);
+
+/**
+ * Cumulative Sum over Array
+ * @param arr1
+ * @param len
+ * @param outarr
+ */
+void _double_cumsum(const double* arr1, int len, double* outarr);
+void _float_cumsum(const float* arr1, int len, float* outarr);

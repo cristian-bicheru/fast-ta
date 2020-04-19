@@ -10,13 +10,17 @@ class FastTABuild(build_ext):
         self.include_dirs.append(numpy.get_include())
         build_ext.run(self)
 
+common_backend = ['fast_ta/src/error_methods.c', 'fast_ta/src/funcs.c']
+compile_args = ['-mavx', '-O2', '-ffast-math', '-march=native', '-mno-align-double',
+                '-fomit-frame-pointer', '-frename-registers']
+        
 momentum_ext = Extension('fast_ta/momentum',
                    sources=['fast_ta/src/momentum.c', 'fast_ta/src/momentum_backend.c',
-                            'fast_ta/src/parallel_momentum_backend.c',
-                            'fast_ta/src/error_methods.c', 'fast_ta/src/funcs.c'],
-                   extra_compile_args=['-mavx', '-O2', '-ffast-math', '-march=native',
-                                       '-mno-align-double',
-                                       '-fomit-frame-pointer', '-frename-registers'])
+                            'fast_ta/src/parallel_momentum_backend.c']+common_backend,
+                   extra_compile_args=compile_args)
+volume_ext = Extension('fast_ta/volume',
+                   sources=['fast_ta/src/volume.c', 'fast_ta/src/volume_backend.c']+common_backend,
+                   extra_compile_args=compile_args)
 
 setup(name = 'fast_ta',
       packages = ["fast_ta"],
@@ -56,4 +60,4 @@ setup(name = 'fast_ta',
         'Source': 'https://github.com/cristian-bicheru/fast-ta',
       },
       cmdclass = {'build_ext': FastTABuild},
-      ext_modules=[momentum_ext])
+      ext_modules=[momentum_ext, volume_ext])

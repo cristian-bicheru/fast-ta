@@ -34,12 +34,14 @@ if not args.large_dataset:
     high_data = []
     low_data = []
     open_data = []
+    volume_data = []
 
     for row in csv_data:
         close_data.append(row[4])
         high_data.append(row[2])
         low_data.append(row[3])
         open_data.append(row[1])
+        volume_data.append(row[6])
 else:
     with open('tests/AAPL.csv', 'r') as dataset:
         csv_data = list(csv.reader(dataset))[1:]
@@ -48,12 +50,14 @@ else:
     high_data = []
     low_data = []
     open_data = []
+    volume_data = []
 
     for row in csv_data:
         close_data.append(row[1])
         high_data.append(row[2])
         low_data.append(row[3])
         open_data.append(row[4])
+        volume_data.append(row[6])
 
     while 'null' in close_data: close_data.remove('null')
     while 'null' in high_data: high_data.remove('null')
@@ -64,6 +68,7 @@ close_data = np.array(close_data, dtype=np.float64)
 high_data = np.array(high_data, dtype=np.float64)
 low_data = np.array(low_data, dtype=np.float64)
 open_data = np.array(open_data, dtype=np.float64)
+volume_data = np.array(volume_data, dtype=np.float64)
 
 
 def rsi():
@@ -160,6 +165,18 @@ def wr():
         plt.show()
     if args.save_plots:
         plt.savefig("tests/plots/WR " + str(close_data.dtype) + ".svg")
+
+def adi():
+    plt.clf()
+    plt.title("Accumulation/Distribution Index (ADI) "+str(close_data.dtype))
+    so = fast_ta.volume.ADI(high=high_data, low=low_data, close=close_data, volume=volume_data)
+    plt.plot(so)
+    sot = ta.volume.AccDistIndexIndicator(pandas.Series(high_data), pandas.Series(low_data), pandas.Series(close_data), pandas.Series(volume_data))
+    plt.plot(sot.acc_dist_index())
+    if args.show_plots:
+        plt.show()
+    if args.save_plots:
+        plt.savefig("tests/plots/ADI " + str(close_data.dtype) + ".svg")
         
 def run_tests():
     rsi()
@@ -170,6 +187,7 @@ def run_tests():
     tsi()
     uo()
     wr()
+    adi()
 
 plt.rcParams['figure.figsize'] = (20.0, 10.0)
 run_tests()
@@ -177,4 +195,5 @@ close_data = np.array(close_data, dtype=np.float32)
 high_data = np.array(high_data, dtype=np.float32)
 low_data = np.array(low_data, dtype=np.float32)
 open_data = np.array(open_data, dtype=np.float32)
+volume_data = np.array(volume_data, dtype=np.float32)
 run_tests()

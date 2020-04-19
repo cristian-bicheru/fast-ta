@@ -40,10 +40,12 @@ Indicators
    :hidden:
 
    api/momentum
+   api/volume
 
 :doc:`api/momentum`
    View the documentation for the momentum indicators.
-
+:doc:`api/volume`
+   View the documentation for the volume indicators.
 
 Contributing
 ============
