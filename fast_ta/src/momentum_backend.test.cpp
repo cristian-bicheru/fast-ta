@@ -6,8 +6,13 @@ extern "C" {
     #include "momentum_backend.h"
 }
 
+// this is the largest the floating point error can be.
+// there are deltas seen between float calculations and double calculations.
+// this is that max delta.
+const int max_fp_error = 0.00002;
+
 const int data_len = 253;
-const double SAMPLE_OPEN[data_len] = {
+const double SAMPLE_OPEN_DOUBLE[data_len] = {
     199.250000, 203.130005, 203.860001, 204.529999, 207.479996, 207.160004,
     205.279999, 204.300003, 204.610001, 200.669998, 210.520004, 209.149994,
     211.750000, 208.479996, 202.860001, 202.899994, 200.720001, 197.179993,
@@ -52,8 +57,9 @@ const double SAMPLE_OPEN[data_len] = {
     259.429993, 266.070007, 267.989990, 273.250000, 287.049988, 284.429993,
     286.559998
 };
+float SAMPLE_OPEN_FLOAT[data_len] = {0};
 
-const double SAMPLE_CLOSE[data_len] = {
+const double SAMPLE_CLOSE_DOUBLE[data_len] = {
     199.250000, 203.130005, 203.860001, 204.529999, 207.479996, 207.160004,
     205.279999, 204.300003, 204.610001, 200.669998, 210.520004, 209.149994,
     211.750000, 208.479996, 202.860001, 202.899994, 200.720001, 197.179993,
@@ -98,8 +104,9 @@ const double SAMPLE_CLOSE[data_len] = {
     259.429993, 266.070007, 267.989990, 273.250000, 287.049988, 284.429993,
     286.559998
 };
+float SAMPLE_CLOSE_FLOAT[data_len] = {0};
 
-const double SAMPLE_HIGH[data_len] = {
+const double SAMPLE_HIGH_DOUBLE[data_len] = {
     201.369995, 203.380005, 204.149994, 204.940002, 207.750000, 208.479996,
     207.759995, 205.000000, 205.970001, 203.399994, 215.309998, 212.649994,
     211.839996, 208.839996, 207.419998, 205.339996, 201.679993, 198.850006,
@@ -144,8 +151,9 @@ const double SAMPLE_HIGH[data_len] = {
     271.700012, 267.369995, 270.070007, 273.700012, 288.250000, 286.329987,
     288.179993
 };
+float SAMPLE_HIGH_FLOAT[data_len] = {0};
 
-const double SAMPLE_LOW[data_len] = {
+const double SAMPLE_LOW_DOUBLE[data_len] = {
     198.559998, 198.610001, 202.520004, 202.339996, 203.899994, 207.050003,
     205.119995, 202.119995, 203.860001, 199.110001, 209.229996, 208.130005,
     210.229996, 203.500000, 200.830002, 201.750000, 196.660004, 192.770004,
@@ -190,8 +198,9 @@ const double SAMPLE_LOW[data_len] = {
     259.000000, 261.230011, 264.700012, 265.829987, 278.049988, 280.630005,
     282.350189
 };
+float SAMPLE_LOW_FLOAT[data_len] = {0};
 
-const double RSI_REF[data_len] = {
+const double RSI_REF_DOUBLE[data_len] = {
     100.00000000000000, 100.00000000000000, 100.00000000000000, 100.00000000000000,
     100.00000000000000,  96.25739825599740,  78.90701364804372,  72.12974526092886,
      72.86692382849918,  54.53384069849339,  72.08938801872016,  68.41516330018673,
@@ -258,19 +267,74 @@ const double RSI_REF[data_len] = {
      58.80446579522105,
 };
 
+float RSI_REF_FLOAT[data_len] = {0};
 
 TEST(momentum_backend, RSIDouble_SelfAllocated) {
     int window_size = 14;
 
-    double* out = _RSI_DOUBLE(SAMPLE_CLOSE, NULL, data_len, window_size, 0);
+    double* out = _RSI_DOUBLE(SAMPLE_CLOSE_DOUBLE, NULL, data_len, window_size, 0);
     for (int i=0; i<data_len; i++) {
-        ASSERT_DOUBLE_EQ(RSI_REF[i], out[i]);
+        ASSERT_DOUBLE_EQ(RSI_REF_DOUBLE[i], out[i]);
+    }
+
+    free(out);
+}
+
+TEST(momentum_backend, RSIDouble_PreAllocated) {
+    int window_size = 14;
+    double* out = (double*)malloc(data_len*sizeof(double));
+
+    _RSI_DOUBLE(SAMPLE_CLOSE_DOUBLE, out, data_len, window_size, 0);
+    for (int i=0; i<data_len; i++) {
+        ASSERT_DOUBLE_EQ(RSI_REF_DOUBLE[i], out[i]);
+    }
+
+    free(out);
+}
+
+TEST(momentum_backend, RSIFloat_SelfAllocated) {
+    int window_size = 14;
+
+    float* out = _RSI_FLOAT(SAMPLE_CLOSE_FLOAT, NULL, data_len, window_size, 0);
+    for (int i=0; i<data_len; i++) {
+        // keeping this since it's nice for debugging.
+        //printf("%d %f %f %f\n", i, RSI_REF_FLOAT[i], out[i], out[i] - RSI_REF_FLOAT[i]);
+        ASSERT_NEAR(RSI_REF_FLOAT[i], out[i], 0.00002);
+    }
+
+    free(out);
+}
+
+TEST(momentum_backend, RSIFloat_PreAllocated) {
+    int window_size = 14;
+    float* out = (float*)malloc(data_len*sizeof(float));
+
+    _RSI_FLOAT(SAMPLE_CLOSE_FLOAT, out, data_len, window_size, 0);
+    for (int i=0; i<data_len; i++) {
+        ASSERT_NEAR(RSI_REF_FLOAT[i], out[i], 0.00002);
     }
 
     free(out);
 }
 
 int main(int argc, char* argv[]) {
+    // init all the float arrays from the double arrays
+    for (int i=0; i<data_len; i++) {
+        SAMPLE_OPEN_FLOAT[i] = (float)SAMPLE_OPEN_DOUBLE[i];
+    }
+    for (int i=0; i<data_len; i++) {
+        SAMPLE_CLOSE_FLOAT[i] = (float)SAMPLE_CLOSE_DOUBLE[i];
+    }
+    for (int i=0; i<data_len; i++) {
+        SAMPLE_HIGH_FLOAT[i] = (float)SAMPLE_HIGH_DOUBLE[i];
+    }
+    for (int i=0; i<data_len; i++) {
+        SAMPLE_LOW_FLOAT[i] = (float)SAMPLE_LOW_DOUBLE[i];
+    }
+    for (int i=0; i<data_len; i++) {
+        RSI_REF_FLOAT[i] = (float)RSI_REF_DOUBLE[i];
+    }
+
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
