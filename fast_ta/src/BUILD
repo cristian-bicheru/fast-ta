@@ -39,7 +39,7 @@ cc_library(
         ":debug_tools",
     ],
     copts = PYTHON_INCLUDE + [
-        "-mavx"
+        "-mavx",
     ],
 )
 
@@ -52,6 +52,16 @@ cc_library(
         ":array_pair",
     ],
     copts = PYTHON_INCLUDE,
+)
+
+cc_test(
+    name = "momentum_backend_tests",
+    srcs = ["momentum_backend.test.cpp"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        "@gtest//:main",
+        ":momentum_backend",
+    ]
 )
 
 cc_library(

@@ -1,8 +1,11 @@
-#ifndef FAST_TA_DEBUG_TOOLS
-#define FAST_TA_DEBUG_TOOLS
+#pragma once
+
 #include "Python.h"
+
 #include <stdlib.h>
 #include <math.h>
+
+#include "debug_tools.h"
 
 void print(char* str) {
     PyObject* pyBuiltIn = PyImport_ImportModule("builtins");
@@ -35,5 +38,3 @@ void print_int(int i) {
         print("0");
     }
 }
-
-#endif
