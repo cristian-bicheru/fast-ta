@@ -14,7 +14,9 @@ momentum_ext = Extension('fast_ta/momentum',
                    sources=['fast_ta/src/momentum.c', 'fast_ta/src/momentum_backend.c',
                             'fast_ta/src/parallel_momentum_backend.c',
                             'fast_ta/src/error_methods.c', 'fast_ta/src/funcs.c'],
-                   extra_compile_args=['-mavx'])
+                   extra_compile_args=['-mavx', '-O2', '-ffast-math', '-march=native',
+                                       '-mno-align-double',
+                                       '-fomit-frame-pointer', '-frename-registers'])
 
 setup(name = 'fast_ta',
       packages = ["fast_ta"],
