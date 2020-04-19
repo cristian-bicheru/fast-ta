@@ -36,7 +36,6 @@ cc_library(
     srcs = ["funcs.c"],
     hdrs = ["funcs.h"],
     deps = [
-        ":debug_tools",
     ],
     copts = PYTHON_INCLUDE + [
         "-mavx",
@@ -61,7 +60,7 @@ cc_test(
     deps = [
         "@gtest//:main",
         ":momentum_backend",
-    ]
+    ],
 )
 
 cc_library(

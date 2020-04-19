@@ -4,8 +4,23 @@
 #include <stdlib.h>
 #include <numpy/npy_math.h>
 
-#include "debug_tools.h"
 #include "funcs.h"
+
+__m256 abs_ps(__m256 x, __m256 sign_mask) {
+    return _mm256_andnot_ps(sign_mask, x);
+}
+
+__m256d abs_pd(__m256d x, __m256d sign_mask) {
+    return _mm256_andnot_pd(sign_mask, x);
+}
+
+__m256d _mm256_loadu2_pd(const double* A, const double* B) {
+    return _mm256_insertf128_pd(_mm256_castpd128_pd256(_mm_loadu_pd(A)), _mm_loadu_pd(B), 1);
+}
+
+__m256d _mm256_loadu2_ps4(const float* A, const float* B) {
+    return _mm256_loadu_pd((double[4]) {A[0], A[1], B[0], B[1]});
+}
 
 void _double_ema(const double* arr, int len, double alpha, double* outarr) {
     for (int i = 1; i < len; i++) {

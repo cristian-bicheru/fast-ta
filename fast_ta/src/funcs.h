@@ -24,13 +24,8 @@
  * @param sign_mask
  * @return
  */
-inline __m256 abs_ps(__m256 x, __m256 sign_mask) {
-    return _mm256_andnot_ps(sign_mask, x);
-}
-
-inline __m256d abs_pd(__m256d x, __m256d sign_mask) {
-    return _mm256_andnot_pd(sign_mask, x);
-}
+__m256 abs_ps(__m256 x, __m256 sign_mask);
+__m256d abs_pd(__m256d x, __m256d sign_mask);
 
 /**
  * AVX Load Four Single Or Double Precision Numbers From Arrays
@@ -38,15 +33,9 @@ inline __m256d abs_pd(__m256d x, __m256d sign_mask) {
  * @param B
  * @return
  */
-#ifndef _mm256_loadu2_pd
-inline __m256d _mm256_loadu2_pd(const double* A, const double* B) {
-    return _mm256_insertf128_pd(_mm256_castpd128_pd256(_mm_loadu_pd(A)), _mm_loadu_pd(B), 1);
-}
-#endif
-inline __m256d _mm256_loadu2_ps4(const float* A, const float* B) {
-    return _mm256_loadu_pd((double[4]) {A[0], A[1], B[0], B[1]});
-}
-;
+__m256d _mm256_loadu2_pd(const double* A, const double* B);
+__m256d _mm256_loadu2_ps4(const float* A, const float* B);
+
 /**
  * Exponential Moving Average
  * @param arr
