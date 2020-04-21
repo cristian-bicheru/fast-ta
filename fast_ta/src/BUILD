@@ -1,7 +1,10 @@
+package(default_visibility = ["//fast_ta:__subpackages__",
+                              "//tests:__subpackages__"])
+
 # this will vary from system to system. The best/simplist solution currently
 # is for each fast_ta developer to switch this to their own path.
 PYTHON_INCLUDE = [
-    "-I/usr/include/python3.7",
+    "-I/usr/include/python3.6",
     "-I/usr/include/",
 ]
 

@@ -6,6 +6,18 @@ python3.x setup.py build_ext --inplace
 ```
 
 # Testing:
+
+To run CI tests:
+```bash
+bazel test //fast_ta/src/...
+```
+All of these must pass for any code to be added to the repo. Info on installing
+bazel [here](https://docs.bazel.build/versions/master/install.html). More
+info on developing & testing can be found in
+[CONTRIBUTING.md](https://github.com/cristian-bicheru/fast-ta/blob/master/CONTRIBUTING.md).
+
+For general, eyeball testing you can generate plots of the indicators with
+this script.
 ```bash
 python3.x tests/tests.py --show-plots --save-plots
 ```
