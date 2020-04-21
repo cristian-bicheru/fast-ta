@@ -9,8 +9,9 @@ addons:
       - pkg-config
 
 before_install:
-  - wget https://github.com/bazelbuild/bazel/releases/download/0.3.1/bazel_0.3.1-linux-x86_64.deb
-  - sudo dpkg -i bazel_0.3.1-linux-x86_64.deb
+  - wget https://github.com/bazelbuild/bazel/releases/download/3.0.0/bazel-3.0.0-installer-linux-x86_64.sh
+  - chmod +x bazel-3.0.0-installer-linux-x86_64.sh
+  - ./bazel-3.0.0-installer-linux-x86_64.sh
 
 script:
   - bazel test //fast_ta/src/...
