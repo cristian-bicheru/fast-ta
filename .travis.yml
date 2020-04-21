@@ -25,13 +25,19 @@ before_install:
 
 script:
   - bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99" --collect_code_coverage
+  - travis_fold start "gcov, No SIMD"
   - cat bazel-out/k8-fastbuild/testlogs/fast_ta/src/momentum_backend_tests/coverage.dat
+  - travis_fold end "gcov, No SIMD"
   - sudo rm -r ~/.cache/bazel
   - bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99" --define=SSE2=1 --copt="-msse2" --collect_code_coverage
+  - travis_fold start "gcov, SSE2"
   - cat bazel-out/k8-fastbuild/testlogs/fast_ta/src/momentum_backend_tests/coverage.dat
+  - travis_fold end "gcov, SSE2"
   - sudo rm -r ~/.cache/bazel
   - bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99" --define=AVX=1 --copt="-mavx" --collect_code_coverage
+  - travis_fold start "gcov, AVX"
   - cat bazel-out/k8-fastbuild/testlogs/fast_ta/src/momentum_backend_tests/coverage.dat
+  - travis_fold end "gcov, AVX"
 
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+  - bash <(curl -s https://codecov.io/bash) -v
