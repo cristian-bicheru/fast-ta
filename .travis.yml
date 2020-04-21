@@ -6,7 +6,7 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - wget
-      - python3-dev
+      - python3.7-dev
 
 before_install:
   - wget https://github.com/bazelbuild/bazel/releases/download/3.0.0/bazel-3.0.0-installer-linux-x86_64.sh
