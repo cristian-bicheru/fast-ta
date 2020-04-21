@@ -30,12 +30,18 @@ cc_library(
     copts = PYTHON_INCLUDE,
 )
 
+cc_library(
+    name = "generic_simd",
+    hdrs = ["generic_simd.h"],
+)
+
 ##################### Core Library #####################
 cc_library(
     name = "funcs",
     srcs = ["funcs.c"],
     hdrs = ["funcs.h"],
     deps = [
+        ":generic_simd",
     ],
     copts = PYTHON_INCLUDE + [
         "-mavx",
