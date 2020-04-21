@@ -26,10 +26,10 @@ before_install:
 script:
   - bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99" --collect_code_coverage
   - cat bazel-out/k8-fastbuild/testlogs/fast_ta/src/momentum_backend_tests/coverage.dat
-  - rm ~/.cache/bazel
+  - sudo rm -r ~/.cache/bazel
   - bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99" --define=SSE2=1 --copt="-msse2" --collect_code_coverage
   - cat bazel-out/k8-fastbuild/testlogs/fast_ta/src/momentum_backend_tests/coverage.dat
-  - rm ~/.cache/bazel
+  - sudo rm -r ~/.cache/bazel
   - bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99" --define=AVX=1 --copt="-mavx" --collect_code_coverage
   - cat bazel-out/k8-fastbuild/testlogs/fast_ta/src/momentum_backend_tests/coverage.dat
 
