@@ -1,40 +1,7 @@
 #pragma once
 
-#include <immintrin.h>
 #include <stdlib.h>
-
-#ifndef max
-#define max(a,b) ((a) > (b) ? (a) : (b))
-#endif
-
-#ifndef min
-#define min(a,b) ((a) < (b) ? (a) : (b))
-#endif
-
-/**
- * AVX Alligned Malloc
- */
-#ifndef avx_malloc
-#define avx_malloc(size) (alligned_malloc(256, size))
-#endif
-
-/**
- * AVX Absolute Value
- * @param x
- * @param sign_mask
- * @return
- */
-__m256 abs_ps(__m256 x, __m256 sign_mask);
-__m256d abs_pd(__m256d x, __m256d sign_mask);
-
-/**
- * AVX Load Four Single Or Double Precision Numbers From Arrays
- * @param A
- * @param B
- * @return
- */
-__m256d _mm256_loadu2_pd(const double* A, const double* B);
-__m256d _mm256_loadu2_ps4(const float* A, const float* B);
+#include "generic_simd.h"
 
 /**
  * Exponential Moving Average

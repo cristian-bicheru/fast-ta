@@ -7,11 +7,21 @@ except ImportError:
 class FastTABuild(build_ext):
     def run(self):
         import numpy
+        import detect_simd
         self.include_dirs.append(numpy.get_include())
+        simd = detect_simd.detect()
+        if not self.define:
+            self.define = []
+        if simd['AVX512'] == 1:
+            self.define.append(('AVX512', '1'))
+        elif simd['AVX'] == 1:
+            self.define.append(('AVX', '1'))
+        elif simd['SSE2'] == 1:
+            self.define.append(('SSE2', '1'))
         build_ext.run(self)
 
 common_backend = ['fast_ta/src/error_methods.c', 'fast_ta/src/funcs.c']
-compile_args = ['-mavx', '-O2', '-ffast-math', '-march=native', '-mno-align-double',
+compile_args = ['-O2', '-ffast-math', '-march=native', '-mno-align-double',
                 '-fomit-frame-pointer', '-frename-registers']
         
 momentum_ext = Extension('fast_ta/momentum',
@@ -40,7 +50,8 @@ setup(name = 'fast_ta',
       download_url = 'https://github.com/cristian-bicheru/fast-ta/archive/v0.1.3.tar.gz',
       keywords = ['technical analysis', 'python3', 'numpy'],
       install_requires = [
-          'numpy'
+          'numpy',
+          'detect-simd'
       ],
       classifiers=[
         'Development Status :: 3 - Alpha',

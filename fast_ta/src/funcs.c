@@ -6,22 +6,6 @@
 
 #include "funcs.h"
 
-__m256 abs_ps(__m256 x, __m256 sign_mask) {
-    return _mm256_andnot_ps(sign_mask, x);
-}
-
-__m256d abs_pd(__m256d x, __m256d sign_mask) {
-    return _mm256_andnot_pd(sign_mask, x);
-}
-
-__m256d _mm256_loadu2_pd(const double* A, const double* B) {
-    return _mm256_insertf128_pd(_mm256_castpd128_pd256(_mm_loadu_pd(A)), _mm_loadu_pd(B), 1);
-}
-
-__m256d _mm256_loadu2_ps4(const float* A, const float* B) {
-    return _mm256_loadu_pd((double[4]) {A[0], A[1], B[0], B[1]});
-}
-
 void _double_ema(const double* arr, int len, double alpha, double* outarr) {
     for (int i = 1; i < len; i++) {
         outarr[i] = arr[i-1] * (1-alpha) + arr[i] * alpha;
@@ -35,85 +19,89 @@ void _float_ema(const float* arr, int len, float alpha, float* outarr) {
 }
 
 void _double_pairwise_mean(const double* arr1, const double* arr2, int len, double* outarr) {
-    __m256d v1;
-    __m256d v2;
-    __m256d d2 = _mm256_set_pd(0.5, 0.5, 0.5, 0.5);
+    __double_vector v1;
+    __double_vector v2;
+    __double_vector d2 = _double_set1_vec(0.5);
 
-    for (int i = 0; i < len-len%4; i += 4) {
-        v1 = _mm256_loadu_pd(&arr1[i]);
-        v2 = _mm256_loadu_pd(&arr2[i]);
-        v1 = _mm256_add_pd(v1, v2);
-        v1 = _mm256_mul_pd(v1, d2);
-        _mm256_storeu_pd(&outarr[i], v1);
+    for (int i = 0; i < len - len % DOUBLE_VEC_SIZE; i += DOUBLE_VEC_SIZE) {
+        v1 = _double_loadu(&arr1[i]);
+        v2 = _double_loadu(&arr2[i]);
+        v1 = _double_add_vec(v1, v2);
+        v1 = _double_mul_vec(v1, d2);
+        _double_storeu(&outarr[i], v1);
     }
 
-    for (int i = len-len%4; i < len; i++) {
+    for (int i = len - len % DOUBLE_VEC_SIZE; i < len; i++) {
         outarr[i] = (arr1[i]+arr2[i])/2;
     }
 }
 
 void _float_pairwise_mean(const float* arr1, const float* arr2, int len, float* outarr) {
-    __m256 v1;
-    __m256 v2;
-    __m256 d2 = _mm256_set_ps(0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5);
+    __float_vector v1;
+    __float_vector v2;
+    __float_vector d2 = _float_set1_vec(0.5f);
 
-    for (int i = 0; i < len-len%8; i += 8) {
-        v1 = _mm256_loadu_ps(&arr1[i]);
-        v2 = _mm256_loadu_ps(&arr2[i]);
-        v1 = _mm256_add_ps(v1, v2);
-        v1 = _mm256_mul_ps(v1, d2);
-        _mm256_storeu_ps(&outarr[i], v1);
+    for (int i = 0; i < len - len % FLOAT_VEC_SIZE; i += FLOAT_VEC_SIZE) {
+        v1 = _float_loadu(&arr1[i]);
+        v2 = _float_loadu(&arr2[i]);
+        v1 = _float_add_vec(v1, v2);
+        v1 = _float_mul_vec(v1, d2);
+        _float_storeu(&outarr[i], v1);
     }
 
-    for (int i = len-len%8; i < len; i++) {
+    for (int i = len - len % FLOAT_VEC_SIZE; i < len; i++) {
         outarr[i] = (arr1[i]+arr2[i])/2;
     }
 }
 
 
 void _double_div(const double* arr, int len, double x, double* outarr) {
-    __m256d v;
-    __m256d vx;
-    vx = _mm256_set_pd(x, x, x, x);
+    __double_vector v;
+    __double_vector vx;
+    vx = _double_set1_vec(x);
 
-    for (int i = 0; i < len-len%4; i += 4) {
-        v = _mm256_loadu_pd(&arr[i]);
-        _mm256_storeu_pd(&outarr[i], _mm256_div_pd(v, vx));
+    for (int i = 0; i < len - len % DOUBLE_VEC_SIZE; i += DOUBLE_VEC_SIZE) {
+        v = _double_loadu(&arr[i]);
+        _double_storeu(&outarr[i], _double_div_vec(v, vx));
     }
 
-    for (int i = len-len%4; i < len; i++) {
+    for (int i = len - len % DOUBLE_VEC_SIZE; i < len; i++) {
         outarr[i] = arr[i]/x;
     }
 }
 
 void _float_div(const float* arr, int len, float x, float* outarr) {
-    __m256 v;
-    __m256 vx;
-    vx = _mm256_set_ps(x, x, x, x, x, x, x, x);
+    __float_vector v;
+    __float_vector vx;
+    vx = _float_set1_vec(x);
 
-    for (int i = 0; i < len-len%8; i += 8) {
-        v = _mm256_loadu_ps(&arr[i]);
-        _mm256_storeu_ps(&outarr[i], _mm256_div_ps(v, vx));
+    for (int i = 0; i < len - len % FLOAT_VEC_SIZE; i += FLOAT_VEC_SIZE) {
+        v = _float_loadu(&arr[i]);
+        _float_storeu(&outarr[i], _float_div_vec(v, vx));
     }
 
-    for (int i = len-len%8; i < len; i++) {
+    for (int i = len - len % FLOAT_VEC_SIZE; i < len; i++) {
         outarr[i] = arr[i]/x;
     }
 }
 
 double _double_cumilative_sum(const double* arr, int len) {
-    __m256d v;
-    __m256d _sum = _mm256_set_pd(0,0,0,0);
+    __double_vector v;
+    __double_vector _sum = _double_setzero_vec();
     double sum;
 
-    for (int i = 0; i < len-len%4; i += 4) {
-        v = _mm256_loadu_pd(&arr[i]);
-        _sum = _mm256_add_pd(_sum, v);
+    for (int i = 0; i < len - len % DOUBLE_VEC_SIZE; i += DOUBLE_VEC_SIZE) {
+        v = _double_loadu(&arr[i]);
+        _sum = _double_add_vec(_sum, v);
     }
 
-    sum = _sum[0] + _sum[1] + _sum[2] + _sum[3];
+    sum = 0;
 
-    for (int i = len-len%4; i < len; i++) {
+    for (int i = 0; i < DOUBLE_VEC_SIZE; i++) {
+        sum += _double_index_vec(_sum, i);
+    }
+
+    for (int i = len - len % DOUBLE_VEC_SIZE; i < len; i++) {
         sum += arr[i];
     }
 
@@ -121,19 +109,22 @@ double _double_cumilative_sum(const double* arr, int len) {
 }
 
 float _float_cumilative_sum(const float* arr, int len) {
-    __m256 v;
-    __m256 _sum = _mm256_set_ps(0,0,0,0,0,0,0,0);
+    __float_vector v;
+    __float_vector _sum = _float_setzero_vec();
     float sum;
 
-    for (int i = 0; i < len-len%8; i += 8) {
-        v = _mm256_loadu_ps(&arr[i]);
-        _sum = _mm256_add_ps(_sum, v);
+    for (int i = 0; i < len - len % FLOAT_VEC_SIZE; i += FLOAT_VEC_SIZE) {
+        v = _float_loadu(&arr[i]);
+        _sum = _float_add_vec(_sum, v);
     }
 
-    sum =   _sum[0] + _sum[1] + _sum[2] + _sum[3] +
-            _sum[4] + _sum[5] + _sum[6] + _sum[7];
+    sum = 0;
 
-    for (int i = len-len%8; i < len; i++) {
+    for (int i = 0; i < FLOAT_VEC_SIZE; i++) {
+        sum += _float_index_vec(_sum, i);
+    }
+
+    for (int i = len - len % FLOAT_VEC_SIZE; i < len; i++) {
         sum += arr[i];
     }
 
@@ -176,28 +167,28 @@ void _float_sma(const float* arr, int len, int window, float* outarr) {
 
 void
 _double_sub_arr(const double *arr1, const double *arr2, int len, double *arr3) {
-    __m256d v1;
-    __m256d v2;
-    for (int i = 0; i < len-len%4; i+=4) {
-        v1 = _mm256_loadu_pd(&arr1[i]);
-        v2 = _mm256_loadu_pd(&arr2[i]);
-        _mm256_storeu_pd(&arr3[i], _mm256_sub_pd(v1, v2));
+    __double_vector v1;
+    __double_vector v2;
+    for (int i = 0; i < len - len % DOUBLE_VEC_SIZE; i += DOUBLE_VEC_SIZE) {
+        v1 = _double_loadu(&arr1[i]);
+        v2 = _double_loadu(&arr2[i]);
+        _double_storeu(&arr3[i], _double_sub_vec(v1, v2));
     }
-    for (int i = len-len%4; i<len; i++) {
+    for (int i = len - len % DOUBLE_VEC_SIZE; i<len; i++) {
         arr3[i] = arr1[i]-arr2[i];
     }
 }
 
 void
 _float_sub_arr(const float *arr1, const float *arr2, int len, float *arr3) {
-    __m256 v1;
-    __m256 v2;
-    for (int i = 0; i < len-len%8; i+=8) {
-        v1 = _mm256_loadu_ps(&arr1[i]);
-        v2 = _mm256_loadu_ps(&arr2[i]);
-        _mm256_storeu_ps(&arr3[i], _mm256_sub_ps(v1, v2));
+    __float_vector v1;
+    __float_vector v2;
+    for (int i = 0; i < len - len % FLOAT_VEC_SIZE; i += FLOAT_VEC_SIZE) {
+        v1 = _float_loadu(&arr1[i]);
+        v2 = _float_loadu(&arr2[i]);
+        _float_storeu(&arr3[i], _float_sub_vec(v1, v2));
     }
-    for (int i = len-len%8; i<len; i++) {
+    for (int i = len - len % FLOAT_VEC_SIZE; i<len; i++) {
         arr3[i] = arr1[i]-arr2[i];
     }
 }
@@ -235,160 +226,164 @@ void _float_volatility_sum(const float* arr1, int period, int len, float* outarr
 }
 
 void _double_div_arr(const double* arr1, const double* arr2, int len, double* outarr) {
-    __m256d v1;
-    __m256d v2;
+    __double_vector v1;
+    __double_vector v2;
 
-    for (int i = 0; i < len-len%4; i += 4) {
-        v1 = _mm256_loadu_pd(&arr1[i]);
-        v2 = _mm256_loadu_pd(&arr2[i]);
-        _mm256_storeu_pd(&outarr[i], _mm256_div_pd(v1, v2));
+    for (int i = 0; i < len - len % DOUBLE_VEC_SIZE; i += DOUBLE_VEC_SIZE) {
+        v1 = _double_loadu(&arr1[i]);
+        v2 = _double_loadu(&arr2[i]);
+        _double_storeu(&outarr[i], _double_div_vec(v1, v2));
     }
 
-    for (int i = len-len%4; i < len; i++) {
+    for (int i = len - len % DOUBLE_VEC_SIZE; i < len; i++) {
         outarr[i] = arr1[i]/arr2[i];
     }
 }
 
 void _float_div_arr(const float* arr1, const float* arr2, int len, float* outarr) {
-    __m256 v1;
-    __m256 v2;
+    __float_vector v1;
+    __float_vector v2;
 
-    for (int i = 0; i < len-len%8; i += 8) {
-        v1 = _mm256_loadu_ps(&arr1[i]);
-        v2 = _mm256_loadu_ps(&arr2[i]);
-        _mm256_storeu_ps(&outarr[i], _mm256_div_ps(v1, v2));
+    for (int i = 0; i < len - len % FLOAT_VEC_SIZE; i += FLOAT_VEC_SIZE) {
+        v1 = _float_loadu(&arr1[i]);
+        v2 = _float_loadu(&arr2[i]);
+        _float_storeu(&outarr[i], _float_div_vec(v1, v2));
     }
 
-    for (int i = len-len%8; i < len; i++) {
+    for (int i = len - len % FLOAT_VEC_SIZE; i < len; i++) {
         outarr[i] = arr1[i]/arr2[i];
     }
 }
 
 void _double_mul(const double* arr, int len, double x, double* outarr) {
-    __m256d v;
-    __m256d vx;
-    vx = _mm256_set_pd(x, x, x, x);
+    __double_vector v;
+    __double_vector vx;
+    vx = _double_set1_vec(x);
 
-    for (int i = 0; i < len-len%4; i += 4) {
-        v = _mm256_loadu_pd(&arr[i]);
-        _mm256_storeu_pd(&outarr[i], _mm256_mul_pd(v, vx));
+    for (int i = 0; i < len - len % DOUBLE_VEC_SIZE; i += DOUBLE_VEC_SIZE) {
+        v = _double_loadu(&arr[i]);
+        _double_storeu(&outarr[i], _double_mul_vec(v, vx));
     }
 
-    for (int i = len-len%4; i < len; i++) {
+    for (int i = len - len % DOUBLE_VEC_SIZE; i < len; i++) {
         outarr[i] = arr[i]*x;
     }
 }
 
 void _float_mul(const float* arr, int len, float x, float* outarr) {
-    __m256 v;
-    __m256 vx;
-    vx = _mm256_set_ps(x, x, x, x, x, x, x, x);
+    __float_vector v;
+    __float_vector vx;
+    vx = _float_set1_vec(x);
 
-    for (int i = 0; i < len-len%8; i += 8) {
-        v = _mm256_loadu_ps(&arr[i]);
-        _mm256_storeu_ps(&outarr[i], _mm256_mul_ps(v, vx));
+    for (int i = 0; i < len - len % FLOAT_VEC_SIZE; i += FLOAT_VEC_SIZE) {
+        v = _float_loadu(&arr[i]);
+        _float_storeu(&outarr[i], _float_mul_vec(v, vx));
     }
 
-    for (int i = len-len%8; i < len; i++) {
+    for (int i = len - len % FLOAT_VEC_SIZE; i < len; i++) {
         outarr[i] = arr[i]*x;
     }
 }
 
 void _double_add(const double* arr, int len, double x, double* outarr) {
-    __m256d v;
-    __m256d vx;
-    vx = _mm256_set_pd(x, x, x, x);
+    __double_vector v;
+    __double_vector vx;
+    vx = _double_set1_vec(x);
 
-    for (int i = 0; i < len-len%4; i += 4) {
-        v = _mm256_loadu_pd(&arr[i]);
-        _mm256_storeu_pd(&outarr[i], _mm256_add_pd(v, vx));
+    for (int i = 0; i < len - len % DOUBLE_VEC_SIZE; i += DOUBLE_VEC_SIZE) {
+        v = _double_loadu(&arr[i]);
+        _double_storeu(&outarr[i], _double_add_vec(v, vx));
     }
 
-    for (int i = len-len%4; i < len; i++) {
+    for (int i = len - len % DOUBLE_VEC_SIZE; i < len; i++) {
         outarr[i] = arr[i]+x;
     }
 }
 
 void _float_add(const float* arr, int len, float x, float* outarr) {
-    __m256 v;
-    __m256 vx;
-    vx = _mm256_set_ps(x, x, x, x, x, x, x, x);
+    __float_vector v;
+    __float_vector vx;
+    vx = _float_set1_vec(x);
 
-    for (int i = 0; i < len-len%8; i += 8) {
-        v = _mm256_loadu_ps(&arr[i]);
-        _mm256_storeu_ps(&outarr[i], _mm256_add_ps(v, vx));
+    for (int i = 0; i < len - len % FLOAT_VEC_SIZE; i += FLOAT_VEC_SIZE) {
+        v = _float_loadu(&arr[i]);
+        _float_storeu(&outarr[i], _float_add_vec(v, vx));
     }
 
-    for (int i = len-len%8; i < len; i++) {
+    for (int i = len - len % FLOAT_VEC_SIZE; i < len; i++) {
         outarr[i] = arr[i]+x;
     }
 }
 
 void _double_square(const double* arr, int len, double* outarr) {
-    __m256d v;
+    __double_vector v;
 
-    for (int i = 0; i < len-len%4; i += 4) {
-        v = _mm256_loadu_pd(&arr[i]);
-        _mm256_storeu_pd(&outarr[i], _mm256_mul_pd(v, v));
+    for (int i = 0; i < len - len % DOUBLE_VEC_SIZE; i += DOUBLE_VEC_SIZE) {
+        v = _double_loadu(&arr[i]);
+        _double_storeu(&outarr[i], _double_mul_vec(v, v));
     }
 
-    for (int i = len-len%4; i < len; i++) {
+    for (int i = len - len % DOUBLE_VEC_SIZE; i < len; i++) {
         outarr[i] = arr[i]*arr[i];
     }
 }
 
 void _float_square(const float* arr, int len, float* outarr) {
-    __m256 v;
+    __float_vector v;
 
-    for (int i = 0; i < len-len%8; i += 8) {
-        v = _mm256_loadu_ps(&arr[i]);
-        _mm256_storeu_ps(&outarr[i], _mm256_mul_ps(v, v));
+    for (int i = 0; i < len - len % FLOAT_VEC_SIZE; i += FLOAT_VEC_SIZE) {
+        v = _float_loadu(&arr[i]);
+        _float_storeu(&outarr[i], _float_mul_vec(v, v));
     }
 
-    for (int i = len-len%8; i < len; i++) {
+    for (int i = len - len % FLOAT_VEC_SIZE; i < len; i++) {
         outarr[i] = arr[i]*arr[i];
     }
 }
 
 void _double_abs(const double* arr, int len, double* outarr) {
-    __m256d v;
-    const __m256d sign_mask = _mm256_set1_pd(-0.); // -0. = 1 << 63
+    __double_vector v;
+    const __double_vector sign_mask = _double_set1_vec(-0.);
 
-    for (int i = 0; i < len-len%4; i += 4) {
-        v = _mm256_loadu_pd(&arr[i]);
-        _mm256_storeu_pd(&outarr[i], abs_pd(v, sign_mask));
+    for (int i = 0; i < len - len % DOUBLE_VEC_SIZE; i += DOUBLE_VEC_SIZE) {
+        v = _double_loadu(&arr[i]);
+        _double_storeu(&outarr[i], _double_abs_vec(v, sign_mask));
     }
 
-    for (int i = len-len%4; i < len; i++) {
+    for (int i = len - len % DOUBLE_VEC_SIZE; i < len; i++) {
         outarr[i] = fabs(arr[i]);
     }
 }
 
 void _float_abs(const float* arr, int len, float* outarr) {
-    __m256 v;
-    const __m256 sign_mask = _mm256_set1_ps(-0.); // -0.f = 1 << 31
+    __float_vector v;
+    const __float_vector sign_mask = _float_set1_vec(-0.);
 
-    for (int i = 0; i < len-len%8; i += 8) {
-        v = _mm256_loadu_ps(&arr[i]);
-        _mm256_storeu_ps(&outarr[i], abs_ps(v, sign_mask));
+    for (int i = 0; i < len - len % FLOAT_VEC_SIZE; i += FLOAT_VEC_SIZE) {
+        v = _float_loadu(&arr[i]);
+        _float_storeu(&outarr[i], _float_abs_vec(v, sign_mask));
     }
 
-    for (int i = len-len%8; i < len; i++) {
+    for (int i = len - len % FLOAT_VEC_SIZE; i < len; i++) {
         outarr[i] = fabs(arr[i]);
     }
 }
 
 void _double_running_max(const double* arr, int len, int window, double* outarr) {
-    __m256d v;
+    __double_vector v;
     double m;
     for (int i = 0; i < len-window+1; i++) {
-        v = _mm256_loadu_pd(&arr[i]);
-        for (int j = 4; j < window-window%4; j += 4) {
-            v = _mm256_max_pd(v, _mm256_loadu_pd(&arr[i+j]));
+        v = _double_loadu(&arr[i]);
+        for (int j = DOUBLE_VEC_SIZE; j < window - window % DOUBLE_VEC_SIZE; j += DOUBLE_VEC_SIZE) {
+            v = _double_max_vec(v, _double_loadu(&arr[i+j]));
         }
-        m = max(max(max(v[0], v[1]), v[2]), v[3]);
 
-        for (int j = window-window%4; j < window; j++) {
+        m = _double_index_vec(v, 0);
+        for (int j = 1; j < DOUBLE_VEC_SIZE; j++) {
+            m = max(m, _double_index_vec(v, j));
+        }
+
+        for (int j = window - window % DOUBLE_VEC_SIZE; j < window; j++) {
             m = max(m, arr[i+j]);
         }
         outarr[i] = m;
@@ -396,17 +391,20 @@ void _double_running_max(const double* arr, int len, int window, double* outarr)
 }
 
 void _float_running_max(const float* arr, int len, int window, float* outarr) {
-    __m256 v;
+    __float_vector v;
     float m;
     for (int i = 0; i < len-window+1; i++) {
-        v = _mm256_loadu_ps(&arr[i]);
-        for (int j = 8; j < window-window%8; j += 8) {
-            v = _mm256_max_ps(v, _mm256_loadu_ps(&arr[i+j]));
+        v = _float_loadu(&arr[i]);
+        for (int j = FLOAT_VEC_SIZE; j < window - window % FLOAT_VEC_SIZE; j += FLOAT_VEC_SIZE) {
+            v = _float_max_vec(v, _float_loadu(&arr[i+j]));
         }
-        m = max(max(max(max(v[0], v[1]), v[2]), v[3]),
-                max(max(max(v[4], v[5]), v[6]), v[7]));
 
-        for (int j = window-window%8; j < window; j++) {
+        m = _float_index_vec(v, 0);
+        for (int j = 1; j < FLOAT_VEC_SIZE; j++) {
+            m = max(m, _float_index_vec(v, j));
+        }
+
+        for (int j = window - window % FLOAT_VEC_SIZE; j < window; j++) {
             m = max(m, arr[i+j]);
         }
         outarr[i] = m;
@@ -414,16 +412,20 @@ void _float_running_max(const float* arr, int len, int window, float* outarr) {
 }
 
 void _double_running_min(const double* arr, int len, int window, double* outarr) {
-    __m256d v;
+    __double_vector v;
     double m;
     for (int i = 0; i < len-window+1; i++) {
-        v = _mm256_loadu_pd(&arr[i]);
-        for (int j = 4; j < window-window%4; j += 4) {
-            v = _mm256_min_pd(v, _mm256_loadu_pd(&arr[i+j]));
+        v = _double_loadu(&arr[i]);
+        for (int j = DOUBLE_VEC_SIZE; j < window - window % DOUBLE_VEC_SIZE; j += DOUBLE_VEC_SIZE) {
+            v = _double_min_vec(v, _double_loadu(&arr[i+j]));
         }
-        m = min(min(min(v[0], v[1]), v[2]), v[3]);
 
-        for (int j = window-window%4; j < window; j++) {
+        m = _double_index_vec(v, 0);
+        for (int j = 1; j < DOUBLE_VEC_SIZE; j++) {
+            m = min(m, _double_index_vec(v, j));
+        }
+
+        for (int j = window - window % DOUBLE_VEC_SIZE; j < window; j++) {
             m = min(m, arr[i+j]);
         }
         outarr[i] = m;
@@ -431,17 +433,20 @@ void _double_running_min(const double* arr, int len, int window, double* outarr)
 }
 
 void _float_running_min(const float* arr, int len, int window, float* outarr) {
-    __m256 v;
+    __float_vector v;
     float m;
     for (int i = 0; i < len-window+1; i++) {
-        v = _mm256_loadu_ps(&arr[i]);
-        for (int j = 8; j < window-window%8; j += 8) {
-            v = _mm256_min_ps(v, _mm256_loadu_ps(&arr[i+j]));
+        v = _float_loadu(&arr[i]);
+        for (int j = FLOAT_VEC_SIZE; j < window - window % FLOAT_VEC_SIZE; j += FLOAT_VEC_SIZE) {
+            v = _float_min_vec(v, _float_loadu(&arr[i+j]));
         }
-        m = min(min(min(min(v[0], v[1]), v[2]), v[3]),
-                min(min(min(v[4], v[5]), v[6]), v[7]));
 
-        for (int j = window-window%8; j < window; j++) {
+        m = _float_index_vec(v, 0);
+        for (int j = 1; j < FLOAT_VEC_SIZE; j++) {
+            m = min(m, _float_index_vec(v, j));
+        }
+
+        for (int j = window - window % FLOAT_VEC_SIZE; j < window; j++) {
             m = min(m, arr[i+j]);
         }
         outarr[i] = m;
@@ -461,50 +466,51 @@ void _float_set_nan(float* arr, int len) {
 }
 
 void _double_consecutive_diff(const double* arr, int len, double* outarr) {
-    __m256d v1;
-    __m256d v2;
+    __double_vector v1;
+    __double_vector v2;
 
-    for (int i = 0; i < (len-1)-(len-1)%4; i+=4) {
-        v1 = _mm256_loadu_pd(&arr[i]);
-        v2 = _mm256_loadu_pd(&arr[i+1]);
-        _mm256_storeu_pd(&outarr[i], _mm256_sub_pd(v2, v1));
+    for (int i = 0; i < (len-1) - (len-1) % DOUBLE_VEC_SIZE; i += DOUBLE_VEC_SIZE) {
+        v1 = _double_loadu(&arr[i]);
+        v2 = _double_loadu(&arr[i+1]);
+        _double_storeu(&outarr[i], _double_sub_vec(v2, v1));
     }
 
-    for (int i = len-len%4; i < len-1; i++) {
+    for (int i = len - len % DOUBLE_VEC_SIZE; i < len-1; i++) {
         outarr[i] = arr[i+1]-arr[i];
     }
 }
 
 void _float_consecutive_diff(const float* arr, int len, float* outarr) {
-    __m256 v1;
-    __m256 v2;
+    __float_vector v1;
+    __float_vector v2;
 
-    for (int i = 0; i < (len-1)-(len-1)%8; i+=8) {
-        v1 = _mm256_loadu_ps(&arr[i]);
-        v2 = _mm256_loadu_ps(&arr[i+1]);
-        _mm256_storeu_ps(&outarr[i], _mm256_sub_ps(v2, v1));
+    for (int i = 0; i < (len-1) - (len-1) % FLOAT_VEC_SIZE; i += FLOAT_VEC_SIZE) {
+        v1 = _float_loadu(&arr[i]);
+        v2 = _float_loadu(&arr[i+1]);
+        _float_storeu(&outarr[i], _float_sub_vec(v2, v1));
     }
 
-    for (int i = len-len%8; i < len-1; i++) {
+    for (int i = len - len % FLOAT_VEC_SIZE; i < len-1; i++) {
         outarr[i] = arr[i+1]-arr[i];
     }
 }
 
+#if (DOUBLE_VEC_SIZE >= 4)
 void _double_tsi_fast_ema(double* pc, double* apc, int len, int r, int s) {
-    __m256d v;
+    __double_vector v;
     double alpha1 = 2./(r+1);
     double alpha2 = 2./(s+1);
 
-    const __m256d a = _mm256_set_pd(alpha2, alpha1, alpha2, alpha1);
-    const __m256d am = _mm256_set_pd(1.-alpha2, 1.-alpha1, 1.-alpha2, 1.-alpha1);
+    const __double_vector a = _double_set_vec(alpha2, alpha1, alpha2, alpha1);
+    const __double_vector am = _double_set_vec(1.-alpha2, 1.-alpha1, 1.-alpha2, 1.-alpha1);
 
-    __m256d ema = _mm256_loadu2_pd(&pc[0], &apc[0]);
+    __double_vector ema = _double_loadu2(&pc[0], &apc[0]);
 
     for (int i = 1; i < len-1; i++) {
-        v = _mm256_loadu2_pd(&pc[i-1], &apc[i-1]);
-        v = _mm256_mul_pd(v, a);
-        ema = _mm256_mul_pd(ema, am);
-        ema = _mm256_add_pd(v, ema);
+        v = _double_loadu2(&pc[i-1], &apc[i-1]);
+        v = _double_mul_vec(v, a);
+        ema = _double_mul_vec(ema, am);
+        ema = _double_add_vec(v, ema);
 
         pc[i-1] = ema[0];
         pc[i] = ema[1];
@@ -514,22 +520,53 @@ void _double_tsi_fast_ema(double* pc, double* apc, int len, int r, int s) {
 }
 
 void _float_tsi_fast_ema(float* pc, float* apc, int len, int r, int s) {
-    __m256d v;
+    __double_vector v;
     double alpha1 = 2./(r+1);
     double alpha2 = 2./(s+1);
 
-    const __m256d a = _mm256_set_pd(alpha2, alpha1, alpha2, alpha1);
-    const __m256d am = _mm256_set_pd(1.f-alpha2, 1.f-alpha1, 1.f-alpha2, 1.f-alpha1);
+    const __double_vector a = _double_set_vec(alpha2, alpha1, alpha2, alpha1);
+    const __double_vector am = _double_set_vec(1.f-alpha2, 1.f-alpha1, 1.f-alpha2, 1.f-alpha1);
 
-    __m256d ema = _mm256_loadu2_ps4(&pc[0],
-                                   &apc[0]);
+    __double_vector ema = _double_loadu2_from_float(&pc[0],&apc[0]);
 
     for (int i = 1; i < len-1; i++) {
-        v = _mm256_loadu2_ps4(&pc[i-1],
-                             &apc[i-1]);
-        v = _mm256_mul_pd(v, a);
-        ema = _mm256_mul_pd(ema, am);
-        ema = _mm256_add_pd(v, ema);
+        v = _double_loadu2_from_float(&pc[i-1],&apc[i-1]);
+        v = _double_mul_vec(v, a);
+        ema = _double_mul_vec(ema, am);
+        ema = _double_add_vec(v, ema);
+
+        pc[i-1] = ema[0];
+        pc[i] = ema[1];
+        apc[i-1] = ema[2];
+        apc[i] = ema[3];
+    }
+}
+#else
+void _double_tsi_fast_ema(double* pc, double* apc, int len, int r, int s) {
+    double v[4];
+    double alpha1 = 2./(r+1);
+    double alpha2 = 2./(s+1);
+
+    const double a[4] = {alpha2, alpha1, alpha2, alpha1};
+    const double am[4] = {1.f-alpha2, 1.f-alpha1, 1.f-alpha2, 1.f-alpha1};
+
+    double ema[4] = {pc[0], pc[1], apc[0], apc[1]};
+
+    for (int i = 1; i < len-1; i++) {
+        v[0] = pc[i-1];
+        v[1] = pc[i];
+        v[2] = apc[i-1];
+        v[3] = apc[i];
+
+        for (int j = 0; j < 4; j++) {
+            v[j] *= a[j];
+        }
+        for (int j = 0; j < 4; j++) {
+            ema[j] *= am[j];
+        }
+        for (int j = 0; j < 4; j++) {
+            ema[j] += v[j];
+        }
 
         pc[i-1] = ema[0];
         pc[i] = ema[1];
@@ -538,50 +575,84 @@ void _float_tsi_fast_ema(float* pc, float* apc, int len, int r, int s) {
     }
 }
 
+void _float_tsi_fast_ema(float* pc, float* apc, int len, int r, int s) {
+    float v[4];
+    float alpha1 = 2./(r+1);
+    float alpha2 = 2./(s+1);
+
+    const float a[4] = {alpha2, alpha1, alpha2, alpha1};
+    const float am[4] = {1.f-alpha2, 1.f-alpha1, 1.f-alpha2, 1.f-alpha1};
+
+    float ema[4] = {pc[0], pc[1], apc[0], apc[1]};
+
+    for (int i = 1; i < len-1; i++) {
+        v[0] = pc[i-1];
+        v[1] = pc[i];
+        v[2] = apc[i-1];
+        v[3] = apc[i];
+
+        for (int j = 0; j < 4; j++) {
+            v[j] *= a[j];
+        }
+        for (int j = 0; j < 4; j++) {
+            ema[j] *= am[j];
+        }
+        for (int j = 0; j < 4; j++) {
+            ema[j] += v[j];
+        }
+
+        pc[i-1] = ema[0];
+        pc[i] = ema[1];
+        apc[i-1] = ema[2];
+        apc[i] = ema[3];
+    }
+}
+#endif
+
 void _double_pairwise_max(const double* arr1, const double* arr2, int len, double* outarr) {
-    __m256d v;
-    for (int i = 0; i < len-len%4; i += 4) {
-        v = _mm256_max_pd(_mm256_loadu_pd(&arr1[i]), _mm256_loadu_pd(&arr2[i]));
-        _mm256_storeu_pd(&outarr[i], v);
+    __double_vector v;
+    for (int i = 0; i < len - len % DOUBLE_VEC_SIZE; i += DOUBLE_VEC_SIZE) {
+        v = _double_max_vec(_double_loadu(&arr1[i]), _double_loadu(&arr2[i]));
+        _double_storeu(&outarr[i], v);
     }
 
-    for (int i = len-len%4; i < len; i++) {
+    for (int i = len - len % DOUBLE_VEC_SIZE; i < len; i++) {
         outarr[i] = max(arr1[i], arr2[i]);
     }
 }
 
 void _float_pairwise_max(const float* arr1, const float* arr2, int len, float* outarr) {
-    __m256 v;
-    for (int i = 0; i < len-len%8; i += 8) {
-        v = _mm256_max_ps(_mm256_loadu_ps(&arr1[i]), _mm256_loadu_ps(&arr2[i]));
-        _mm256_storeu_ps(&outarr[i], v);
+    __float_vector v;
+    for (int i = 0; i < len - len % FLOAT_VEC_SIZE; i += FLOAT_VEC_SIZE) {
+        v = _float_max_vec(_float_loadu(&arr1[i]), _float_loadu(&arr2[i]));
+        _float_storeu(&outarr[i], v);
     }
 
-    for (int i = len-len%8; i < len; i++) {
+    for (int i = len - len % FLOAT_VEC_SIZE; i < len; i++) {
         outarr[i] = max(arr1[i], arr2[i]);
     }
 }
 
 void _double_pairwise_min(const double* arr1, const double* arr2, int len, double* outarr) {
-    __m256d v;
-    for (int i = 0; i < len-len%4; i += 4) {
-        v = _mm256_min_pd(_mm256_loadu_pd(&arr1[i]), _mm256_loadu_pd(&arr2[i]));
-        _mm256_storeu_pd(&outarr[i], v);
+    __double_vector v;
+    for (int i = 0; i < len - len % DOUBLE_VEC_SIZE; i += DOUBLE_VEC_SIZE) {
+        v = _double_min_vec(_double_loadu(&arr1[i]), _double_loadu(&arr2[i]));
+        _double_storeu(&outarr[i], v);
     }
 
-    for (int i = len-len%4; i < len; i++) {
+    for (int i = len - len % DOUBLE_VEC_SIZE; i < len; i++) {
         outarr[i] = min(arr1[i], arr2[i]);
     }
 }
 
 void _float_pairwise_min(const float* arr1, const float* arr2, int len, float* outarr) {
-    __m256 v;
-    for (int i = 0; i < len-len%8; i += 8) {
-        v = _mm256_min_ps(_mm256_loadu_ps(&arr1[i]), _mm256_loadu_ps(&arr2[i]));
-        _mm256_storeu_ps(&outarr[i], v);
+    __float_vector v;
+    for (int i = 0; i < len - len % FLOAT_VEC_SIZE; i += FLOAT_VEC_SIZE) {
+        v = _float_min_vec(_float_loadu(&arr1[i]), _float_loadu(&arr2[i]));
+        _float_storeu(&outarr[i], v);
     }
 
-    for (int i = len-len%8; i < len; i++) {
+    for (int i = len - len % FLOAT_VEC_SIZE; i < len; i++) {
         outarr[i] = min(arr1[i], arr2[i]);
     }
 }
@@ -617,93 +688,93 @@ void _float_running_sum(const float* arr, int len, int window, float* outarr) {
 }
 
 void _double_add_arr(const double* arr1, const double* arr2, int len, double* outarr) {
-    __m256d v;
-    for (int i = 0; i < len-len%4; i += 4) {
-        v = _mm256_add_pd(_mm256_loadu_pd(&arr1[i]), _mm256_loadu_pd(&arr2[i]));
-        _mm256_storeu_pd(&outarr[i], v);
+    __double_vector v;
+    for (int i = 0; i < len - len % DOUBLE_VEC_SIZE; i += DOUBLE_VEC_SIZE) {
+        v = _double_add_vec(_double_loadu(&arr1[i]), _double_loadu(&arr2[i]));
+        _double_storeu(&outarr[i], v);
     }
 
-    for (int i = len-len%4; i < len; i++) {
+    for (int i = len - len % DOUBLE_VEC_SIZE; i < len; i++) {
         outarr[i] = arr1[i]+arr2[i];
     }
 }
 
 void _float_add_arr(const float* arr1, const float* arr2, int len, float* outarr) {
-    __m256 v;
-    for (int i = 0; i < len-len%8; i += 8) {
-        v = _mm256_add_ps(_mm256_loadu_ps(&arr1[i]), _mm256_loadu_ps(&arr2[i]));
-        _mm256_storeu_ps(&outarr[i], v);
+    __float_vector v;
+    for (int i = 0; i < len - len % FLOAT_VEC_SIZE; i += FLOAT_VEC_SIZE) {
+        v = _float_add_vec(_float_loadu(&arr1[i]), _float_loadu(&arr2[i]));
+        _float_storeu(&outarr[i], v);
     }
 
-    for (int i = len-len%8; i < len; i++) {
-        outarr[i] =arr1[i]+arr2[i];
+    for (int i = len - len % FLOAT_VEC_SIZE; i < len; i++) {
+        outarr[i] = arr1[i]+arr2[i];
     }
 }
 
 void _double_memcpy(const double* src, int len, double* outarr) {
-    for (int i = 0; i < len-len%4; i += 4) {
-        _mm256_storeu_pd(&outarr[i], _mm256_loadu_pd(&src[i]));
+    for (int i = 0; i < len - len % DOUBLE_VEC_SIZE; i += DOUBLE_VEC_SIZE) {
+        _double_storeu(&outarr[i], _double_loadu(&src[i]));
     }
 
-    for (int i = len-len%4; i < len; i++) {
+    for (int i = len - len % DOUBLE_VEC_SIZE; i < len; i++) {
         outarr[i] = src[i];
     }
 }
 
 void _float_memcpy(const float* src, int len, float* outarr) {
-    for (int i = 0; i < len-len%8; i += 8) {
-        _mm256_storeu_ps(&outarr[i], _mm256_loadu_ps(&src[i]));
+    for (int i = 0; i < len - len % FLOAT_VEC_SIZE; i += FLOAT_VEC_SIZE) {
+        _float_storeu(&outarr[i], _float_loadu(&src[i]));
     }
 
-    for (int i = len-len%8; i < len; i++) {
+    for (int i = len - len % FLOAT_VEC_SIZE; i < len; i++) {
         outarr[i] = src[i];
     }
 }
 
 void _double_div_diff(const double* arr1, const double* arr2, const double* arr3, int len, double* outarr) {
-    for (int i = 0; i < len-len%4; i += 4) {
-        _mm256_storeu_pd(&outarr[i], _mm256_div_pd(_mm256_loadu_pd(&arr1[i]),
-                _mm256_sub_pd(_mm256_loadu_pd(&arr2[i]),
-                        _mm256_loadu_pd(&arr3[i]))));
+    for (int i = 0; i < len - len % DOUBLE_VEC_SIZE; i += DOUBLE_VEC_SIZE) {
+        _double_storeu(&outarr[i], _double_div_vec(_double_loadu(&arr1[i]),
+                _double_sub_vec(_double_loadu(&arr2[i]),
+                        _double_loadu(&arr3[i]))));
     }
 
-    for (int i = len-len%4; i < len; i++) {
+    for (int i = len - len % DOUBLE_VEC_SIZE; i < len; i++) {
         outarr[i] = arr1[i]/(arr2[i]-arr3[i]);
     }
 }
 
 void _float_div_diff(const float* arr1, const float* arr2, const float* arr3, int len, float* outarr) {
-    for (int i = 0; i < len-len%8; i += 8) {
-        _mm256_storeu_ps(&outarr[i], _mm256_div_ps(_mm256_loadu_ps(&arr1[i]),
-                                                   _mm256_sub_ps(_mm256_loadu_ps(&arr2[i]),
-                                                                 _mm256_loadu_ps(&arr3[i]))));
+    for (int i = 0; i < len - len % FLOAT_VEC_SIZE; i += FLOAT_VEC_SIZE) {
+        _float_storeu(&outarr[i], _float_div_vec(_float_loadu(&arr1[i]),
+                                                   _float_sub_vec(_float_loadu(&arr2[i]),
+                                                                 _float_loadu(&arr3[i]))));
     }
 
-    for (int i = len-len%8; i < len; i++) {
+    for (int i = len - len % FLOAT_VEC_SIZE; i < len; i++) {
         outarr[i] = arr1[i]/(arr2[i]-arr3[i]);
     }
 }
 
 void _double_mul_arr(const double* arr1, const double* arr2, int len, double* outarr) {
-    for (int i = 0; i < len-len%4; i += 4) {
-        _mm256_storeu_pd(&outarr[i],
-                _mm256_mul_pd(_mm256_loadu_pd(&arr1[i]),
-                        _mm256_loadu_pd(&arr2[i])));
+    for (int i = 0; i < len - len % DOUBLE_VEC_SIZE; i += DOUBLE_VEC_SIZE) {
+        _double_storeu(&outarr[i],
+                _double_mul_vec(_double_loadu(&arr1[i]),
+                        _double_loadu(&arr2[i])));
     }
 
-    for (int i = len-len%4; i < len; i++) {
+    for (int i = len - len % DOUBLE_VEC_SIZE; i < len; i++) {
         outarr[i] = arr1[i]*arr2[i];
     }
 }
 
 void _float_mul_arr(const float* arr1, const float* arr2, int len, float* outarr) {
-    for (int i = 0; i < len-len%8; i += 8) {
-        _mm256_storeu_ps(&outarr[i],
-                         _mm256_mul_ps(_mm256_loadu_ps(&arr1[i]),
-                                       _mm256_loadu_ps(&arr2[i])));
+    for (int i = 0; i < len - len % FLOAT_VEC_SIZE; i += FLOAT_VEC_SIZE) {
+        _float_storeu(&outarr[i],
+                         _float_mul_vec(_float_loadu(&arr1[i]),
+                                       _float_loadu(&arr2[i])));
     }
 
-    for (int i = len-len%8; i < len; i++) {
+    for (int i = len - len % FLOAT_VEC_SIZE; i < len; i++) {
         outarr[i] = arr1[i]*arr2[i];
     }
 }
