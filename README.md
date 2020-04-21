@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/cristian-bicheru/fast-ta.svg?branch=master)](https://travis-ci.com/cristian-bicheru/fast-ta)
+
 # Building:
 ```bash
 python3.x setup.py build_ext --inplace

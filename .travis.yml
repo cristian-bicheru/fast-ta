@@ -24,4 +24,13 @@ before_install:
   - sudo ln -sfn $dest /usr/include/numpy
 
 script:
-  - bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99"
+  - bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99" --copt="-coverage"
+  - gcov momentum.c
+  - gcov momentum_backend.c
+  - gcov parallel_momentum_backend.c
+  - gcov funcs.c
+  - gcov volume.c
+  - gcov volume_backend.c
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
