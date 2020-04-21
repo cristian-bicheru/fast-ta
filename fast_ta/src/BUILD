@@ -2,7 +2,7 @@
 # is for each fast_ta developer to switch this to their own path.
 PYTHON_INCLUDE = [
     "-I/usr/include/python3.7",
-    "-I~/.local/lib/python3.7/site-packages/numpy/core/include/",
+    "-I/usr/include/",
 ]
 
 ##################### Structs #####################
