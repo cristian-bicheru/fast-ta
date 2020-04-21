@@ -1,5 +1,3 @@
-#pragma once
-
 #include "Python.h"
 
 #include <stdlib.h>
