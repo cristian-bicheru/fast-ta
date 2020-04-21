@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdlib.h>
-#include <numpy/npy_math.h>
 
 #include "funcs.h"
 
