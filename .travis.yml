@@ -9,6 +9,16 @@ addons:
     packages:
       - wget
       - python3.7-dev
+      - build-essential
+      - checkinstall
+      - libreadline-gplv2-dev
+      - libncursesw5-dev
+      - libssl-dev
+      - libsqlite3-dev
+      - tk-dev
+      - libgdbm-dev
+      - libc6-dev
+      - libbz2-dev
 
 before_install:
   - wget https://github.com/bazelbuild/bazel/releases/download/3.0.0/bazel-3.0.0-installer-linux-x86_64.sh
