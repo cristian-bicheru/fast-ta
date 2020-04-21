@@ -40,4 +40,4 @@ script:
   - travis_fold end "gcov, AVX"
 
 after_success:
-  - bash <(curl -s https://codecov.io/bash) -v
+  - bash <(curl --connect-timeout 10 --max-time 10 --retry 5 --retry-delay 0 --retry-max-time 120 -s https://codecov.io/bash) -X gcov
