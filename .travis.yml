@@ -24,7 +24,7 @@ before_install:
   - sudo ln -sfn $dest /usr/include/numpy
 
 script:
-  - bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99" --conlyopt="-coverage"
+  - bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99" --conlyopt="-fprofile-arcs" --conlyopt="-ftest-coverage" --conlyopt="-lgcov" --conlyopt="--coverage"
   - gcov /fast_ta/src/momentum.c
   - gcov /fast_ta/src/momentum_backend.c
   - gcov /fast_ta/src/parallel_momentum_backend.c
