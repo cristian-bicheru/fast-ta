@@ -44,9 +44,7 @@ cc_library(
     deps = [
         ":generic_simd",
     ],
-    copts = PYTHON_INCLUDE + [
-        "-mavx",
-    ],
+    copts = PYTHON_INCLUDE
 )
 
 cc_library(

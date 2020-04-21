@@ -24,13 +24,14 @@ before_install:
   - sudo ln -sfn $dest /usr/include/numpy
 
 script:
-  - bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99" --conlyopt="-fprofile-arcs" --conlyopt="-fprofile-generate" --conlyopt="-ftest-generate" --linkopt="-lgcov" --linkopt="--coverage"
-  - gcov /fast_ta/src/momentum.c
-  - gcov /fast_ta/src/momentum_backend.c
-  - gcov /fast_ta/src/parallel_momentum_backend.c
-  - gcov /fast_ta/src/funcs.c
-  - gcov /fast_ta/src/volume.c
-  - gcov /fast_ta/src/volume_backend.c
+  - bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99" --collect_code_coverage
+  - cat bazel-out/k8-fastbuild/testlogs/fast_ta/src/momentum_backend_tests/coverage.dat
+  - rm ~/.cache/bazel
+  - bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99" --define=SSE2=1 --copt="-msse2" --collect_code_coverage
+  - cat bazel-out/k8-fastbuild/testlogs/fast_ta/src/momentum_backend_tests/coverage.dat
+  - rm ~/.cache/bazel
+  - bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99" --define=AVX=1 --copt="-mavx" --collect_code_coverage
+  - cat bazel-out/k8-fastbuild/testlogs/fast_ta/src/momentum_backend_tests/coverage.dat
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
