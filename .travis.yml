@@ -34,8 +34,8 @@ script:
   - mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/momentum_backend_tests/coverage.dat avx.dat
 
 after_success:
-  - uploader.sh < (curl --connect-timeout 10 --max-time 10 --retry 5 --retry-delay 0 --retry-max-time 120 -s https://codecov.io/bash)
+  - curl --connect-timeout 10 --max-time 10 --retry 5 --retry-delay 0 --retry-max-time 120 https://codecov.io/bash -o uploader.sh
   - chmod +x uploader.sh
-  - uploader.sh -f no_simd.dat
-  - uploader.sh -f sse2.dat
-  - uploader.sh -f avx.dat
+  - ./uploader.sh -f no_simd.dat
+  - ./uploader.sh -f sse2.dat
+  - ./uploader.sh -f avx.dat
