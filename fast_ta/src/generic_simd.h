@@ -245,11 +245,121 @@
         return A[i];
     }
 
+#elif defined(AVX512)
+/** AVX512 Support **/
+    #include <immintrin.h>
+    #define __float_vector __m512
+    #define __double_vector __m512d
+    #define FLOAT_VEC_SIZE 16
+    #define DOUBLE_VEC_SIZE 8
+    #define simd_malloc(size) (alligned_malloc(512, size))
+
+    inline __attribute__((always_inline)) void _float_storeu(float* addr, const __float_vector A) {
+        _mm512_storeu_ps(addr, A);
+    }
+
+    inline __attribute__((always_inline)) void _double_storeu(double* addr, const __double_vector A) {
+        _mm512_storeu_pd(addr, A);
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_loadu(const float* addr) {
+        return _mm512_loadu_ps(addr);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_loadu(const double* addr) {
+        return _mm512_loadu_pd(addr);
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_add_vec(__float_vector A, __float_vector B) {
+        return _mm512_add_ps(A, B);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_add_vec(__double_vector A, __double_vector B) {
+        return _mm512_add_pd(A, B);
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_sub_vec(__float_vector A, __float_vector B) {
+        return _mm512_sub_ps(A, B);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_sub_vec(__double_vector A, __double_vector B) {
+        return _mm512_sub_pd(A, B);
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_mul_vec(__float_vector A, __float_vector B) {
+        return _mm512_mul_ps(A, B);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_mul_vec(__double_vector A, __double_vector B) {
+        return _mm512_mul_pd(A, B);
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_div_vec(__float_vector A, __float_vector B) {
+        return _mm512_div_ps(A, B);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_div_vec(__double_vector A, __double_vector B) {
+        return _mm512_div_pd(A, B);
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_set1_vec(float a) {
+        return _mm512_set1_ps(a);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_set1_vec(double a) {
+        return _mm512_set1_pd(a);
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_set_vec(float a, float b, float c, float d) {
+        return _mm512_set_ps(a, b, c, d);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_set_vec(double a, double b) {
+        return _mm512_set_pd(a, b);
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_abs_vec(__float_vector x, __float_vector sign_mask) {
+        return _mm512_andnot_ps(sign_mask, x);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_abs_vec(__double_vector x, __double_vector sign_mask) {
+        return _mm512_andnot_pd(sign_mask, x);
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_max_vec(__float_vector A, __float_vector B) {
+        return _mm512_max_ps(A, B);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_max_vec(__double_vector A, __double_vector B) {
+        return _mm512_max_pd(A, B);
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_min_vec(__float_vector A, __float_vector B) {
+        return _mm512_min_ps(A, B);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_min_vec(__double_vector A, __double_vector B) {
+        return _mm512_min_pd(A, B);
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_setzero_vec() {
+        return _mm512_setzero_ps();
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_setzero_vec() {
+        return _mm512_setzero_pd();
+    }
+
+    inline __attribute__((always_inline)) float _float_index_vec(const __float_vector A, const int i) {
+        return A[i];
+    }
+
+    inline __attribute__((always_inline)) double _double_index_vec(const __double_vector A, const int i) {
+        return A[i];
+    }
+
 #else
 /** No SIMD Support **/
-    struct float_vec {
-        float f0;
-    };
     #define __float_vector float
     #define __double_vector double
     #define FLOAT_VEC_SIZE 1

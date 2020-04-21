@@ -1,1 +1,2 @@
 numpy>=1.13
+detect-simd>=0.1
