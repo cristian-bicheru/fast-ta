@@ -4,6 +4,7 @@ addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
+      - deadsnakes-ppa
     packages:
       - wget
       - python3.7-dev
