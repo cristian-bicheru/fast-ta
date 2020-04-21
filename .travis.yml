@@ -17,4 +17,4 @@ before_install:
   - export PATH="$PATH:$HOME/bin"
 
 script:
-  - bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress
+  - bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99"
