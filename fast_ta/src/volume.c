@@ -6,7 +6,6 @@
 #include <stdlib.h>
 
 #include "numpy/arrayobject.h"
-#include "array_pair.h"
 #include "volume_backend.h"
 #include "error_methods.h"
 

@@ -3,5 +3,7 @@ cc_binary(
     srcs = ["gen_test_data.cpp"],
     deps = [
         "//fast_ta/src:momentum_backend",
+        "//fast_ta/src:volume_backend",
+        "//fast_ta/src:testing_common",
     ],
 )

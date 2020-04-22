@@ -39,6 +39,11 @@ cc_library(
     hdrs = ["generic_simd.h"],
 )
 
+cc_library(
+    name = "testing_common",
+    hdrs = ["testing_common.h"],
+)
+
 ##################### Core Library #####################
 cc_library(
     name = "funcs",
@@ -61,6 +66,16 @@ cc_library(
     copts = PYTHON_INCLUDE,
 )
 
+cc_library(
+    name = "volume_backend",
+    srcs = ["volume_backend.c"],
+    hdrs = ["volume_backend.h"],
+    deps = [
+        ":funcs",
+    ],
+    copts = PYTHON_INCLUDE,
+)
+
 cc_test(
     name = "momentum_backend_tests",
     srcs = ["momentum_backend.test.cpp"],
@@ -68,6 +83,18 @@ cc_test(
     deps = [
         "@gtest//:main",
         ":momentum_backend",
+        ":testing_common",
+    ],
+)
+
+cc_test(
+    name = "volume_backend_tests",
+    srcs = ["volume_backend.test.cpp"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        "@gtest//:main",
+        ":volume_backend",
+        ":testing_common",
     ],
 )
 
@@ -92,6 +119,16 @@ cc_library(
     deps = [
         ":momentum_backend",
         ":parallel_momentum_backend",
+    ],
+    copts = PYTHON_INCLUDE,
+)
+
+cc_library(
+    name = "volume",
+    srcs = ["volume.c"],
+    deps = [
+        ":volume_backend",
+        ":error_methods",
     ],
     copts = PYTHON_INCLUDE,
 )

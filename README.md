@@ -1,4 +1,6 @@
 [![Build Status](https://travis-ci.com/cristian-bicheru/fast-ta.svg?branch=master)](https://travis-ci.com/cristian-bicheru/fast-ta)
+[![codecov](https://codecov.io/gh/cristian-bicheru/fast-ta/branch/master/graph/badge.svg)](https://codecov.io/gh/cristian-bicheru/fast-ta)
+
 
 # Building:
 ```bash

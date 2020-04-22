@@ -2,8 +2,6 @@
 #include <stdio.h>
 
 #include "funcs.h"
-#include "momentum_backend.h"
-#include "array_pair.h"
 
 double* _ADI_DOUBLE(const double* high, const double* low, const double* close,
                     const double* volume, int len) {
