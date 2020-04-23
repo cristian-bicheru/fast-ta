@@ -16,10 +16,10 @@ double get_abs_max(const double* arr, int len) {
 // this is the largest the floating point error can be.
 // there are deltas seen between float calculations and double calculations.
 // this is that max delta.
-// to find the max_fp_error, multiply the largest number in your data by this factor
-const double max_fp_error_factor = 2e-5;
+// computed as precision * length of dataset, this ensures that even if floating
+// point errors add up, it should remain bounded by the max_fp_error
 double get_max_fp_error(const double* x, int len) {
-    return get_abs_max(x, len)*max_fp_error_factor;
+    return get_abs_max(x, len)*len*1e-7;
 }
 
 const int data_len = 253;

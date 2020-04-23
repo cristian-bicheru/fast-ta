@@ -339,7 +339,7 @@ TEST(momentum_backend, EMVFloat) {
     double max_fp_error2 = get_max_fp_error(EMV_SMA_REF_DOUBLE, data_len);
     for (int i=1; i<data_len; i++) {
         ASSERT_NEAR(EMV_REF_FLOAT[i], out.arr1[i], max_fp_error1);
-        ASSERT_NEAR(EMV_SMA_REF_FLOAT[i], out.arr1[i], max_fp_error2));
+        ASSERT_NEAR(EMV_SMA_REF_FLOAT[i], out.arr2[i], max_fp_error2);
     }
 
     free(out.arr1);
@@ -350,6 +350,15 @@ int main(int argc, char* argv[]) {
     populate_float_arrays();
     for (int i=0; i<data_len; i++) {
         ADI_REF_FLOAT[i] = (float)ADI_REF_DOUBLE[i];
+    }
+    for (int i=0; i<data_len; i++) {
+        CMF_REF_FLOAT[i] = (float)CMF_REF_DOUBLE[i];
+    }
+    for (int i=0; i<data_len; i++) {
+        EMV_REF_FLOAT[i] = (float)EMV_REF_DOUBLE[i];
+    }
+    for (int i=0; i<data_len; i++) {
+        EMV_SMA_REF_FLOAT[i] = (float)EMV_SMA_REF_DOUBLE[i];
     }
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
