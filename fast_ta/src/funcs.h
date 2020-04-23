@@ -229,3 +229,13 @@ void _float_mul_arr(const float* arr1, const float* arr2, int len, float* outarr
  */
 void _double_cumsum(const double* arr1, int len, double* outarr);
 void _float_cumsum(const float* arr1, int len, float* outarr);
+
+/**
+ * Divide Two Running Sums And Store Result In Array
+ * @param arr
+ * @param len
+ * @param window
+ * @param outarr
+ */
+void _double_running_sum_div(const double* arr1, const double* arr2, int len, int window, double* outarr);
+void _float_running_sum_div(const float* arr1, const float* arr2, int len, int window, float* outarr);

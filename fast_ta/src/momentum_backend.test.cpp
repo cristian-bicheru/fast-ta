@@ -103,10 +103,11 @@ TEST(momentum_backend, RSIFloat_SelfAllocated) {
     int window_size = 14;
 
     float* out = _RSI_FLOAT(SAMPLE_CLOSE_FLOAT, nullptr, data_len, window_size, 0);
+    double max_fp_error = get_max_fp_error(RSI_REF_DOUBLE, data_len);
     for (int i=0; i<data_len; i++) {
         // keeping this since it's nice for debugging.
         //printf("%d %f %f %f\n", i, RSI_REF_FLOAT[i], out[i], out[i] - RSI_REF_FLOAT[i]);
-        ASSERT_NEAR(RSI_REF_FLOAT[i], out[i], get_max_fp_error(RSI_REF_DOUBLE[0]));
+        ASSERT_NEAR(RSI_REF_FLOAT[i], out[i], max_fp_error);
     }
 
     free(out);
@@ -115,10 +116,10 @@ TEST(momentum_backend, RSIFloat_SelfAllocated) {
 TEST(momentum_backend, RSIFloat_PreAllocated) {
     int window_size = 14;
     float* out = (float*)malloc(data_len*sizeof(float));
-
+    double max_fp_error = get_max_fp_error(RSI_REF_DOUBLE, data_len);
     _RSI_FLOAT(SAMPLE_CLOSE_FLOAT, out, data_len, window_size, 0);
     for (int i=0; i<data_len; i++) {
-        ASSERT_NEAR(RSI_REF_FLOAT[i], out[i], get_max_fp_error(RSI_REF_DOUBLE[0]));
+        ASSERT_NEAR(RSI_REF_FLOAT[i], out[i], max_fp_error);
     }
 
     free(out);

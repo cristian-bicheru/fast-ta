@@ -72,6 +72,7 @@ cc_library(
     hdrs = ["volume_backend.h"],
     deps = [
         ":funcs",
+        ":array_pair",
     ],
     copts = PYTHON_INCLUDE,
 )

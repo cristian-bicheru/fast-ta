@@ -794,3 +794,75 @@ void _float_cumsum(const float* arr1, int len, float* outarr) {
         outarr[i] = sum;
     }
 }
+
+void _double_running_sum_div(const double* arr1, const double* arr2, int len, int window, double* outarr) {
+    double wsum1 = 0;
+    double wsum2 = 0;
+    double* buffer1 = malloc(window*sizeof(double));
+    double* buffer2 = malloc(window*sizeof(double));
+    int buf_loc = 0;
+
+    for (int i = 0; i < window; i++) {
+        wsum1 += arr1[i];
+        wsum2 += arr2[i];
+        buffer1[i] = arr1[i];
+        buffer2[i] = arr2[i];
+        outarr[i] = wsum1/wsum2;
+    }
+
+    for (int i = window; i < len; i++) {
+        wsum1 += arr1[i];
+        wsum1 -= buffer1[buf_loc];
+        wsum2 += arr2[i];
+        wsum2 -= buffer2[buf_loc];
+
+        buffer1[buf_loc] = arr1[i];
+        buffer2[buf_loc] = arr2[i];
+
+        buf_loc++;
+        if (buf_loc >= window) {
+            buf_loc = 0;
+        }
+
+        outarr[i] = wsum1/wsum2;
+    }
+
+    free(buffer1);
+    free(buffer2);
+}
+
+void _float_running_sum_div(const float* arr1, const float* arr2, int len, int window, float* outarr) {
+    float wsum1 = 0;
+    float wsum2 = 0;
+    float* buffer1 = malloc(window*sizeof(float));
+    float* buffer2 = malloc(window*sizeof(float));
+    int buf_loc = 0;
+
+    for (int i = 0; i < window; i++) {
+        wsum1 += arr1[i];
+        wsum2 += arr2[i];
+        buffer1[i] = arr1[i];
+        buffer2[i] = arr2[i];
+        outarr[i] = wsum1/wsum2;
+    }
+
+    for (int i = window; i < len; i++) {
+        wsum1 += arr1[i];
+        wsum1 -= buffer1[buf_loc];
+        wsum2 += arr2[i];
+        wsum2 -= buffer2[buf_loc];
+
+        buffer1[buf_loc] = arr1[i];
+        buffer2[buf_loc] = arr2[i];
+
+        buf_loc++;
+        if (buf_loc >= window) {
+            buf_loc = 0;
+        }
+
+        outarr[i] = wsum1/wsum2;
+    }
+
+    free(buffer1);
+    free(buffer2);
+}

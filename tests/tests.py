@@ -178,16 +178,51 @@ def adi():
     if args.save_plots:
         plt.savefig("tests/plots/ADI " + str(close_data.dtype) + ".svg")
         
+def cmf():
+    plt.clf()
+    plt.title("Chaikin Money Flow (CMF) "+str(close_data.dtype))
+    so = fast_ta.volume.CMF(high=high_data, low=low_data, close=close_data, volume=volume_data, n=20)
+    plt.plot(so)
+    sot = ta.volume.ChaikinMoneyFlowIndicator(pandas.Series(high_data), pandas.Series(low_data), pandas.Series(close_data), pandas.Series(volume_data))
+    plt.plot(sot.chaikin_money_flow())
+    if args.show_plots:
+        plt.show()
+    if args.save_plots:
+        plt.savefig("tests/plots/CMF " + str(close_data.dtype) + ".svg")
+
+def emv():
+    plt.clf()
+    plt.title("Ease of movement (EoM, EMV) "+str(close_data.dtype))
+    so = fast_ta.volume.EMV(high = high_data, low = low_data, volume = volume_data, n = 14)
+    plt.plot(so[0])
+    sot = ta.volume.EaseOfMovementIndicator(pandas.Series(high_data), pandas.Series(low_data), pandas.Series(volume_data))
+    plt.plot(sot.ease_of_movement())
+    if args.show_plots:
+        plt.show()
+    if args.save_plots:
+        plt.savefig("tests/plots/EMV " + str(close_data.dtype) + ".svg")
+
+    plt.clf()
+    plt.title("Ease of movement (EoM, EMV) Signal "+str(close_data.dtype))
+    plt.plot(so[1])
+    plt.plot(sot.sma_ease_of_movement())
+    if args.show_plots:
+        plt.show()
+    if args.save_plots:
+        plt.savefig("tests/plots/EMV SIGNAL " + str(close_data.dtype) + ".svg")
+        
 def run_tests():
-    rsi()
-    ao()
-    kama()
-    roc()
-    stoch()
-    tsi()
-    uo()
-    wr()
-    adi()
+    #rsi()
+    #ao()
+    #kama()
+    #roc()
+    #stoch()
+    #tsi()
+    #uo()
+    #wr()
+    #adi()
+    #cmf()
+    emv()
 
 plt.rcParams['figure.figsize'] = (20.0, 10.0)
 run_tests()

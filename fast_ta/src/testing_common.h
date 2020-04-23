@@ -1,13 +1,25 @@
 #pragma once
 #include <cmath>
 
+#ifndef max
+#define max(a,b) ((a) > (b) ? (a) : (b))
+#endif
+
+double get_abs_max(const double* arr, int len) {
+    double m = fabs(arr[0]);
+    for (int i = 1; i < len; i++) {
+        m = max(m, fabs(arr[i]));
+    }
+    return m;
+}
+
 // this is the largest the floating point error can be.
 // there are deltas seen between float calculations and double calculations.
 // this is that max delta.
-// to find the max_fp_error, multiply the first number in your data by this factor
+// to find the max_fp_error, multiply the largest number in your data by this factor
 const double max_fp_error_factor = 2e-5;
-double get_max_fp_error(double x) {
-    return fabs(x*max_fp_error_factor);
+double get_max_fp_error(const double* x, int len) {
+    return get_abs_max(x, len)*max_fp_error_factor;
 }
 
 const int data_len = 253;

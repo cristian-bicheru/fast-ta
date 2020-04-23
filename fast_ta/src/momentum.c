@@ -314,7 +314,8 @@ static PyObject* STOCHASTIC_OSCILLATOR(PyObject* self, PyObject* args, PyObject*
             double* high = PyArray_DATA(_high);
             double* low = PyArray_DATA(_low);
             double* close = PyArray_DATA(_close);
-            struct double_array_pair so = _STOCHASTIC_OSCILLATOR_DOUBLE(high, low, close, n, d, len, Normal);
+            struct double_array_pair so = _STOCHASTIC_OSCILLATOR_DOUBLE(high,
+                    low, close, n, d, len, Normal);
             npy_intp dims[1] = {len};
 
             PyObject* ret = PyTuple_New(2);
@@ -334,7 +335,8 @@ static PyObject* STOCHASTIC_OSCILLATOR(PyObject* self, PyObject* args, PyObject*
             float* high = PyArray_DATA(_high);
             float* low = PyArray_DATA(_low);
             float* close = PyArray_DATA(_close);
-            struct float_array_pair so = _STOCHASTIC_OSCILLATOR_FLOAT(high, low, close, n, d, len, Normal);
+            struct float_array_pair so = _STOCHASTIC_OSCILLATOR_FLOAT(high,
+                    low, close, n, d, len, Normal);
             npy_intp dims[1] = {len};
 
             PyObject* ret = PyTuple_New(2);
