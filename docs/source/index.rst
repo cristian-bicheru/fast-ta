@@ -46,6 +46,8 @@ Indicators
    View the documentation for the momentum indicators.
 :doc:`api/volume`
    View the documentation for the volume indicators.
+:doc:`api/volatility`
+   View the documentation for the volatility indicators.
 
 Contributing
 ============
