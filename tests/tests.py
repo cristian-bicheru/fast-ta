@@ -210,19 +210,141 @@ def emv():
         plt.show()
     if args.save_plots:
         plt.savefig("tests/plots/EMV SIGNAL " + str(close_data.dtype) + ".svg")
+
+def fi():
+    plt.clf()
+    plt.title("Force Index (FI) "+str(close_data.dtype))
+    so = fast_ta.volume.FI(close=close_data, volume=volume_data, n=13)
+    plt.plot(so)
+    sot = ta.volume.ForceIndexIndicator(pandas.Series(close_data), pandas.Series(volume_data))
+    plt.plot(sot.force_index())
+    if args.show_plots:
+        plt.show()
+    if args.save_plots:
+        plt.savefig("tests/plots/FI " + str(close_data.dtype) + ".svg")
+        
+def mfi():
+    plt.clf()
+    plt.title("Money Flow Index (MFI) "+str(close_data.dtype))
+    so = fast_ta.volume.MFI(high=high_data, low=low_data, close=close_data, volume=volume_data, n=14)
+    plt.plot(so)
+    sot = ta.volume.MFIIndicator(pandas.Series(high_data), pandas.Series(low_data), pandas.Series(close_data), pandas.Series(volume_data))
+    plt.plot(sot.money_flow_index())
+    if args.show_plots:
+        plt.show()
+    if args.save_plots:
+        plt.savefig("tests/plots/MFI " + str(close_data.dtype) + ".svg")
+
+def nvi():
+    plt.clf()
+    plt.title("Negative Volume Index (NVI) "+str(close_data.dtype))
+    so = fast_ta.volume.NVI(close=close_data, volume=volume_data)
+    plt.plot(so)
+    sot = ta.volume.NegativeVolumeIndexIndicator(pandas.Series(close_data), pandas.Series(volume_data))
+    plt.plot(sot.negative_volume_index())
+    if args.show_plots:
+        plt.show()
+    if args.save_plots:
+        plt.savefig("tests/plots/NVI " + str(close_data.dtype) + ".svg")
+        
+def obv():
+    plt.clf()
+    plt.title("On-balance volume (OBV) "+str(close_data.dtype))
+    so = fast_ta.volume.OBV(close=close_data, volume=volume_data)
+    plt.plot(so)
+    sot = ta.volume.OnBalanceVolumeIndicator(pandas.Series(close_data), pandas.Series(volume_data))
+    plt.plot(sot.on_balance_volume())
+    if args.show_plots:
+        plt.show()
+    if args.save_plots:
+        plt.savefig("tests/plots/OBV " + str(close_data.dtype) + ".svg")
+        
+def vpt():
+    plt.clf()
+    plt.title("Volume-price trend (VPT) (NOTE: TA'S IMPLEMENTATION IS BROKEN, USE TRADINGVIEW TO VALIDATE) "+str(close_data.dtype))
+    so = fast_ta.volume.VPT(close=close_data, volume=volume_data)
+    plt.plot(so)
+    sot = ta.volume.VolumePriceTrendIndicator(pandas.Series(close_data), pandas.Series(volume_data))
+    #plt.plot(sot.volume_price_trend())
+    if args.show_plots:
+        plt.show()
+    if args.save_plots:
+        plt.savefig("tests/plots/VPT " + str(close_data.dtype) + ".svg")
+        
+def vwap():
+    plt.clf()
+    plt.title("Volume Weighted Average Price (VWAP) "+str(close_data.dtype))
+    so = fast_ta.volume.VWAP(high=high_data, low=low_data, close=close_data, volume=volume_data, n=14)
+    plt.plot(so)
+    sot = ta.volume.VolumeWeightedAveragePrice(pandas.Series(high_data), pandas.Series(low_data), pandas.Series(close_data), pandas.Series(volume_data))
+    plt.plot(sot.volume_weighted_average_price())
+    if args.show_plots:
+        plt.show()
+    if args.save_plots:
+        plt.savefig("tests/plots/VWAP " + str(close_data.dtype) + ".svg")
+        
+def atr():
+    plt.clf()
+    plt.title("Average True Range (ATR) "+str(close_data.dtype))
+    so = fast_ta.volatility.ATR(high=high_data, low=low_data, close=close_data, n=14)
+    plt.plot(so)
+    sot = ta.volatility.AverageTrueRange(pandas.Series(high_data), pandas.Series(low_data), pandas.Series(close_data))
+    plt.plot(sot.average_true_range())
+    if args.show_plots:
+        plt.show()
+    if args.save_plots:
+        plt.savefig("tests/plots/ATR " + str(close_data.dtype) + ".svg")
+
+def bol():
+    plt.clf()
+    plt.title("Bollinger Bands hband "+str(close_data.dtype))
+    so = fast_ta.volatility.BOL(close = close_data, n = 20, ndev = 2)
+    plt.plot(so[0])
+    sot = ta.volatility.BollingerBands(pandas.Series(close_data))
+    plt.plot(sot.bollinger_hband())
+    if args.show_plots:
+        plt.show()
+    if args.save_plots:
+        plt.savefig("tests/plots/BOL HBAND " + str(close_data.dtype) + ".svg")
+
+    plt.clf()
+    plt.title("Bollinger Bands mband "+str(close_data.dtype))
+    plt.plot(so[1])
+    plt.plot(sot.bollinger_mavg())
+    if args.show_plots:
+        plt.show()
+    if args.save_plots:
+        plt.savefig("tests/plots/BOL MBAND " + str(close_data.dtype) + ".svg")
+    
+    plt.clf()
+    plt.title("Bollinger Bands lband "+str(close_data.dtype))
+    plt.plot(so[2])
+    plt.plot(sot.bollinger_lband())
+    if args.show_plots:
+        plt.show()
+    if args.save_plots:
+        plt.savefig("tests/plots/BOL LBAND " + str(close_data.dtype) + ".svg")
         
 def run_tests():
-    #rsi()
-    #ao()
-    #kama()
-    #roc()
-    #stoch()
-    #tsi()
-    #uo()
-    #wr()
-    #adi()
-    #cmf()
+    rsi()
+    ao()
+    kama()
+    roc()
+    stoch()
+    tsi()
+    uo()
+    wr()
+    adi()
+    cmf()
     emv()
+    fi()
+    mfi()
+    nvi()
+    obv()
+    vpt()
+    vwap()
+    atr()
+    bol()
 
 plt.rcParams['figure.figsize'] = (20.0, 10.0)
 run_tests()

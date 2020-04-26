@@ -3,7 +3,6 @@
 
 #include "funcs.h"
 #include "momentum_backend.h"
-#include "array_pair.h"
 
 #define COMPUTE_RSI_TEMPLATE(diff, last_gain, last_loss, window_size, TYPE) ({ \
     TYPE gain;                                                                 \
@@ -221,7 +220,7 @@ float* _ROC_FLOAT(const float* close, int n, int len) {
     return roc;
 }
 
-struct double_array_pair _STOCHASTIC_OSCILLATOR_DOUBLE(const double* high, const double* low, double* close, int n, int d, int len, enum stoch_mode mode) {
+double** _STOCHASTIC_OSCILLATOR_DOUBLE(const double* high, const double* low, double* close, int n, int d, int len, enum stoch_mode mode) {
     // NOTE: While running_max and running_min are initially running maxes and minimums,
     //       they are reused later on save memory.
     double* running_max = malloc(len*sizeof(double));
@@ -253,11 +252,13 @@ struct double_array_pair _STOCHASTIC_OSCILLATOR_DOUBLE(const double* high, const
 
     _double_set_nan(running_min, n-1);
 
-    struct double_array_pair ret = {running_min, running_max};
+    double** ret = malloc(2*sizeof(double));
+    ret[0] = running_min;
+    ret[1] = running_max;
     return ret;
 }
 
-struct float_array_pair _STOCHASTIC_OSCILLATOR_FLOAT(const float* high, const float* low, float* close, int n, int d, int len, enum stoch_mode mode) {
+float** _STOCHASTIC_OSCILLATOR_FLOAT(const float* high, const float* low, float* close, int n, int d, int len, enum stoch_mode mode) {
     // NOTE: While running_max and running_min are initially running maxes and minimums,
     //       they are reused later on save memory.
     float* running_max = malloc(len*sizeof(float));
@@ -289,7 +290,9 @@ struct float_array_pair _STOCHASTIC_OSCILLATOR_FLOAT(const float* high, const fl
 
     _float_set_nan(running_min, n-1);
 
-    struct float_array_pair ret = {running_min, running_max};
+    float** ret = malloc(2*sizeof(float));
+    ret[0] = running_min;
+    ret[1] = running_max;
     return ret;
 }
 
@@ -411,10 +414,10 @@ float* _ULTIMATE_OSCILLATOR_FLOAT(const float* high, const float* low, const flo
 
 double* _WILLIAMS_R_DOUBLE(const double* high, const double* low, double* close, int n,
                            int len) {
-    return _STOCHASTIC_OSCILLATOR_DOUBLE(high, low, close, n, -1, len, Williams).arr1;
+    return _STOCHASTIC_OSCILLATOR_DOUBLE(high, low, close, n, -1, len, Williams)[0];
 }
 
 float* _WILLIAMS_R_FLOAT(const float* high, const float* low, float* close, int n,
                          int len) {
-    return _STOCHASTIC_OSCILLATOR_FLOAT(high, low, close, n, -1, len, Williams).arr1;
+    return _STOCHASTIC_OSCILLATOR_FLOAT(high, low, close, n, -1, len, Williams)[0];
 }

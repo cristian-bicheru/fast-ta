@@ -61,7 +61,7 @@
     }
 
     inline __attribute__((always_inline)) __float_vector _float_div_vec(__float_vector A, __float_vector B) {
-        return _mm256_div_ps(A, B);
+        return _mm256_mul_ps(A, _mm256_rcp_ps(B));
     }
 
     inline __attribute__((always_inline)) __double_vector _double_div_vec(__double_vector A, __double_vector B) {
@@ -130,6 +130,30 @@
 
     inline __attribute__((always_inline)) double _double_index_vec(const __double_vector A, const int i) {
         return A[i];
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_recp_vec(const __float_vector A) {
+        return _mm256_rcp_ps(A);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_recp_vec(const __double_vector A) {
+        return _mm256_div_pd(_mm256_set1_pd(1.), A);
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_rsqrt_vec(const __float_vector A) {
+        return _mm256_rsqrt_ps(A);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_rsqrt_vec(const __double_vector A) {
+        return _mm256_div_pd(_mm256_set1_pd(1.), _mm256_sqrt_pd(A));
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_sqrt_vec(const __float_vector A) {
+        return _mm256_rcp_ps(_mm256_rsqrt_ps(A));
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_sqrt_vec(const __double_vector A) {
+        return _mm256_sqrt_pd(A);
     }
 
 #elif defined(SSE2)
@@ -245,6 +269,30 @@
         return A[i];
     }
 
+    inline __attribute__((always_inline)) __float_vector _float_recp_vec(const __float_vector A) {
+        return _mm_rcp_ps(A);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_recp_vec(const __double_vector A) {
+        return _mm_div_pd(_mm_set1_pd(1.), A);
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_rsqrt_vec(const __float_vector A) {
+        return _mm_rsqrt_ps(A);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_rsqrt_vec(const __double_vector A) {
+        return _mm_div_pd(_mm_set1_pd(1.), _mm_sqrt_pd(A));
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_sqrt_vec(const __float_vector A) {
+        return _mm_rcp_ps(_mm_rsqrt_ps(A));
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_sqrt_vec(const __double_vector A) {
+        return _mm_sqrt_pd(A);
+    }
+
 #elif defined(AVX512)
 /** AVX512 Support **/
     #include <immintrin.h>
@@ -358,6 +406,30 @@
         return A[i];
     }
 
+    inline __attribute__((always_inline)) __float_vector _float_recp_vec(const __float_vector A) {
+        return _mm512_rcp14_ps(A);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_recp_vec(const __double_vector A) {
+        return _mm512_rcp14_pd(A);
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_rsqrt_vec(const __float_vector A) {
+        return _mm512_rsqrt14_ps(A);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_rsqrt_vec(const __double_vector A) {
+        return _mm512_rsqrt14_pd(A);
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_sqrt_vec(const __float_vector A) {
+        return _mm512_rcp14_ps(_mm512_rsqrt14_ps(A));
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_sqrt_vec(const __double_vector A) {
+        return _mm512_rcp14_pd(_mm512_rsqrt14_pd(A));
+    }
+
 #else
 /** No SIMD Support **/
     #define __float_vector float
@@ -423,7 +495,7 @@
     }
 
     inline __attribute__((always_inline)) __float_vector _float_abs_vec(const __float_vector x, const __float_vector sign_mask) {
-        return fabs(x);
+        return fabsf(x);
     }
 
     inline __attribute__((always_inline)) __double_vector _double_abs_vec(const __double_vector x, const __double_vector sign_mask) {
@@ -460,5 +532,29 @@
 
     inline __attribute__((always_inline)) double _double_index_vec(const __double_vector A, const int i) {
         return A;
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_recp_vec(const __float_vector A) {
+        return 1.f/A;
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_recp_vec(const __double_vector A) {
+        return 1./A;
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_rsqrt_vec(const __float_vector A) {
+        return 1.f/sqrtf(A);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_rsqrt_vec(const __double_vector A) {
+        return 1./sqrt(A);
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_sqrt_vec(const __float_vector A) {
+        return sqrtf(A);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_sqrt_vec(const __double_vector A) {
+        return sqrt(A);
     }
 #endif

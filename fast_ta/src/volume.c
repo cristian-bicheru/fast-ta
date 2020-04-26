@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "array_pair.h"
 #include "numpy/arrayobject.h"
 #include "volume_backend.h"
 #include "error_methods.h"
@@ -73,6 +72,8 @@ static PyObject* ADI(PyObject* self, PyObject* args, PyObject* kwargs) {
 
             Py_DECREF(_high);
             Py_DECREF(_low);
+            Py_DECREF(_close);
+            Py_DECREF(_volume);
             PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
             memcpy(PyArray_DATA((PyArrayObject*) ret), adi,
                    len*sizeof(double));
@@ -89,6 +90,8 @@ static PyObject* ADI(PyObject* self, PyObject* args, PyObject* kwargs) {
 
             Py_DECREF(_high);
             Py_DECREF(_low);
+            Py_DECREF(_close);
+            Py_DECREF(_volume);
             PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
             memcpy(PyArray_DATA((PyArrayObject*) ret), adi,
                    len*sizeof(float));
@@ -167,6 +170,8 @@ static PyObject* CMF(PyObject* self, PyObject* args, PyObject* kwargs) {
 
             Py_DECREF(_high);
             Py_DECREF(_low);
+            Py_DECREF(_close);
+            Py_DECREF(_volume);
             PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
             memcpy(PyArray_DATA((PyArrayObject*) ret), cmf,
                    len*sizeof(double));
@@ -183,6 +188,8 @@ static PyObject* CMF(PyObject* self, PyObject* args, PyObject* kwargs) {
 
             Py_DECREF(_high);
             Py_DECREF(_low);
+            Py_DECREF(_close);
+            Py_DECREF(_volume);
             PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
             memcpy(PyArray_DATA((PyArrayObject*) ret), cmf,
                    len*sizeof(float));
@@ -247,18 +254,21 @@ static PyObject* EMV(PyObject* self, PyObject* args, PyObject* kwargs) {
             double* high = PyArray_DATA(_high);
             double* low = PyArray_DATA(_low);
             double* volume = PyArray_DATA(_volume);
-            struct double_array_pair emv = _EMV_DOUBLE(high, low, volume, len, n);
+            double** emv = _EMV_DOUBLE(high, low, volume, len, n);
             npy_intp dims[1] = {len};
-
+            Py_DECREF(_high);
+            Py_DECREF(_low);
+            Py_DECREF(_volume);
             PyObject* ret = PyTuple_New(2);
             PyObject* arr1 = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) arr1), emv.arr1,
+            memcpy(PyArray_DATA((PyArrayObject*) arr1), emv[0],
                    len*sizeof(double));
             PyObject* arr2 = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) arr2), emv.arr2,
+            memcpy(PyArray_DATA((PyArrayObject*) arr2), emv[1],
                    len*sizeof(double));
-            free(emv.arr1);
-            free(emv.arr2);
+            free(emv[0]);
+            free(emv[1]);
+            free(emv);
             PyTuple_SetItem(ret, 0, arr1);
             PyTuple_SetItem(ret, 1, arr2);
             return ret;
@@ -267,20 +277,506 @@ static PyObject* EMV(PyObject* self, PyObject* args, PyObject* kwargs) {
             float* high = PyArray_DATA(_high);
             float* low = PyArray_DATA(_low);
             float* volume = PyArray_DATA(_volume);
-            struct float_array_pair emv = _EMV_FLOAT(high, low, volume, len, n);
+            float** emv = _EMV_FLOAT(high, low, volume, len, n);
             npy_intp dims[1] = {len};
-
+            Py_DECREF(_high);
+            Py_DECREF(_low);
+            Py_DECREF(_volume);
             PyObject* ret = PyTuple_New(2);
             PyObject* arr1 = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) arr1), emv.arr1,
+            memcpy(PyArray_DATA((PyArrayObject*) arr1), emv[0],
                    len*sizeof(float));
             PyObject* arr2 = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) arr2), emv.arr2,
+            memcpy(PyArray_DATA((PyArrayObject*) arr2), emv[1],
                    len*sizeof(float));
-            free(emv.arr1);
-            free(emv.arr2);
+            free(emv[0]);
+            free(emv[1]);
+            free(emv);
             PyTuple_SetItem(ret, 0, arr1);
             PyTuple_SetItem(ret, 1, arr2);
+            return ret;
+        }
+        default:
+            raise_dtype_error();
+            return NULL;
+    }
+};
+
+static PyObject* FI(PyObject* self, PyObject* args, PyObject* kwargs) {
+    PyObject* in1;
+    PyObject* in2;
+    int n = 13;
+
+    static char *kwlist[] = {
+            "close",
+            "volume",
+            "n",
+            NULL
+    };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|i:FI", kwlist,
+                                     &in1,
+                                     &in2,
+                                     &n)) {
+        return NULL;
+    }
+
+    int type1 = PyArray_TYPE((PyArrayObject*) in1);
+
+    if (type1 != PyArray_TYPE((PyArrayObject*) in2)) {
+        raise_error("Input Array DType Mismatch");
+        return NULL;
+    }
+
+    PyArrayObject* _close = (PyArrayObject*) PyArray_FROM_OTF(in1,
+                                                             type1,
+                                                             NPY_ARRAY_IN_ARRAY);
+    PyArrayObject* _volume = (PyArrayObject*) PyArray_FROM_OTF(in2,
+                                                               type1,
+                                                               NPY_ARRAY_IN_ARRAY);
+    int len = PyArray_SIZE(_close);
+
+    if (len != PyArray_SIZE(_volume)) {
+        raise_error("Input Array Dim Mismatch");
+        return NULL;
+    }
+
+    switch(type1) {
+        case NPY_FLOAT64: {
+            double* close = PyArray_DATA(_close);
+            double* volume = PyArray_DATA(_volume);
+            double* fi = _FI_DOUBLE(close, volume, len, n);
+            npy_intp dims[1] = {len};
+
+            Py_DECREF(_close);
+            Py_DECREF(_volume);
+            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
+            memcpy(PyArray_DATA((PyArrayObject*) ret), fi,
+                   len*sizeof(double));
+            free(fi);
+            return ret;
+        }
+        case NPY_FLOAT32: {
+            float* close = PyArray_DATA(_close);
+            float* volume = PyArray_DATA(_volume);
+            float* fi = _FI_FLOAT(close, volume, len, n);
+            npy_intp dims[1] = {len};
+
+            Py_DECREF(_close);
+            Py_DECREF(_volume);
+            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
+            memcpy(PyArray_DATA((PyArrayObject*) ret), fi,
+                   len*sizeof(float));
+            free(fi);
+            return ret;
+        }
+        default:
+            raise_dtype_error();
+            return NULL;
+    }
+};
+
+static PyObject* MFI(PyObject* self, PyObject* args, PyObject* kwargs) {
+    PyObject* in1;
+    PyObject* in2;
+    PyObject* in3;
+    PyObject* in4;
+    int n = 14;
+
+    static char *kwlist[] = {
+            "high",
+            "low",
+            "close",
+            "volume",
+            "n",
+            NULL
+    };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOO|i:MFI", kwlist,
+                                     &in1,
+                                     &in2,
+                                     &in3,
+                                     &in4,
+                                     &n)) {
+        return NULL;
+    }
+
+    int type1 = PyArray_TYPE((PyArrayObject*) in1);
+
+    if (type1 != PyArray_TYPE((PyArrayObject*) in2) ||
+        type1 != PyArray_TYPE((PyArrayObject*) in3) ||
+        type1 != PyArray_TYPE((PyArrayObject*) in4)) {
+        raise_error("Input Array DType Mismatch");
+        return NULL;
+    }
+
+    PyArrayObject* _high = (PyArrayObject*) PyArray_FROM_OTF(in1,
+                                                             type1,
+                                                             NPY_ARRAY_IN_ARRAY);
+    PyArrayObject* _low = (PyArrayObject*) PyArray_FROM_OTF(in2,
+                                                            type1,
+                                                            NPY_ARRAY_IN_ARRAY);
+    PyArrayObject* _close = (PyArrayObject*) PyArray_FROM_OTF(in3,
+                                                              type1,
+                                                              NPY_ARRAY_IN_ARRAY);
+    PyArrayObject* _volume = (PyArrayObject*) PyArray_FROM_OTF(in4,
+                                                               type1,
+                                                               NPY_ARRAY_IN_ARRAY);
+    int len = PyArray_SIZE(_high);
+
+    if (len != PyArray_SIZE(_low) ||
+        len != PyArray_SIZE(_close) ||
+        len != PyArray_SIZE(_volume)) {
+        raise_error("Input Array Dim Mismatch");
+        return NULL;
+    }
+
+    switch(type1) {
+        case NPY_FLOAT64: {
+            double* high = PyArray_DATA(_high);
+            double* low = PyArray_DATA(_low);
+            double* close = PyArray_DATA(_close);
+            double* volume = PyArray_DATA(_volume);
+            double* mfi = _MFI_DOUBLE(high, low, close, volume, len, n);
+            npy_intp dims[1] = {len};
+
+            Py_DECREF(_high);
+            Py_DECREF(_low);
+            Py_DECREF(_close);
+            Py_DECREF(_volume);
+            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
+            memcpy(PyArray_DATA((PyArrayObject*) ret), mfi,
+                   len*sizeof(double));
+            free(mfi);
+            return ret;
+        }
+        case NPY_FLOAT32: {
+            float* high = PyArray_DATA(_high);
+            float* low = PyArray_DATA(_low);
+            float* close = PyArray_DATA(_close);
+            float* volume = PyArray_DATA(_volume);
+            float* mfi = _MFI_FLOAT(high, low, close, volume, len, n);
+            npy_intp dims[1] = {len};
+
+            Py_DECREF(_high);
+            Py_DECREF(_low);
+            Py_DECREF(_close);
+            Py_DECREF(_volume);
+            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
+            memcpy(PyArray_DATA((PyArrayObject*) ret), mfi,
+                   len*sizeof(float));
+            free(mfi);
+            return ret;
+        }
+        default:
+            raise_dtype_error();
+            return NULL;
+    }
+};
+
+static PyObject* NVI(PyObject* self, PyObject* args, PyObject* kwargs) {
+    PyObject* in1;
+    PyObject* in2;
+
+    static char *kwlist[] = {
+            "close",
+            "volume",
+            NULL
+    };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO:NVI", kwlist,
+                                     &in1,
+                                     &in2)) {
+        return NULL;
+    }
+
+    int type1 = PyArray_TYPE((PyArrayObject*) in1);
+
+    if (type1 != PyArray_TYPE((PyArrayObject*) in2)) {
+        raise_error("Input Array DType Mismatch");
+        return NULL;
+    }
+
+    PyArrayObject* _close = (PyArrayObject*) PyArray_FROM_OTF(in1,
+                                                              type1,
+                                                              NPY_ARRAY_IN_ARRAY);
+    PyArrayObject* _volume = (PyArrayObject*) PyArray_FROM_OTF(in2,
+                                                               type1,
+                                                               NPY_ARRAY_IN_ARRAY);
+    int len = PyArray_SIZE(_close);
+
+    if (len != PyArray_SIZE(_volume)) {
+        raise_error("Input Array Dim Mismatch");
+        return NULL;
+    }
+
+    switch(type1) {
+        case NPY_FLOAT64: {
+            double* close = PyArray_DATA(_close);
+            double* volume = PyArray_DATA(_volume);
+            double* nvi = _NVI_DOUBLE(close, volume, len);
+            npy_intp dims[1] = {len};
+
+            Py_DECREF(_close);
+            Py_DECREF(_volume);
+            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
+            memcpy(PyArray_DATA((PyArrayObject*) ret), nvi,
+                   len*sizeof(double));
+            free(nvi);
+            return ret;
+        }
+        case NPY_FLOAT32: {
+            float* close = PyArray_DATA(_close);
+            float* volume = PyArray_DATA(_volume);
+            float* nvi = _NVI_FLOAT(close, volume, len);
+            npy_intp dims[1] = {len};
+
+            Py_DECREF(_close);
+            Py_DECREF(_volume);
+            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
+            memcpy(PyArray_DATA((PyArrayObject*) ret), nvi,
+                   len*sizeof(float));
+            free(nvi);
+            return ret;
+        }
+        default:
+            raise_dtype_error();
+            return NULL;
+    }
+};
+
+static PyObject* OBV(PyObject* self, PyObject* args, PyObject* kwargs) {
+    PyObject* in1;
+    PyObject* in2;
+
+    static char *kwlist[] = {
+            "close",
+            "volume",
+            NULL
+    };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO:OBV", kwlist,
+                                     &in1,
+                                     &in2)) {
+        return NULL;
+    }
+
+    int type1 = PyArray_TYPE((PyArrayObject*) in1);
+
+    if (type1 != PyArray_TYPE((PyArrayObject*) in2)) {
+        raise_error("Input Array DType Mismatch");
+        return NULL;
+    }
+
+    PyArrayObject* _close = (PyArrayObject*) PyArray_FROM_OTF(in1,
+                                                              type1,
+                                                              NPY_ARRAY_IN_ARRAY);
+    PyArrayObject* _volume = (PyArrayObject*) PyArray_FROM_OTF(in2,
+                                                               type1,
+                                                               NPY_ARRAY_IN_ARRAY);
+    int len = PyArray_SIZE(_close);
+
+    if (len != PyArray_SIZE(_volume)) {
+        raise_error("Input Array Dim Mismatch");
+        return NULL;
+    }
+
+    switch(type1) {
+        case NPY_FLOAT64: {
+            double* close = PyArray_DATA(_close);
+            double* volume = PyArray_DATA(_volume);
+            double* obv = _OBV_DOUBLE(close, volume, len);
+            npy_intp dims[1] = {len};
+
+            Py_DECREF(_close);
+            Py_DECREF(_volume);
+            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
+            memcpy(PyArray_DATA((PyArrayObject*) ret), obv,
+                   len*sizeof(double));
+            free(obv);
+            return ret;
+        }
+        case NPY_FLOAT32: {
+            float* close = PyArray_DATA(_close);
+            float* volume = PyArray_DATA(_volume);
+            float* obv = _OBV_FLOAT(close, volume, len);
+            npy_intp dims[1] = {len};
+
+            Py_DECREF(_close);
+            Py_DECREF(_volume);
+            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
+            memcpy(PyArray_DATA((PyArrayObject*) ret), obv,
+                   len*sizeof(float));
+            free(obv);
+            return ret;
+        }
+        default:
+            raise_dtype_error();
+            return NULL;
+    }
+};
+
+static PyObject* VPT(PyObject* self, PyObject* args, PyObject* kwargs) {
+    PyObject* in1;
+    PyObject* in2;
+
+    static char *kwlist[] = {
+            "close",
+            "volume",
+            NULL
+    };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO:VPT", kwlist,
+                                     &in1,
+                                     &in2)) {
+        return NULL;
+    }
+
+    int type1 = PyArray_TYPE((PyArrayObject*) in1);
+
+    if (type1 != PyArray_TYPE((PyArrayObject*) in2)) {
+        raise_error("Input Array DType Mismatch");
+        return NULL;
+    }
+
+    PyArrayObject* _close = (PyArrayObject*) PyArray_FROM_OTF(in1,
+                                                              type1,
+                                                              NPY_ARRAY_IN_ARRAY);
+    PyArrayObject* _volume = (PyArrayObject*) PyArray_FROM_OTF(in2,
+                                                               type1,
+                                                               NPY_ARRAY_IN_ARRAY);
+    int len = PyArray_SIZE(_close);
+
+    if (len != PyArray_SIZE(_volume)) {
+        raise_error("Input Array Dim Mismatch");
+        return NULL;
+    }
+
+    switch(type1) {
+        case NPY_FLOAT64: {
+            double* close = PyArray_DATA(_close);
+            double* volume = PyArray_DATA(_volume);
+            double* vpt = _VPT_DOUBLE(close, volume, len);
+            npy_intp dims[1] = {len};
+
+            Py_DECREF(_close);
+            Py_DECREF(_volume);
+            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
+            memcpy(PyArray_DATA((PyArrayObject*) ret), vpt,
+                   len*sizeof(double));
+            free(vpt);
+            return ret;
+        }
+        case NPY_FLOAT32: {
+            float* close = PyArray_DATA(_close);
+            float* volume = PyArray_DATA(_volume);
+            float* vpt = _VPT_FLOAT(close, volume, len);
+            npy_intp dims[1] = {len};
+
+            Py_DECREF(_close);
+            Py_DECREF(_volume);
+            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
+            memcpy(PyArray_DATA((PyArrayObject*) ret), vpt,
+                   len*sizeof(float));
+            free(vpt);
+            return ret;
+        }
+        default:
+            raise_dtype_error();
+            return NULL;
+    }
+};
+
+static PyObject* VWAP(PyObject* self, PyObject* args, PyObject* kwargs) {
+    PyObject* in1;
+    PyObject* in2;
+    PyObject* in3;
+    PyObject* in4;
+    int n = 14;
+
+    static char *kwlist[] = {
+            "high",
+            "low",
+            "close",
+            "volume",
+            "n",
+            NULL
+    };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOO|i:MFI", kwlist,
+                                     &in1,
+                                     &in2,
+                                     &in3,
+                                     &in4,
+                                     &n)) {
+        return NULL;
+    }
+
+    int type1 = PyArray_TYPE((PyArrayObject*) in1);
+
+    if (type1 != PyArray_TYPE((PyArrayObject*) in2) ||
+        type1 != PyArray_TYPE((PyArrayObject*) in3) ||
+        type1 != PyArray_TYPE((PyArrayObject*) in4)) {
+        raise_error("Input Array DType Mismatch");
+        return NULL;
+    }
+
+    PyArrayObject* _high = (PyArrayObject*) PyArray_FROM_OTF(in1,
+                                                             type1,
+                                                             NPY_ARRAY_IN_ARRAY);
+    PyArrayObject* _low = (PyArrayObject*) PyArray_FROM_OTF(in2,
+                                                            type1,
+                                                            NPY_ARRAY_IN_ARRAY);
+    PyArrayObject* _close = (PyArrayObject*) PyArray_FROM_OTF(in3,
+                                                              type1,
+                                                              NPY_ARRAY_IN_ARRAY);
+    PyArrayObject* _volume = (PyArrayObject*) PyArray_FROM_OTF(in4,
+                                                               type1,
+                                                               NPY_ARRAY_IN_ARRAY);
+    int len = PyArray_SIZE(_high);
+
+    if (len != PyArray_SIZE(_low) ||
+        len != PyArray_SIZE(_close) ||
+        len != PyArray_SIZE(_volume)) {
+        raise_error("Input Array Dim Mismatch");
+        return NULL;
+    }
+
+    switch(type1) {
+        case NPY_FLOAT64: {
+            double* high = PyArray_DATA(_high);
+            double* low = PyArray_DATA(_low);
+            double* close = PyArray_DATA(_close);
+            double* volume = PyArray_DATA(_volume);
+            double* vwap = _VWAP_DOUBLE(high, low, close, volume, len, n);
+            npy_intp dims[1] = {len};
+
+            Py_DECREF(_high);
+            Py_DECREF(_low);
+            Py_DECREF(_close);
+            Py_DECREF(_volume);
+            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
+            memcpy(PyArray_DATA((PyArrayObject*) ret), vwap,
+                   len*sizeof(double));
+            free(vwap);
+            return ret;
+        }
+        case NPY_FLOAT32: {
+            float* high = PyArray_DATA(_high);
+            float* low = PyArray_DATA(_low);
+            float* close = PyArray_DATA(_close);
+            float* volume = PyArray_DATA(_volume);
+            float* vwap = _VWAP_FLOAT(high, low, close, volume, len, n);
+            npy_intp dims[1] = {len};
+
+            Py_DECREF(_high);
+            Py_DECREF(_low);
+            Py_DECREF(_close);
+            Py_DECREF(_volume);
+            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
+            memcpy(PyArray_DATA((PyArrayObject*) ret), vwap,
+                   len*sizeof(float));
+            free(vwap);
             return ret;
         }
         default:
@@ -295,6 +791,12 @@ static PyMethodDef VolumeMethods[] = {
         {"ADI", (PyCFunction) ADI, pyargflag, "Compute ADI On Data"},
         {"CMF", (PyCFunction) CMF, pyargflag, "Compute CMF On Data"},
         {"EMV", (PyCFunction) EMV, pyargflag, "Compute EMV On Data"},
+        {"FI", (PyCFunction) FI, pyargflag, "Compute FI On Data"},
+        {"MFI", (PyCFunction) MFI, pyargflag, "Compute MFI On Data"},
+        {"NVI", (PyCFunction) NVI, pyargflag, "Compute NVI On Data"},
+        {"OBV", (PyCFunction) OBV, pyargflag, "Compute OBV On Data"},
+        {"VPT", (PyCFunction) VPT, pyargflag, "Compute VPT On Data"},
+        {"VWAP", (PyCFunction) VWAP, pyargflag, "Compute VWAP On Data"},
         {NULL, NULL, 0, NULL}
 };
 

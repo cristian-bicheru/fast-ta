@@ -10,16 +10,17 @@ PYTHON_INCLUDE = [
 
 ##################### Structs #####################
 cc_library(
-    name = "array_pair",
-    hdrs = ["array_pair.h"],
-)
-
-cc_library(
     name = "momentum_backend_args",
     hdrs = ["momentum_backend_args.h"],
 )
 
 ##################### Utils #####################
+cc_library(
+    name = "2darray",
+    srcs = ["2darray.c"],
+    hdrs = ["2darray.h"],
+)
+
 cc_library(
     name = "debug_tools",
     srcs = ["debug_tools.c"],
@@ -61,7 +62,6 @@ cc_library(
     hdrs = ["momentum_backend.h"],
     deps = [
         ":funcs",
-        ":array_pair",
     ],
     copts = PYTHON_INCLUDE,
 )
@@ -72,7 +72,17 @@ cc_library(
     hdrs = ["volume_backend.h"],
     deps = [
         ":funcs",
-        ":array_pair",
+    ],
+    copts = PYTHON_INCLUDE,
+)
+
+cc_library(
+    name = "volatility_backend",
+    srcs = ["volatility_backend.c"],
+    hdrs = ["volatility_backend.h"],
+    deps = [
+        ":funcs",
+        ":2darray",
     ],
     copts = PYTHON_INCLUDE,
 )
@@ -99,13 +109,25 @@ cc_test(
     ],
 )
 
+cc_test(
+    name = "volatility_backend_tests",
+    srcs = ["volatility_backend.test.cpp"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        "@gtest//:main",
+        ":volatility_backend",
+        ":testing_common",
+	":2darray",
+    ],
+)
+
 cc_library(
     name = "parallel_momentum_backend",
     srcs = ["parallel_momentum_backend.c"],
     hdrs = ["parallel_momentum_backend.h"],
     deps = [
         ":momentum_backend",
-        ":array_pair",
+        ":2darray",
         ":momentum_backend_args",
         ":error_methods",
     ],
@@ -130,6 +152,17 @@ cc_library(
     deps = [
         ":volume_backend",
         ":error_methods",
+    ],
+    copts = PYTHON_INCLUDE,
+)
+
+cc_library(
+    name = "volatility",
+    srcs = ["volatility.c"],
+    deps = [
+        ":volatility_backend",
+        ":error_methods",
+	":2darray",
     ],
     copts = PYTHON_INCLUDE,
 )

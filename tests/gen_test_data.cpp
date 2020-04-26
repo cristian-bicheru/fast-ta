@@ -3,11 +3,12 @@
 #include <iomanip>
 
 #include "fast_ta/src/testing_common.h"
-#include "fast_ta/src/array_pair.h"
+#include "fast_ta/src/2darray.h"
 
 extern "C" {
     #include "fast_ta/src/momentum_backend.h"
     #include "fast_ta/src/volume_backend.h"
+    #include "fast_ta/src/volatility_backend.h"
 }
 
 void pprint(double* arr) {
@@ -22,11 +23,13 @@ void pprint(double* arr) {
 }
 
 int main() {
-    int window_size = 14;
     // your indicator here
-    struct double_array_pair out = _EMV_DOUBLE(SAMPLE_HIGH_DOUBLE, SAMPLE_LOW_DOUBLE, SAMPLE_VOLUME_DOUBLE, data_len, 14);
-    pprint(out.arr1);
-    pprint(out.arr2);
-    free(out.arr1);
-    free(out.arr2);
+    double** out = _BOL_DOUBLE(SAMPLE_CLOSE_DOUBLE, data_len, 20, 2);
+    pprint(out[0]);
+    pprint(out[1]);
+    pprint(out[2]);
+    free(out[0]);
+    free(out[1]);
+    free(out[2]);
+    free(out);
 }

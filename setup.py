@@ -20,7 +20,7 @@ class FastTABuild(build_ext):
             self.define.append(('SSE2', '1'))
         build_ext.run(self)
 
-common_backend = ['fast_ta/src/error_methods.c', 'fast_ta/src/funcs.c']
+common_backend = ['fast_ta/src/error_methods.c', 'fast_ta/src/funcs.c', 'fast_ta/src/2darray.c']
 compile_args = ['-O2', '-ffast-math', '-march=native', '-mno-align-double',
                 '-fomit-frame-pointer', '-frename-registers']
         
@@ -30,6 +30,9 @@ momentum_ext = Extension('fast_ta/momentum',
                    extra_compile_args=compile_args)
 volume_ext = Extension('fast_ta/volume',
                    sources=['fast_ta/src/volume.c', 'fast_ta/src/volume_backend.c']+common_backend,
+                   extra_compile_args=compile_args)
+volatility_ext = Extension('fast_ta/volatility',
+                   sources=['fast_ta/src/volatility.c', 'fast_ta/src/volatility_backend.c']+common_backend,
                    extra_compile_args=compile_args)
 
 setup(name = 'fast_ta',
@@ -71,4 +74,4 @@ setup(name = 'fast_ta',
         'Source': 'https://github.com/cristian-bicheru/fast-ta',
       },
       cmdclass = {'build_ext': FastTABuild},
-      ext_modules=[momentum_ext, volume_ext])
+      ext_modules=[momentum_ext, volume_ext, volatility_ext])

@@ -68,10 +68,10 @@ float* _ROC_FLOAT(const float* close, int n, int len);
  * @return          Stochastic Oscillator Indicator Time Series And Signal If
  *                  Specified
  */
-struct double_array_pair
+double**
 _STOCHASTIC_OSCILLATOR_DOUBLE(const double* high, const double* low, double* close, int n,
                               int d, int len, enum stoch_mode mode);
-struct float_array_pair
+float**
 _STOCHASTIC_OSCILLATOR_FLOAT(const float* high, const float* low, float* close, int n,
                              int d, int len, enum stoch_mode mode);
 

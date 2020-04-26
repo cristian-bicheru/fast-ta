@@ -38,8 +38,8 @@ void _float_div(const float* arr, int len, float x, float* outarr);
  * @param len
  * @return sum
  */
-double _double_cumilative_sum(const double* arr, int len);
-float _float_cumilative_sum(const float* arr, int len);
+double _double_total_sum(const double* arr, int len);
+float _float_total_sum(const float* arr, int len);
 
 /**
  * Compute the Simple Moving Average on an array.
@@ -97,6 +97,15 @@ void _float_mul(const float* arr, int len, float x, float* outarr);
  */
 void _double_add(const double* arr, int len, double x, double* outarr);
 void _float_add(const float* arr, int len, float x, float* outarr);
+
+/**
+ * Vectorized Inplace Subtraction
+ * @param arr
+ * @param len
+ * @param x
+ */
+void _double_sub(const double* arr, int len, double x, double* outarr);
+void _float_sub(const float* arr, int len, float x, float* outarr);
 
 /**
  * Vectorized Inplace Square
@@ -239,3 +248,112 @@ void _float_cumsum(const float* arr1, int len, float* outarr);
  */
 void _double_running_sum_div(const double* arr1, const double* arr2, int len, int window, double* outarr);
 void _float_running_sum_div(const float* arr1, const float* arr2, int len, int window, float* outarr);
+
+/**
+ * Vectorized Arithmetic Mean Over n Arrays
+ * @param arrm
+ * @param n
+ * @param len
+ * @param outarrm
+ */
+void _double_vec_mean(const double** arrm, int n, int len, double* outarrm);
+void _float_vec_mean(const float** arrm, int n, int len, float* outarrm);
+
+/**
+ * Divide Sum of Positive Numbers Within Lookback Period By Sum of Negative Numbers
+ * @param arr1
+ * @param len
+ * @param outarr
+ */
+void _double_mfi_algo(const double* high, const double* low, const double* close,
+                      const double* volume, int n, int len, double* outarr);
+void _float_mfi_algo(const float* high, const float* low, const float* close,
+                     const float* volume, int n, int len, float* outarr);
+
+/**
+ * Compute Elementwise Reciprocal of arr1 and Store in outarr
+ * @param arr1
+ * @param len
+ * @param outarr
+ */
+void _double_recip(const double* arr1, int len, double* outarr);
+void _float_recip(const float* arr1, int len, float* outarr);
+
+/**
+ * NVI Algorithm
+ * @param close
+ * @param volume
+ * @param len
+ * @param outarr
+ */
+void _double_nvi(const double* close, const double* volume, int len, double* outarr);
+void _float_nvi(const float* close, const float* volume, int len, float* outarr);
+
+/**
+ * OBV Algorithm
+ * @param close
+ * @param len
+ * @param outarr
+ */
+void _double_obv(const double* close, const double* volume, int len, double* outarr);
+void _float_obv(const float* close, const float* volume, int len, float* outarr);
+
+/**
+ * VPT Algorithm
+ * @param close
+ * @param len
+ * @param outarr
+ */
+void _double_vpt(const double* close, const double* volume, int len, double* outarr);
+void _float_vpt(const float* close, const float* volume, int len, float* outarr);
+
+/**
+ * VWAP Algorithm
+ * @param close
+ * @param len
+ * @param outarr
+ */
+void _double_vwap(const double* high, const double* low, const double* close,
+                  const double* volume, int n, int len, double* outarr);
+void _float_vwap(const float* high, const float* low, const float* close,
+                 const float* volume, int n, int len, float* outarr);
+
+/**
+ * Vecotorized True Range
+ * @param close
+ * @param len
+ * @param outarr
+ */
+void _double_tr(const double* high, const double* low, const double* close,
+                int len, double* outarr);
+void _float_tr(const float* high, const float* low, const float* close,
+               int len, float* outarr);
+
+/**
+ * Vectorized Reciprocal Square Root of Array
+ * @param arr1
+ * @param len
+ * @param outarr
+ */
+void _double_rsqrt(const double* arr1, int len, double* outarr);
+void _float_rsqrt(const float* arr1, int len, float* outarr);
+
+/**
+ * Vectorized Square Root of Array
+ * @param arr1
+ * @param len
+ * @param outarr
+ */
+void _double_sqrt(const double* arr1, int len, double* outarr);
+void _float_sqrt(const float* arr1, int len, float* outarr);
+
+/**
+ * Rolling Standard Deviation
+ * @param arr1
+ * @param arr2
+ * @param len
+ * @param n
+ * @param outarr
+ */
+void _double_running_stddev(const double* arr1, const double* arr2, int len, int n, double* outarr);
+void _float_running_stddev(const float* arr1, const float* arr2, int len, int n, float* outarr);

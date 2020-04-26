@@ -6,7 +6,6 @@
 #include <stdlib.h>
 
 #include "numpy/arrayobject.h"
-#include "array_pair.h"
 #include "momentum_backend.h"
 #include "parallel_momentum_backend.h"
 #include "error_methods.h"
@@ -314,19 +313,20 @@ static PyObject* STOCHASTIC_OSCILLATOR(PyObject* self, PyObject* args, PyObject*
             double* high = PyArray_DATA(_high);
             double* low = PyArray_DATA(_low);
             double* close = PyArray_DATA(_close);
-            struct double_array_pair so = _STOCHASTIC_OSCILLATOR_DOUBLE(high,
+            double** so = _STOCHASTIC_OSCILLATOR_DOUBLE(high,
                     low, close, n, d, len, Normal);
             npy_intp dims[1] = {len};
 
             PyObject* ret = PyTuple_New(2);
             PyObject* arr1 = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) arr1), so.arr1,
+            memcpy(PyArray_DATA((PyArrayObject*) arr1), so[0],
                    len*sizeof(double));
             PyObject* arr2 = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) arr2), so.arr2,
+            memcpy(PyArray_DATA((PyArrayObject*) arr2), so[1],
                    len*sizeof(double));
-            free(so.arr1);
-            free(so.arr2);
+            free(so[0]);
+            free(so[1]);
+            free(so);
             PyTuple_SetItem(ret, 0, arr1);
             PyTuple_SetItem(ret, 1, arr2);
             return ret;
@@ -335,19 +335,20 @@ static PyObject* STOCHASTIC_OSCILLATOR(PyObject* self, PyObject* args, PyObject*
             float* high = PyArray_DATA(_high);
             float* low = PyArray_DATA(_low);
             float* close = PyArray_DATA(_close);
-            struct float_array_pair so = _STOCHASTIC_OSCILLATOR_FLOAT(high,
+            float** so = _STOCHASTIC_OSCILLATOR_FLOAT(high,
                     low, close, n, d, len, Normal);
             npy_intp dims[1] = {len};
 
             PyObject* ret = PyTuple_New(2);
             PyObject* arr1 = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) arr1), so.arr1,
+            memcpy(PyArray_DATA((PyArrayObject*) arr1), so[0],
                    len*sizeof(float));
             PyObject* arr2 = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) arr2), so.arr2,
+            memcpy(PyArray_DATA((PyArrayObject*) arr2), so[1],
                    len*sizeof(float));
-            free(so.arr1);
-            free(so.arr2);
+            free(so[0]);
+            free(so[1]);
+            free(so);
             PyTuple_SetItem(ret, 0, arr1);
             PyTuple_SetItem(ret, 1, arr2);
             return ret;
