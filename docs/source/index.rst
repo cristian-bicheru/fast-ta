@@ -41,6 +41,7 @@ Indicators
 
    api/momentum
    api/volume
+   api/volatility
 
 :doc:`api/momentum`
    View the documentation for the momentum indicators.
