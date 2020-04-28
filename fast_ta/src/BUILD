@@ -73,6 +73,12 @@ cc_library(
 	"//fast_ta/src/test_data:obv_ref.txt",
 	"//fast_ta/src/test_data:vpt_ref.txt",
 	"//fast_ta/src/test_data:vwap_ref.txt",
+	"//fast_ta/src/test_data:dcl_ref.txt",
+	"//fast_ta/src/test_data:dcm_ref.txt",
+	"//fast_ta/src/test_data:dch_ref.txt",
+	"//fast_ta/src/test_data:kcl_ref.txt",
+	"//fast_ta/src/test_data:kcm_ref.txt",
+	"//fast_ta/src/test_data:kch_ref.txt",
 ])
 
 ##################### Core Library #####################

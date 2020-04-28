@@ -1556,3 +1556,15 @@ void _float_er(const float* close, int len, int n, float* outarr) {
         outarr[i] = fabsf(close[i]-close[i-n])/outarr[i];
     }
 }
+
+void _double_atr(const double* high, const double* low, const double* close,
+                    int len, int n, double* outarr) {
+    _double_tr(high, low, close, len, outarr);
+    _double_ema(outarr, len, 1./(double) n, outarr);
+}
+
+void _float_atr(const float* high, const float* low, const float* close,
+                  int len, int n, float* outarr) {
+    _float_tr(high, low, close, len, outarr);
+    _float_ema(outarr, len, 1.f/(float) n, outarr);
+}

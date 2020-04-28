@@ -27,4 +27,10 @@ exports_files([
 	"obv_ref.txt",
 	"vpt_ref.txt",
 	"vwap_ref.txt",
+	"dcl_ref.txt",
+	"dcm_ref.txt",
+	"dch_ref.txt",
+	"kcl_ref.txt",
+	"kcm_ref.txt",
+	"kch_ref.txt",
 ])

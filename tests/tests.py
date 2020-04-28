@@ -324,27 +324,83 @@ def bol():
         plt.show()
     if args.save_plots:
         plt.savefig("tests/plots/BOL LBAND " + str(close_data.dtype) + ".svg")
+
+def dc():
+    # For testing purposes, we specify the high and low data to be the close data
+    # since that is how the ta lib does it, however this should only be done if
+    # high/low data does not exist.
+    plt.clf()
+    plt.title("Donchian Channel hband "+str(close_data.dtype))
+    so = fast_ta.volatility.DC(high = close_data, low = close_data, n = 20)
+    plt.plot(so[0])
+    sot = ta.volatility.DonchianChannel(pandas.Series(close_data))
+    plt.plot(sot.donchian_channel_hband())
+    if args.show_plots:
+        plt.show()
+    if args.save_plots:
+        plt.savefig("tests/plots/DC HBAND " + str(close_data.dtype) + ".svg")
+    
+    plt.clf()
+    plt.title("Donchian Channel lband "+str(close_data.dtype))
+    plt.plot(so[2])
+    plt.plot(sot.donchian_channel_lband())
+    if args.show_plots:
+        plt.show()
+    if args.save_plots:
+        plt.savefig("tests/plots/DC LBAND " + str(close_data.dtype) + ".svg")
+
+def kc():
+    plt.clf()
+    plt.title("Keltner Channel hband "+str(close_data.dtype))
+    so = fast_ta.volatility.KC(high=high_data, low=low_data, close=close_data, n1=14, n2=10, num_channels=1)
+    plt.plot(so[2])
+    sot = ta.volatility.KeltnerChannel(pandas.Series(high_data), pandas.Series(low_data), pandas.Series(close_data), ov=False)
+    plt.plot(sot.keltner_channel_hband())
+    if args.show_plots:
+        plt.show()
+    if args.save_plots:
+        plt.savefig("tests/plots/KC HBAND " + str(close_data.dtype) + ".svg")
+
+    plt.clf()
+    plt.title("Keltner Channel mband "+str(close_data.dtype))
+    plt.plot(so[1])
+    plt.plot(sot.keltner_channel_mband())
+    if args.show_plots:
+        plt.show()
+    if args.save_plots:
+        plt.savefig("tests/plots/KC MBAND " + str(close_data.dtype) + ".svg")
+    
+    plt.clf()
+    plt.title("Keltner Channel lband "+str(close_data.dtype))
+    plt.plot(so[0])
+    plt.plot(sot.keltner_channel_lband())
+    if args.show_plots:
+        plt.show()
+    if args.save_plots:
+        plt.savefig("tests/plots/KC LBAND " + str(close_data.dtype) + ".svg")
         
 def run_tests():
-    #rsi()
-    #ao()
-    #kama()
-    #roc()
-    #stoch()
-    #tsi()
-    #uo()
+    rsi()
+    ao()
+    kama()
+    roc()
+    stoch()
+    tsi()
+    uo()
     wr()
-    #adi()
-    #cmf()
-    #emv()
-    #fi()
-    #mfi()
-    #nvi()
-    #obv()
-    #vpt()
-    #vwap()
-    #atr()
-    #bol()
+    adi()
+    cmf()
+    emv()
+    fi()
+    mfi()
+    nvi()
+    obv()
+    vpt()
+    vwap()
+    atr()
+    bol()
+    dc()
+    kc()
 
 plt.rcParams['figure.figsize'] = (20.0, 10.0)
 run_tests()

@@ -143,11 +143,176 @@ static PyObject* BOL(PyObject* self, PyObject* args, PyObject* kwargs) {
     }
 };
 
+static PyObject* DC(PyObject* self, PyObject* args, PyObject* kwargs) {
+    PyObject* in1;
+    PyObject* in2;
+    int n = 20;
+
+    static char *kwlist[] = {
+            "high",
+            "low",
+            "n",
+            NULL
+    };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|i:DC", kwlist,
+                                     &in1,
+                                     &in2,
+                                     &n)) {
+        return NULL;
+    }
+
+    int type1 = PyArray_TYPE((PyArrayObject*) in1);
+
+    if (type1 != PyArray_TYPE((PyArrayObject*) in2)) {
+        raise_error("Input Array DType Mismatch");
+        return NULL;
+    }
+
+    PyArrayObject* _high = (PyArrayObject*) PyArray_FROM_OTF(in1,
+                                                             type1,
+                                                             NPY_ARRAY_IN_ARRAY);
+    PyArrayObject* _low = (PyArrayObject*) PyArray_FROM_OTF(in2,
+                                                            type1,
+                                                            NPY_ARRAY_IN_ARRAY);
+    int len = PyArray_SIZE(_high);
+
+    if (len != PyArray_SIZE(_low)) {
+        raise_error("Input Array Dim Mismatch");
+        return NULL;
+    }
+
+    switch(type1) {
+        case NPY_FLOAT64: {
+            double* high = PyArray_DATA(_high);
+            double* low = PyArray_DATA(_low);
+            double** dc = _DC_DOUBLE(high, low, len, n);
+            npy_intp dims[2] = {3, len};
+
+            Py_DECREF(_high);
+            Py_DECREF(_low);
+            PyObject* ret = PyArray_SimpleNewFromData(2, dims, NPY_FLOAT64, dc[0]);
+            free(dc);
+            return ret;
+        }
+        case NPY_FLOAT32: {
+            float* high = PyArray_DATA(_high);
+            float* low = PyArray_DATA(_low);
+            float** dc = _DC_FLOAT(high, low, len, n);
+            npy_intp dims[2] = {3, len};
+
+            Py_DECREF(_high);
+            Py_DECREF(_low);
+            PyObject* ret = PyArray_SimpleNewFromData(2, dims, NPY_FLOAT32, dc[0]);
+            free(dc);
+            return ret;
+        }
+        default:
+            raise_dtype_error();
+            return NULL;
+    }
+};
+
+static PyObject* KC(PyObject* self, PyObject* args, PyObject* kwargs) {
+    PyObject* in1;
+    PyObject* in2;
+    PyObject* in3;
+    int n1 = 14;
+    int n2 = 10;
+    int num_channels = 1;
+
+    static char *kwlist[] = {
+            "high",
+            "low",
+            "close",
+            "n1",
+            "n2",
+            "num_channels",
+            NULL
+    };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOO|iii:KC", kwlist,
+                                     &in1,
+                                     &in2,
+                                     &in3,
+                                     &n1,
+                                     &n2,
+                                     &num_channels)) {
+        return NULL;
+    }
+
+    if (num_channels < 0) {
+        raise_error("Number of extra channels cannot be negative.");
+        return NULL;
+    }
+
+    int type1 = PyArray_TYPE((PyArrayObject*) in1);
+
+    if (type1 != PyArray_TYPE((PyArrayObject*) in2) ||
+        type1 != PyArray_TYPE((PyArrayObject*) in3)) {
+        raise_error("Input Array DType Mismatch");
+        return NULL;
+    }
+
+    PyArrayObject* _high = (PyArrayObject*) PyArray_FROM_OTF(in1,
+                                                             type1,
+                                                             NPY_ARRAY_IN_ARRAY);
+    PyArrayObject* _low = (PyArrayObject*) PyArray_FROM_OTF(in2,
+                                                            type1,
+                                                            NPY_ARRAY_IN_ARRAY);
+    PyArrayObject* _close = (PyArrayObject*) PyArray_FROM_OTF(in3,
+                                                              type1,
+                                                              NPY_ARRAY_IN_ARRAY);
+    int len = PyArray_SIZE(_high);
+
+    if (len != PyArray_SIZE(_low) ||
+        len != PyArray_SIZE(_close)) {
+        raise_error("Input Array Dim Mismatch");
+        return NULL;
+    }
+
+    switch(type1) {
+        case NPY_FLOAT64: {
+            double* high = PyArray_DATA(_high);
+            double* low = PyArray_DATA(_low);
+            double* close = PyArray_DATA(_close);
+            double** kc = _KC_DOUBLE(high, low, close, len, n1, n2, num_channels);
+            npy_intp dims[2] = {2*num_channels+1, len};
+
+            Py_DECREF(_high);
+            Py_DECREF(_low);
+            Py_DECREF(_close);
+            PyObject* ret = PyArray_SimpleNewFromData(2, dims, NPY_FLOAT64, kc[0]);
+            free(kc);
+            return ret;
+        }
+        case NPY_FLOAT32: {
+            float* high = PyArray_DATA(_high);
+            float* low = PyArray_DATA(_low);
+            float* close = PyArray_DATA(_close);
+            float** kc = _KC_FLOAT(high, low, close, len, n1, n2, num_channels);
+            npy_intp dims[2] = {2*num_channels+1, len};
+
+            Py_DECREF(_high);
+            Py_DECREF(_low);
+            Py_DECREF(_close);
+            PyObject* ret = PyArray_SimpleNewFromData(2, dims, NPY_FLOAT32, kc[0]);
+            free(kc);
+            return ret;
+        }
+        default:
+            raise_dtype_error();
+            return NULL;
+    }
+};
+
 #define pyargflag METH_VARARGS | METH_KEYWORDS
 
 static PyMethodDef VolumeMethods[] = {
         {"ATR", (PyCFunction) ATR, pyargflag, "Compute ATR On Data"},
         {"BOL", (PyCFunction) BOL, pyargflag, "Compute Bollinger Bands On Data"},
+        {"DC", (PyCFunction) DC, pyargflag, "Compute Donchian Channels On Data"},
+        {"KC", (PyCFunction) KC, pyargflag, "Compute Keltner Channels On Data"},
         {NULL, NULL, 0, NULL}
 };
 

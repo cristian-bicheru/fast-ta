@@ -23,8 +23,10 @@ void pprint(double* arr) {
 }
 
 int main() {
-    // your indicator here
-    double* out = _WILLIAMS_R_DOUBLE(SAMPLE_HIGH_DOUBLE, SAMPLE_LOW_DOUBLE, SAMPLE_CLOSE_DOUBLE, 14, data_len);
-    pprint(out);
+    populate_float_arrays();
+    double** out = _KC_DOUBLE(SAMPLE_HIGH_DOUBLE, SAMPLE_LOW_DOUBLE, SAMPLE_CLOSE_DOUBLE, data_len, 14, 10, 1);
+    pprint(out[0]);
+    pprint(out[1]);
+    pprint(out[2]);
     free(out);
 }
