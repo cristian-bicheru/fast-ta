@@ -357,3 +357,13 @@ void _float_sqrt(const float* arr1, int len, float* outarr);
  */
 void _double_running_stddev(const double* arr1, const double* arr2, int len, int n, double* outarr);
 void _float_running_stddev(const float* arr1, const float* arr2, int len, int n, float* outarr);
+
+/**
+ * Vectorized Efficiency Ratio For KAMA
+ * @param close
+ * @param len
+ * @param n
+ * @param outarr
+ */
+void _double_er(const double* close, int len, int n, double* outarr);
+void _float_er(const float* close, int len, int n, float* outarr);

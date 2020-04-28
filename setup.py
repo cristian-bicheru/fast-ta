@@ -20,7 +20,7 @@ class FastTABuild(build_ext):
             self.define.append(('SSE2', '1'))
         build_ext.run(self)
 
-common_backend = ['fast_ta/src/error_methods.c', 'fast_ta/src/funcs.c', 'fast_ta/src/2darray.c']
+common_backend = ['fast_ta/src/error_methods.c', 'fast_ta/src/funcs.c', 'fast_ta/src/2darray.c', 'fast_ta/src/generic_simd.c']
 compile_args = ['-O2', '-ffast-math', '-march=native', '-mno-align-double',
                 '-fomit-frame-pointer', '-frename-registers']
         

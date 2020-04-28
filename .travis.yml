@@ -19,7 +19,7 @@ before_install:
   - python3.7 get-pip.py
   - python3.7 -m pip install -U pip
   - python3.7 -m pip install --upgrade setuptools
-  - python3.7 -m pip install numpy
+  - python3.7 -m pip install numpy detect-simd
   - dest=$(python3.7 -c "import numpy; print(numpy.get_include()+'/numpy')")
   - sudo ln -sfn $dest /usr/include/numpy
 
@@ -38,6 +38,7 @@ script:
   - mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/momentum_backend_tests/coverage.dat avx1.dat
   - mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/volume_backend_tests/coverage.dat avx2.dat
   - mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/volatility_backend_tests/coverage.dat avx3.dat
+  - python3.7 -c "import detect_simd; print(detect_simd.detect())"
 
 after_success:
   - curl --connect-timeout 10 --max-time 10 --retry 5 --retry-delay 0 --retry-max-time 120 https://codecov.io/bash -o uploader.sh

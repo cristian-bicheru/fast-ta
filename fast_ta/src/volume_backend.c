@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "funcs.h"
+#include "2darray.h"
 
 double* _ADI_DOUBLE(const double* high, const double* low, const double* close,
                     const double* volume, int len) {
@@ -65,8 +66,9 @@ float* _CMF_FLOAT(const float* high, const float* low, const float* close,
 
 double** _EMV_DOUBLE(const double* high, const double* low,
                                      const double* volume, int len, int n) {
-    double* temp1 = malloc(len*sizeof(double));
-    double* temp2 = malloc(len*sizeof(double));
+    double** arr = double_malloc2d(2, len);
+    double* temp1 = arr[0];
+    double* temp2 = arr[1];
 
     _double_pairwise_mean(high, low, len, temp1);
     _double_sub_arr(temp1+1, temp1, len-1, temp2+1);
@@ -80,16 +82,14 @@ double** _EMV_DOUBLE(const double* high, const double* low,
     _double_set_nan(temp1, 1);
     _double_set_nan(temp2, 1);
 
-    double** ret = malloc(2*sizeof(double*));
-    ret[0] = temp1;
-    ret[1] = temp2;
-    return ret;
+    return arr;
 }
 
 float** _EMV_FLOAT(const float* high, const float* low,
                                    const float* volume, int len, int n) {
-    float* temp1 = malloc(len*sizeof(float));
-    float* temp2 = malloc(len*sizeof(float));
+    float** arr = float_malloc2d(2, len);
+    float* temp1 = arr[0];
+    float* temp2 = arr[1];
 
     _float_pairwise_mean(high, low, len, temp1);
     _float_sub_arr(temp1+1, temp1, len-1, temp2+1);
@@ -103,10 +103,7 @@ float** _EMV_FLOAT(const float* high, const float* low,
     _float_set_nan(temp1, 1);
     _float_set_nan(temp2, 1);
 
-    float** ret = malloc(2*sizeof(float*));
-    ret[0] = temp1;
-    ret[1] = temp2;
-    return ret;
+    return arr;
 }
 
 double* _FI_DOUBLE(const double* close, const double* volume, int len, int n) {

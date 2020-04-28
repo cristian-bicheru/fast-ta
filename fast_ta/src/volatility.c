@@ -68,10 +68,7 @@ static PyObject* ATR(PyObject* self, PyObject* args, PyObject* kwargs) {
             Py_DECREF(_high);
             Py_DECREF(_low);
             Py_DECREF(_close);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), atr,
-                   len*sizeof(double));
-            free(atr);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT64, atr);
             return ret;
         }
         case NPY_FLOAT32: {
@@ -84,10 +81,7 @@ static PyObject* ATR(PyObject* self, PyObject* args, PyObject* kwargs) {
             Py_DECREF(_high);
             Py_DECREF(_low);
             Py_DECREF(_close);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), atr,
-                   len*sizeof(float));
-            free(atr);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT32, atr);
             return ret;
         }
         default:
@@ -126,43 +120,21 @@ static PyObject* BOL(PyObject* self, PyObject* args, PyObject* kwargs) {
         case NPY_FLOAT64: {
             double* close = PyArray_DATA(_close);
             double** bol = _BOL_DOUBLE(close, len, n, ndev);
-            npy_intp dims[1] = {len};
+            npy_intp dims[2] = {3, len};
 
-            PyObject* ret = PyTuple_New(3);
-            PyObject* arr1 = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) arr1), bol[0],
-                   len*sizeof(double));
-            PyObject* arr2 = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) arr2), bol[1],
-                   len*sizeof(double));
-            PyObject* arr3 = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) arr3), bol[2],
-                   len*sizeof(double));
-            double_free2d(bol, 3);
-            PyTuple_SetItem(ret, 0, arr1);
-            PyTuple_SetItem(ret, 1, arr2);
-            PyTuple_SetItem(ret, 2, arr3);
+            Py_DECREF(_close);
+            PyObject* ret = PyArray_SimpleNewFromData(2, dims, NPY_FLOAT64, bol[0]);
+            free(bol);
             return ret;
         }
         case NPY_FLOAT32: {
             float* close = PyArray_DATA(_close);
             float** bol = _BOL_FLOAT(close, len, n, ndev);
-            npy_intp dims[1] = {len};
+            npy_intp dims[2] = {3, len};
 
-            PyObject* ret = PyTuple_New(3);
-            PyObject* arr1 = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) arr1), bol[0],
-                   len*sizeof(float));
-            PyObject* arr2 = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) arr2), bol[1],
-                   len*sizeof(float));
-            PyObject* arr3 = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) arr3), bol[2],
-                   len*sizeof(float));
-            float_free2d(bol, 3);
-            PyTuple_SetItem(ret, 0, arr1);
-            PyTuple_SetItem(ret, 1, arr2);
-            PyTuple_SetItem(ret, 2, arr3);
+            Py_DECREF(_close);
+            PyObject* ret = PyArray_SimpleNewFromData(2, dims, NPY_FLOAT32, bol[0]);
+            free(bol);
             return ret;
         }
         default:

@@ -743,7 +743,6 @@ TEST(momentum_backend, EMVDouble) {
     }
 
     free(out[0]);
-    free(out[1]);
     free(out);
 }
 
@@ -757,7 +756,6 @@ TEST(momentum_backend, EMVFloat) {
     }
 
     free(out[0]);
-    free(out[1]);
     free(out);
 }
 

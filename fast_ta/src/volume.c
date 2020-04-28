@@ -74,10 +74,7 @@ static PyObject* ADI(PyObject* self, PyObject* args, PyObject* kwargs) {
             Py_DECREF(_low);
             Py_DECREF(_close);
             Py_DECREF(_volume);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), adi,
-                   len*sizeof(double));
-            free(adi);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT64, adi);
             return ret;
         }
         case NPY_FLOAT32: {
@@ -92,10 +89,7 @@ static PyObject* ADI(PyObject* self, PyObject* args, PyObject* kwargs) {
             Py_DECREF(_low);
             Py_DECREF(_close);
             Py_DECREF(_volume);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), adi,
-                   len*sizeof(float));
-            free(adi);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT32, adi);
             return ret;
         }
         default:
@@ -172,10 +166,7 @@ static PyObject* CMF(PyObject* self, PyObject* args, PyObject* kwargs) {
             Py_DECREF(_low);
             Py_DECREF(_close);
             Py_DECREF(_volume);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), cmf,
-                   len*sizeof(double));
-            free(cmf);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT64, cmf);
             return ret;
         }
         case NPY_FLOAT32: {
@@ -190,10 +181,7 @@ static PyObject* CMF(PyObject* self, PyObject* args, PyObject* kwargs) {
             Py_DECREF(_low);
             Py_DECREF(_close);
             Py_DECREF(_volume);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), cmf,
-                   len*sizeof(float));
-            free(cmf);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT32, cmf);
             return ret;
         }
         default:
@@ -255,22 +243,13 @@ static PyObject* EMV(PyObject* self, PyObject* args, PyObject* kwargs) {
             double* low = PyArray_DATA(_low);
             double* volume = PyArray_DATA(_volume);
             double** emv = _EMV_DOUBLE(high, low, volume, len, n);
-            npy_intp dims[1] = {len};
+            npy_intp dims[2] = {2, len};
+
             Py_DECREF(_high);
             Py_DECREF(_low);
             Py_DECREF(_volume);
-            PyObject* ret = PyTuple_New(2);
-            PyObject* arr1 = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) arr1), emv[0],
-                   len*sizeof(double));
-            PyObject* arr2 = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) arr2), emv[1],
-                   len*sizeof(double));
-            free(emv[0]);
-            free(emv[1]);
+            PyObject* ret = PyArray_SimpleNewFromData(2, dims, NPY_FLOAT64, emv[0]);
             free(emv);
-            PyTuple_SetItem(ret, 0, arr1);
-            PyTuple_SetItem(ret, 1, arr2);
             return ret;
         }
         case NPY_FLOAT32: {
@@ -278,22 +257,12 @@ static PyObject* EMV(PyObject* self, PyObject* args, PyObject* kwargs) {
             float* low = PyArray_DATA(_low);
             float* volume = PyArray_DATA(_volume);
             float** emv = _EMV_FLOAT(high, low, volume, len, n);
-            npy_intp dims[1] = {len};
+            npy_intp dims[2] = {2, len};
             Py_DECREF(_high);
             Py_DECREF(_low);
             Py_DECREF(_volume);
-            PyObject* ret = PyTuple_New(2);
-            PyObject* arr1 = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) arr1), emv[0],
-                   len*sizeof(float));
-            PyObject* arr2 = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) arr2), emv[1],
-                   len*sizeof(float));
-            free(emv[0]);
-            free(emv[1]);
+            PyObject* ret = PyArray_SimpleNewFromData(2, dims, NPY_FLOAT32, emv[0]);
             free(emv);
-            PyTuple_SetItem(ret, 0, arr1);
-            PyTuple_SetItem(ret, 1, arr2);
             return ret;
         }
         default:
@@ -350,10 +319,7 @@ static PyObject* FI(PyObject* self, PyObject* args, PyObject* kwargs) {
 
             Py_DECREF(_close);
             Py_DECREF(_volume);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), fi,
-                   len*sizeof(double));
-            free(fi);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT64, fi);
             return ret;
         }
         case NPY_FLOAT32: {
@@ -364,10 +330,7 @@ static PyObject* FI(PyObject* self, PyObject* args, PyObject* kwargs) {
 
             Py_DECREF(_close);
             Py_DECREF(_volume);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), fi,
-                   len*sizeof(float));
-            free(fi);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT32, fi);
             return ret;
         }
         default:
@@ -444,10 +407,7 @@ static PyObject* MFI(PyObject* self, PyObject* args, PyObject* kwargs) {
             Py_DECREF(_low);
             Py_DECREF(_close);
             Py_DECREF(_volume);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), mfi,
-                   len*sizeof(double));
-            free(mfi);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT64, mfi);
             return ret;
         }
         case NPY_FLOAT32: {
@@ -462,10 +422,7 @@ static PyObject* MFI(PyObject* self, PyObject* args, PyObject* kwargs) {
             Py_DECREF(_low);
             Py_DECREF(_close);
             Py_DECREF(_volume);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), mfi,
-                   len*sizeof(float));
-            free(mfi);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT32, mfi);
             return ret;
         }
         default:
@@ -519,10 +476,7 @@ static PyObject* NVI(PyObject* self, PyObject* args, PyObject* kwargs) {
 
             Py_DECREF(_close);
             Py_DECREF(_volume);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), nvi,
-                   len*sizeof(double));
-            free(nvi);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT64, nvi);
             return ret;
         }
         case NPY_FLOAT32: {
@@ -533,10 +487,8 @@ static PyObject* NVI(PyObject* self, PyObject* args, PyObject* kwargs) {
 
             Py_DECREF(_close);
             Py_DECREF(_volume);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), nvi,
-                   len*sizeof(float));
-            free(nvi);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT32, nvi);
+
             return ret;
         }
         default:
@@ -590,10 +542,7 @@ static PyObject* OBV(PyObject* self, PyObject* args, PyObject* kwargs) {
 
             Py_DECREF(_close);
             Py_DECREF(_volume);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), obv,
-                   len*sizeof(double));
-            free(obv);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT64, obv);
             return ret;
         }
         case NPY_FLOAT32: {
@@ -604,10 +553,7 @@ static PyObject* OBV(PyObject* self, PyObject* args, PyObject* kwargs) {
 
             Py_DECREF(_close);
             Py_DECREF(_volume);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), obv,
-                   len*sizeof(float));
-            free(obv);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT32, obv);
             return ret;
         }
         default:
@@ -661,10 +607,7 @@ static PyObject* VPT(PyObject* self, PyObject* args, PyObject* kwargs) {
 
             Py_DECREF(_close);
             Py_DECREF(_volume);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), vpt,
-                   len*sizeof(double));
-            free(vpt);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT64, vpt);
             return ret;
         }
         case NPY_FLOAT32: {
@@ -675,10 +618,7 @@ static PyObject* VPT(PyObject* self, PyObject* args, PyObject* kwargs) {
 
             Py_DECREF(_close);
             Py_DECREF(_volume);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), vpt,
-                   len*sizeof(float));
-            free(vpt);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT32, vpt);
             return ret;
         }
         default:
@@ -755,10 +695,7 @@ static PyObject* VWAP(PyObject* self, PyObject* args, PyObject* kwargs) {
             Py_DECREF(_low);
             Py_DECREF(_close);
             Py_DECREF(_volume);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), vwap,
-                   len*sizeof(double));
-            free(vwap);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT64, vwap);
             return ret;
         }
         case NPY_FLOAT32: {
@@ -773,10 +710,7 @@ static PyObject* VWAP(PyObject* self, PyObject* args, PyObject* kwargs) {
             Py_DECREF(_low);
             Py_DECREF(_close);
             Py_DECREF(_volume);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), vwap,
-                   len*sizeof(float));
-            free(vwap);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT32, vwap);
             return ret;
         }
         default:

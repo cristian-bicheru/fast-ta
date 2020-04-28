@@ -37,6 +37,7 @@ cc_library(
 
 cc_library(
     name = "generic_simd",
+    srcs = ["generic_simd.c"],
     hdrs = ["generic_simd.h"],
 )
 
@@ -72,6 +73,7 @@ cc_library(
     hdrs = ["volume_backend.h"],
     deps = [
         ":funcs",
+        ":2darray",
     ],
     copts = PYTHON_INCLUDE,
 )
@@ -152,6 +154,7 @@ cc_library(
     deps = [
         ":volume_backend",
         ":error_methods",
+        ":2darray",
     ],
     copts = PYTHON_INCLUDE,
 )

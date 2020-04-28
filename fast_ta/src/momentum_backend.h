@@ -1,7 +1,5 @@
 #pragma once
 
-enum stoch_mode {Normal, Williams};
-
 /**
  * Computes Relative Strength Indicator On Data
  * @param close     Close Time Series
@@ -19,7 +17,7 @@ enum stoch_mode {Normal, Williams};
 double* _RSI_DOUBLE(const double* close, double* out, int close_len,
                     int window_size, int prelim);
 float* _RSI_FLOAT(const float* close, float* out, int close_len,
-                    int window_size, int prelim);
+                  int window_size, int prelim);
 
 /**
  * Computes Awesome Oscillator Indicator On Data
@@ -68,12 +66,12 @@ float* _ROC_FLOAT(const float* close, int n, int len);
  * @return          Stochastic Oscillator Indicator Time Series And Signal If
  *                  Specified
  */
-double**
-_STOCHASTIC_OSCILLATOR_DOUBLE(const double* high, const double* low, double* close, int n,
-                              int d, int len, enum stoch_mode mode);
-float**
-_STOCHASTIC_OSCILLATOR_FLOAT(const float* high, const float* low, float* close, int n,
-                             int d, int len, enum stoch_mode mode);
+double*
+_STOCHASTIC_OSCILLATOR_DOUBLE(const double* high, const double* low, const double* close, int n,
+                              int d, int len);
+float *
+_STOCHASTIC_OSCILLATOR_FLOAT(const float *high, const float *low,
+                             const float *close, int n, int d, int len);
 
 /**
  * Compute True Strength Index On Data
@@ -113,7 +111,7 @@ float* _ULTIMATE_OSCILLATOR_FLOAT(const float* high, const float* low, const flo
  * @param len       Time Series Length
  * @return          Williams %R Time Series
  */
-double* _WILLIAMS_R_DOUBLE(const double* high, const double* low, double* close, int n,
+double* _WILLIAMS_R_DOUBLE(const double* high, const double* low, const double* close, int n,
                            int len);
-float* _WILLIAMS_R_FLOAT(const float* high, const float* low, float* close, int n,
+float* _WILLIAMS_R_FLOAT(const float* high, const float* low, const float* close, int n,
                            int len);

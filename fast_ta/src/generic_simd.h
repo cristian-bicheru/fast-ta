@@ -9,6 +9,16 @@
 #define min(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
+/**
+ * Find The First Index Not Covered By Vector
+ * @param len
+ * @param start
+ * @return
+ */
+int float_get_next_index(int len, int start);
+int double_get_next_index(int len, int start);
+
+
 /** Generic SIMD Support **/
 
 #ifdef AVX

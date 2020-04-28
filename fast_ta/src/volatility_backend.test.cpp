@@ -310,8 +310,6 @@ TEST(momentum_backend, BOLDouble) {
         ASSERT_DOUBLE_EQ(BOLH_REF_DOUBLE[i], out[2][i]);
     }
     free(out[0]);
-    free(out[1]);
-    free(out[2]);
     free(out);
 }
 
@@ -327,8 +325,6 @@ TEST(momentum_backend, BOLFloat) {
     }
 
     free(out[0]);
-    free(out[1]);
-    free(out[2]);
     free(out);
 }
 

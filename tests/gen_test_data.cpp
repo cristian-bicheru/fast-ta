@@ -24,12 +24,7 @@ void pprint(double* arr) {
 
 int main() {
     // your indicator here
-    double** out = _BOL_DOUBLE(SAMPLE_CLOSE_DOUBLE, data_len, 20, 2);
-    pprint(out[0]);
-    pprint(out[1]);
-    pprint(out[2]);
-    free(out[0]);
-    free(out[1]);
-    free(out[2]);
+    double* out = _WILLIAMS_R_DOUBLE(SAMPLE_HIGH_DOUBLE, SAMPLE_LOW_DOUBLE, SAMPLE_CLOSE_DOUBLE, 14, data_len);
+    pprint(out);
     free(out);
 }

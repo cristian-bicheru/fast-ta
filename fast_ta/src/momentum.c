@@ -44,10 +44,7 @@ static PyObject* RSI(PyObject* self, PyObject* args, PyObject* kwargs) {
             npy_intp dims[1] = {close_len};
 
             Py_DECREF(arr);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), rsi,
-                             close_len*sizeof(double));
-            free(rsi);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT64, rsi);
             return ret;
         }
         case NPY_FLOAT32: {
@@ -57,10 +54,7 @@ static PyObject* RSI(PyObject* self, PyObject* args, PyObject* kwargs) {
             npy_intp dims[1] = {close_len};
 
             Py_DECREF(arr);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), rsi,
-                             close_len*sizeof(float));
-            free(rsi);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT32, rsi);
             return ret;
         }
         default:
@@ -120,10 +114,7 @@ static PyObject* AO(PyObject* self, PyObject* args, PyObject* kwargs) {
 
             Py_DECREF(_high);
             Py_DECREF(_low);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), ao,
-                             high_len*sizeof(double));
-            free(ao);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT64, ao);
             return ret;
         }
         case NPY_FLOAT32: {
@@ -134,10 +125,7 @@ static PyObject* AO(PyObject* self, PyObject* args, PyObject* kwargs) {
 
             Py_DECREF(_high);
             Py_DECREF(_low);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), ao,
-                             high_len*sizeof(float));
-            free(ao);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT32, ao);
             return ret;
         }
         default:
@@ -182,10 +170,7 @@ static PyObject* KAMA(PyObject* self, PyObject* args, PyObject* kwargs) {
             npy_intp dims[1] = {len};
 
             Py_DECREF(_close);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), kama,
-                   len*sizeof(double));
-            free(kama);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT64, kama);
             return ret;
         }
         case NPY_FLOAT32: {
@@ -194,10 +179,7 @@ static PyObject* KAMA(PyObject* self, PyObject* args, PyObject* kwargs) {
             npy_intp dims[1] = {len};
 
             Py_DECREF(_close);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), kama,
-                   len*sizeof(float));
-            free(kama);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT32, kama);
             return ret;
         }
         default:
@@ -236,10 +218,7 @@ static PyObject* ROC(PyObject* self, PyObject* args, PyObject* kwargs) {
             npy_intp dims[1] = {len};
 
             Py_DECREF(_close);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), roc,
-                   len*sizeof(double));
-            free(roc);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT64, roc);
             return ret;
         }
         case NPY_FLOAT32: {
@@ -248,10 +227,7 @@ static PyObject* ROC(PyObject* self, PyObject* args, PyObject* kwargs) {
             npy_intp dims[1] = {len};
 
             Py_DECREF(_close);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), roc,
-                   len*sizeof(float));
-            free(roc);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT32, roc);
             return ret;
         }
         default:
@@ -313,44 +289,28 @@ static PyObject* STOCHASTIC_OSCILLATOR(PyObject* self, PyObject* args, PyObject*
             double* high = PyArray_DATA(_high);
             double* low = PyArray_DATA(_low);
             double* close = PyArray_DATA(_close);
-            double** so = _STOCHASTIC_OSCILLATOR_DOUBLE(high,
-                    low, close, n, d, len, Normal);
-            npy_intp dims[1] = {len};
+            double* so = _STOCHASTIC_OSCILLATOR_DOUBLE(high,
+                    low, close, n, d, len);
+            npy_intp dims[2] = {2, len};
 
-            PyObject* ret = PyTuple_New(2);
-            PyObject* arr1 = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) arr1), so[0],
-                   len*sizeof(double));
-            PyObject* arr2 = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) arr2), so[1],
-                   len*sizeof(double));
-            free(so[0]);
-            free(so[1]);
-            free(so);
-            PyTuple_SetItem(ret, 0, arr1);
-            PyTuple_SetItem(ret, 1, arr2);
+            Py_DECREF(high);
+            Py_DECREF(low);
+            Py_DECREF(close);
+            PyObject* ret = PyArray_SimpleNewFromData(2, dims, NPY_FLOAT64, so);
             return ret;
         }
         case NPY_FLOAT32: {
             float* high = PyArray_DATA(_high);
             float* low = PyArray_DATA(_low);
             float* close = PyArray_DATA(_close);
-            float** so = _STOCHASTIC_OSCILLATOR_FLOAT(high,
-                    low, close, n, d, len, Normal);
-            npy_intp dims[1] = {len};
+            float* so = _STOCHASTIC_OSCILLATOR_FLOAT(high,
+                                                     low, close, n, d, len);
+            npy_intp dims[2] = {2, len};
 
-            PyObject* ret = PyTuple_New(2);
-            PyObject* arr1 = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) arr1), so[0],
-                   len*sizeof(float));
-            PyObject* arr2 = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) arr2), so[1],
-                   len*sizeof(float));
-            free(so[0]);
-            free(so[1]);
-            free(so);
-            PyTuple_SetItem(ret, 0, arr1);
-            PyTuple_SetItem(ret, 1, arr2);
+            Py_DECREF(high);
+            Py_DECREF(low);
+            Py_DECREF(close);
+            PyObject* ret = PyArray_SimpleNewFromData(2, dims, NPY_FLOAT32, so);
             return ret;
         }
         default:
@@ -392,10 +352,7 @@ static PyObject* TSI(PyObject* self, PyObject* args, PyObject* kwargs) {
             npy_intp dims[1] = {len};
 
             Py_DECREF(_close);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), tsi,
-                   len*sizeof(double));
-            free(tsi);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT64, tsi);
             return ret;
         }
         case NPY_FLOAT32: {
@@ -404,10 +361,7 @@ static PyObject* TSI(PyObject* self, PyObject* args, PyObject* kwargs) {
             npy_intp dims[1] = {len};
 
             Py_DECREF(_close);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), tsi,
-                   len*sizeof(float));
-            free(tsi);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT32, tsi);
             return ret;
         }
         default:
@@ -487,10 +441,7 @@ static PyObject* ULTIMATE_OSCILLATOR(PyObject* self, PyObject* args, PyObject* k
             Py_DECREF(_high);
             Py_DECREF(_low);
             Py_DECREF(_close);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), uo,
-                   len*sizeof(double));
-            free(uo);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT64, uo);
             return ret;
         }
         case NPY_FLOAT32: {
@@ -503,10 +454,7 @@ static PyObject* ULTIMATE_OSCILLATOR(PyObject* self, PyObject* args, PyObject* k
             Py_DECREF(_high);
             Py_DECREF(_low);
             Py_DECREF(_close);
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), uo,
-                   len*sizeof(float));
-            free(uo);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT32, uo);
             return ret;
         }
         default:
@@ -568,10 +516,10 @@ static PyObject* WILLIAMS_R(PyObject* self, PyObject* args, PyObject* kwargs) {
             double* wr = _WILLIAMS_R_DOUBLE(high, low, close, n, len);
             npy_intp dims[1] = {len};
 
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT64);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), wr,
-                   len*sizeof(double));
-            free(wr);
+            Py_DECREF(high);
+            Py_DECREF(low);
+            Py_DECREF(close);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT64, wr);
             return ret;
         }
         case NPY_FLOAT32: {
@@ -581,10 +529,10 @@ static PyObject* WILLIAMS_R(PyObject* self, PyObject* args, PyObject* kwargs) {
             float* wr = _WILLIAMS_R_FLOAT(high, low, close, n, len);
             npy_intp dims[1] = {len};
 
-            PyObject* ret = PyArray_SimpleNew(1, dims, NPY_FLOAT32);
-            memcpy(PyArray_DATA((PyArrayObject*) ret), wr,
-                   len*sizeof(float));
-            free(wr);
+            Py_DECREF(high);
+            Py_DECREF(low);
+            Py_DECREF(close);
+            PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT32, wr);
             return ret;
         }
         default:

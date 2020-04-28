@@ -56,7 +56,7 @@ double* _RSI_DOUBLE(const double* close, double* out, int close_len,
     if (prelim == 0) {
         for (int i = 0; i<window_size; i++) {
             double diff = close[i+1]-close[i];
-            rsi[i+1] = COMPUTE_RSI_TEMPLATE(diff, &last_gain, &last_loss, i+1,
+            rsi[i+1] = COMPUTE_RSI_TEMPLATE(diff, &last_gain, &last_loss, window_size,
                                             double);
         }
     } else {
@@ -66,7 +66,7 @@ double* _RSI_DOUBLE(const double* close, double* out, int close_len,
         const double* reduced_close = close - prelim;
         for (int i = 0; i<prelim + 1; i++) {
             double diff = reduced_close[i+1]-reduced_close[i];
-            COMPUTE_RSI_TEMPLATE(diff, &last_gain, &last_loss, i+1, double);
+            COMPUTE_RSI_TEMPLATE(diff, &last_gain, &last_loss, window_size, double);
         }
     }
 
@@ -100,7 +100,7 @@ float* _RSI_FLOAT(const float* close, float* out, int close_len,
     if (prelim == 0) {
         for (int i = 0; i<window_size; i++) {
             float diff = close[i+1]-close[i];
-            rsi[i+1] = COMPUTE_RSI_TEMPLATE(diff, &last_gain, &last_loss, i+1,
+            rsi[i+1] = COMPUTE_RSI_TEMPLATE(diff, &last_gain, &last_loss, window_size,
                                             float);
         }
     } else {
@@ -110,7 +110,7 @@ float* _RSI_FLOAT(const float* close, float* out, int close_len,
         const float* reduced_close = close - prelim;
         for (int i = 0; i<prelim + 1; i++) {
             float diff = reduced_close[i+1]-reduced_close[i];
-            COMPUTE_RSI_TEMPLATE(diff, &last_gain, &last_loss, i+1, float);
+            COMPUTE_RSI_TEMPLATE(diff, &last_gain, &last_loss, window_size, float);
         }
     }
 
@@ -155,51 +155,35 @@ float* _AO_FLOAT(const float* high, const float* low, int n1, int n2, int len) {
 }
 
 double* _KAMA_DOUBLE(const double* close, int n1, int n2, int n3, int len) {
-    double* change = malloc((len-n1)*sizeof(double));
-    double* vol_sum = malloc(len*sizeof(double));
-    double* sc = malloc(len*sizeof(double));
-    _double_sub_arr(close + n1, close, len - n1, change);
-    _double_abs(change, len-n1, change);
-    _double_volatility_sum(close, n1, len, vol_sum);
-    _double_div_arr(change, vol_sum, len-n1, sc+n1);
-    _double_mul(sc+n1, len-n1, 2./(n2+1)-2./(n3+1), sc+n1);
-    _double_add(sc+n1, len-n1, 2./(n3+1), sc+n1);
-    _double_square(sc+n1, len-n1, sc+n1);
-    sc[n1] = close[n1];
+    double* kama = malloc(len*sizeof(double));
 
-    for (int i = 1; i < len-n1; i++) {
-        sc[i+n1] = sc[i+n1-1]+sc[i+n1]*(close[i+n1] - sc[i+n1-1]);
+    _double_er(close, len, n1, kama);
+    _double_mul(kama, len, 2./(n2+1)-2./(n3+1), kama);
+    _double_add(kama, len, 2./(n3+1), kama);
+    _double_square(kama, len, kama);
+    kama[0] = close[0];
+
+    for (int i = 1; i < len; i++) {
+        kama[i] = kama[i-1]+kama[i]*(close[i] - kama[i-1]);
     }
 
-    _double_set_nan(sc, n1);
-
-    free(change);
-    free(vol_sum);
-    return sc;
+    return kama;
 }
 
 float* _KAMA_FLOAT(const float* close, int n1, int n2, int n3, int len) {
-    float* change = malloc((len-n1)*sizeof(float));
-    float* vol_sum = malloc(len*sizeof(float));
-    float* sc = malloc(len*sizeof(float));
-    _float_sub_arr(close + n1, close, len - n1, change);
-    _float_abs(change, len-n1, change);
-    _float_volatility_sum(close, n1, len, vol_sum);
-    _float_div_arr(change, vol_sum, len-n1, sc+n1);
-    _float_mul(sc+n1, len-n1, 2./(n2+1)-2./(n3+1), sc+n1);
-    _float_add(sc+n1, len-n1, 2./(n3+1), sc+n1);
-    _float_square(sc+n1, len-n1, sc+n1);
-    sc[n1] = close[n1];
+    float* kama = malloc(len*sizeof(float));
 
-    for (int i = 1; i < len-n1; i++) {
-        sc[i+n1] = sc[i+n1-1]+sc[i+n1]*(close[i+n1] - sc[i+n1-1]);
+    _float_er(close, len, n1, kama);
+    _float_mul(kama, len, 2.f/(n2+1)-2./(n3+1), kama);
+    _float_add(kama, len, 2.f/(n3+1), kama);
+    _float_square(kama, len, kama);
+    kama[0] = close[0];
+
+    for (int i = 1; i < len; i++) {
+        kama[i] = kama[i-1]+kama[i]*(close[i] - kama[i-1]);
     }
 
-    _float_set_nan(sc, n1);
-
-    free(change);
-    free(vol_sum);
-    return sc;
+    return kama;
 }
 
 double* _ROC_DOUBLE(const double* close, int n, int len) {
@@ -220,91 +204,57 @@ float* _ROC_FLOAT(const float* close, int n, int len) {
     return roc;
 }
 
-double** _STOCHASTIC_OSCILLATOR_DOUBLE(const double* high, const double* low, double* close, int n, int d, int len, enum stoch_mode mode) {
-    // NOTE: While running_max and running_min are initially running maxes and minimums,
-    //       they are reused later on save memory.
-    double* running_max = malloc(len*sizeof(double));
-    double* running_min = malloc(len*sizeof(double));
+double* _STOCHASTIC_OSCILLATOR_DOUBLE(const double* high, const double* low,
+                                       const double* close, int n, int d,
+                                       int len) {
+    double* arr = malloc(2*len*sizeof(double));
+    double* running_min = arr;
+    double* running_max = arr+len;
 
-    _double_running_max(high, len, n, running_max+n-1);
-    _double_running_min(low, len, n, running_min+n-1);
+    _double_running_max(high, len, n, running_max);
+    _double_running_min(low, len, n, running_min);
 
-    if (mode == Normal) {
-        _double_sub_arr(running_max + n - 1, running_min + n - 1, len - n + 1,
-                        running_max + n - 1);
-        _double_sub_arr(close + n - 1, running_min + n - 1,
-                        len - n + 1, running_min + n - 1);
-        _double_div_arr(running_min+n-1, running_max+n-1, len-n+1, running_min+n-1);
-        _double_mul(running_min+n-1, len-n+1, 100., running_min+n-1);
-        _double_sma(running_min+n-1, len-n+1, d, running_max+n-1);
-        _double_set_nan(running_max, n-1);
+    _double_sub_arr(running_max, running_min, len,
+                        running_max);
+    _double_sub_arr(close, running_min,
+                        len, running_min);
+    _double_div_arr(running_min, running_max, len, running_min);
+    _double_mul(running_min, len, 100., running_min);
+    _double_sma(running_min, len, d, running_max);
 
-    } else if (mode == Williams) {
-        _double_sub_arr(running_max + n - 1, running_min + n - 1, len - n + 1,
-                        running_min + n - 1);
-        _double_sub_arr(running_max + n - 1, close + n - 1,
-                        len - n + 1, running_max + n - 1);
-        _double_div_arr(running_max+n-1, running_min+n-1, len-n+1, running_min+n-1);
-        _double_mul(running_min+n-1, len-n+1, -100., running_min+n-1);
-        free(running_max);
-        running_max = NULL;
-    }
-
-    _double_set_nan(running_min, n-1);
-
-    double** ret = malloc(2*sizeof(double));
-    ret[0] = running_min;
-    ret[1] = running_max;
-    return ret;
+    return arr;
 }
 
-float** _STOCHASTIC_OSCILLATOR_FLOAT(const float* high, const float* low, float* close, int n, int d, int len, enum stoch_mode mode) {
-    // NOTE: While running_max and running_min are initially running maxes and minimums,
-    //       they are reused later on save memory.
-    float* running_max = malloc(len*sizeof(float));
-    float* running_min = malloc(len*sizeof(float));
+float *_STOCHASTIC_OSCILLATOR_FLOAT(const float *high, const float *low,
+                                    const float *close, int n, int d, int len) {
+    float* arr = malloc(2*len*sizeof(float));
+    float* running_min = arr;
+    float* running_max = arr+len;
 
-    _float_running_max(high, len, n, running_max+n-1);
-    _float_running_min(low, len, n, running_min+n-1);
+    _float_running_max(high, len, n, running_max);
+    _float_running_min(low, len, n, running_min);
 
-    if (mode == Normal) {
-        _float_sub_arr(running_max + n - 1, running_min + n - 1, len - n + 1,
-                        running_max + n - 1);
-        _float_sub_arr(close + n - 1, running_min + n - 1,
-                        len - n + 1, running_min + n - 1);
-        _float_div_arr(running_min+n-1, running_max+n-1, len-n+1, running_min+n-1);
-        _float_mul(running_min+n-1, len-n+1, 100.f, running_min+n-1);
-        _float_sma(running_min+n-1, len-n+1, d, running_max+n-1);
-        _float_set_nan(running_max, n-1);
+    _float_sub_arr(running_max, running_min, len,
+                    running_max);
+    _float_sub_arr(close, running_min,
+                    len, running_min);
+    _float_div_arr(running_min, running_max, len, running_min);
+    _float_mul(running_min, len, 100.f, running_min);
+    _float_sma(running_min, len, d, running_max);
 
-    } else if (mode == Williams) {
-        _float_sub_arr(running_max + n - 1, running_min + n - 1, len - n + 1,
-                        running_min + n - 1);
-        _float_sub_arr(running_max + n - 1, close + n - 1,
-                        len - n + 1, running_max + n - 1);
-        _float_div_arr(running_max+n-1, running_min+n-1, len-n+1, running_min+n-1);
-        _float_mul(running_min+n-1, len-n+1, -100.f, running_min+n-1);
-        free(running_max);
-        running_max = NULL;
-    }
-
-    _float_set_nan(running_min, n-1);
-
-    float** ret = malloc(2*sizeof(float));
-    ret[0] = running_min;
-    ret[1] = running_max;
-    return ret;
+    return arr;
 }
 
 double* _TSI_DOUBLE(const double* close, int r, int s, int len) {
     double* pc = malloc(len*sizeof(double));
     double* apc = malloc(len*sizeof(double));
-    _double_consecutive_diff(close, len-1, pc+1);
-    _double_abs(pc+1, len-1, apc);
-    _double_tsi_fast_ema(pc+1, apc, len-1, r, s);
+    _double_consecutive_diff(close, len, pc);
+    _double_abs(pc, len, apc);
+    _double_tsi_fast_ema(pc+1, apc+1, len-1, r, s);
 
-    _double_div_arr(pc+1, apc, len-1, pc+1);
-    _double_mul(pc+1, len-1, 100., pc+1);
+    _double_div_arr(pc, apc, len, pc);
+    _double_mul(pc, len, 100., pc);
+
 
     _double_set_nan(pc, 1);
 
@@ -315,12 +265,13 @@ double* _TSI_DOUBLE(const double* close, int r, int s, int len) {
 float* _TSI_FLOAT(const float* close, int r, int s, int len) {
     float* pc = malloc(len*sizeof(float));
     float* apc = malloc(len*sizeof(float));
-    _float_consecutive_diff(close, len-1, pc+1);
-    _float_abs(pc+1, len-1, apc);
-    _float_tsi_fast_ema(pc+1, apc, len-1, r, s);
+    _float_consecutive_diff(close, len, pc);
+    _float_abs(pc, len, apc);
+    _float_tsi_fast_ema(pc+1, apc+1, len-1, r, s);
 
-    _float_div_arr(pc+1, apc, len-1, pc+1);
-    _float_mul(pc+1, len-1, 100.f, pc+1);
+    _float_div_arr(pc, apc, len, pc);
+    _float_mul(pc, len, 100.f, pc);
+
 
     _float_set_nan(pc, 1);
 
@@ -412,12 +363,42 @@ float* _ULTIMATE_OSCILLATOR_FLOAT(const float* high, const float* low, const flo
     return uo;
 }
 
-double* _WILLIAMS_R_DOUBLE(const double* high, const double* low, double* close, int n,
+double* _WILLIAMS_R_DOUBLE(const double* high, const double* low, const double* close, int n,
                            int len) {
-    return _STOCHASTIC_OSCILLATOR_DOUBLE(high, low, close, n, -1, len, Williams)[0];
+    double* running_min = malloc(len*sizeof(double));
+    double* running_max = malloc(len*sizeof(double));
+
+    _double_running_max(high, len, n, running_max);
+    _double_running_min(low, len, n, running_min);
+
+    _double_sub_arr(running_max, running_min, len,
+                        running_min);
+    _double_sub_arr(running_max, close,
+                        len, running_max);
+    _double_div_arr(running_max, running_min, len, running_min);
+    _double_mul(running_min, len, -100., running_min);
+
+    free(running_max);
+
+    return running_min;
 }
 
-float* _WILLIAMS_R_FLOAT(const float* high, const float* low, float* close, int n,
+float* _WILLIAMS_R_FLOAT(const float* high, const float* low, const float* close, int n,
                          int len) {
-    return _STOCHASTIC_OSCILLATOR_FLOAT(high, low, close, n, -1, len, Williams)[0];
+    float* running_min = malloc(len*sizeof(float));
+    float* running_max = malloc(len*sizeof(float));
+
+    _float_running_max(high, len, n, running_max);
+    _float_running_min(low, len, n, running_min);
+
+    _float_sub_arr(running_max, running_min, len,
+                    running_min);
+    _float_sub_arr(running_max, close,
+                    len, running_max);
+    _float_div_arr(running_max, running_min, len, running_min);
+    _float_mul(running_min, len, -100.f, running_min);
+
+    free(running_max);
+
+    return running_min;
 }
