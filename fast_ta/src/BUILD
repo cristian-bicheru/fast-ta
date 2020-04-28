@@ -44,7 +44,36 @@ cc_library(
 cc_library(
     name = "testing_common",
     hdrs = ["testing_common.h"],
-)
+    data = [
+	"//fast_ta/src/test_data:sample_close_data.txt",
+	"//fast_ta/src/test_data:sample_high_data.txt",
+	"//fast_ta/src/test_data:sample_low_data.txt",
+	"//fast_ta/src/test_data:sample_open_data.txt",
+	"//fast_ta/src/test_data:sample_volume_data.txt",
+	"//fast_ta/src/test_data:rsi_ref.txt",
+	"//fast_ta/src/test_data:ao_ref.txt",
+	"//fast_ta/src/test_data:kama_ref.txt",
+	"//fast_ta/src/test_data:roc_ref.txt",
+	"//fast_ta/src/test_data:stoch_ref.txt",
+	"//fast_ta/src/test_data:stoch_signal_ref.txt",
+	"//fast_ta/src/test_data:tsi_ref.txt",
+	"//fast_ta/src/test_data:uo_ref.txt",
+	"//fast_ta/src/test_data:wr_ref.txt",
+	"//fast_ta/src/test_data:atr_ref.txt",
+	"//fast_ta/src/test_data:boll_ref.txt",
+	"//fast_ta/src/test_data:bolm_ref.txt",
+	"//fast_ta/src/test_data:bolh_ref.txt",
+	"//fast_ta/src/test_data:adi_ref.txt",
+	"//fast_ta/src/test_data:cmf_ref.txt",
+	"//fast_ta/src/test_data:emv_ref.txt",
+	"//fast_ta/src/test_data:emv_sma_ref.txt",
+	"//fast_ta/src/test_data:fi_ref.txt",
+	"//fast_ta/src/test_data:mfi_ref.txt",
+	"//fast_ta/src/test_data:nvi_ref.txt",
+	"//fast_ta/src/test_data:obv_ref.txt",
+	"//fast_ta/src/test_data:vpt_ref.txt",
+	"//fast_ta/src/test_data:vwap_ref.txt",
+])
 
 ##################### Core Library #####################
 cc_library(
