@@ -1,5 +1,6 @@
 simd=$(python3.7 -c "import detect_simd; print(detect_simd.detect())")
 rm fast_ta/*.so
+python3.7 -m pip install ta
 
 echo -e "\e[1m\e[34mBenchmarking without SIMD..."
 python3.7 setup_custom_arch.py build_ext --inplace > /dev/null
