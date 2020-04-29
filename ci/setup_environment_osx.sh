@@ -14,6 +14,7 @@ sudo ln -sfn $dest /usr/local/include/numpy
 pyincludes=$(python3.7-config --includes)
 pyinc=$(echo $pyincludes | tr " " "\n")
 pyinc=(${pyinc[0]})
+pyinc=(${pyinc:2})
 
 cat > WORKSPACE <<- EOM
 workspace(name = 'fast_ta')
