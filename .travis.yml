@@ -21,13 +21,13 @@ branches:
     - master
 
 before_install:
-  - chmod +x setup_environment_${TRAVIS_OS_NAME}.sh
+  - chmod +x ci/setup_environment_${TRAVIS_OS_NAME}.sh
   - ./ci/setup_environment_${TRAVIS_OS_NAME}.sh
 
 script:
-  - chmod +x run_tests_${TRAVIS_OS_NAME}.sh
+  - chmod +x ci/run_tests_${TRAVIS_OS_NAME}.sh
   - ./ci/run_tests_${TRAVIS_OS_NAME}.sh
 
 after_success:
-  - chmod +x upload_codecov_xenial.sh
+  - chmod +x ci/upload_codecov_${TRAVIS_OS_NAME}.sh
   - ./ci/upload_codecov_${TRAVIS_OS_NAME}.sh
