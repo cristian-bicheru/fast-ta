@@ -1,5 +1,40 @@
 workspace(name = 'fast_ta')
 
+new_local_repository(
+    name = "python",
+    path = "/usr/include/python3.7",
+    build_file_content = """
+package(default_visibility = ["//visibility:public"])
+cc_library(
+    name = "headers",
+    hdrs = glob(["**/*.h"])
+)
+"""
+)
+
+new_local_repository(
+    name = "include",
+    path = "/usr/include",
+    build_file_content = """
+package(default_visibility = ["//visibility:public"])
+cc_library(
+    name = "headers",
+    hdrs = glob(["**/*.h"])
+)
+"""
+)
+
+new_local_repository(
+    name = "localinclude",
+    path = "/usr/local/include",
+    build_file_content = """
+package(default_visibility = ["//visibility:public"])
+cc_library(
+    name = "headers",
+    hdrs = glob(["**/*.h"])
+)
+"""
+)
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 

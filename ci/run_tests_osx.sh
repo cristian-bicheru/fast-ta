@@ -1,6 +1,6 @@
 simd=$(python3.7 -c "import detect_simd; print(detect_simd.detect())")
-echo "Detected SIMD Capabilities:"
-echo $simd
+echo -e "\e[1m\e[34mDetected SIMD Capabilities:"
+echo -e "\e[1m\e[34m"$simd
 
 bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99" --collect_code_coverage
 mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/momentum_backend_tests/coverage.dat no_simd1.dat

@@ -4,10 +4,9 @@ matrix:
   include:
     - os: linux
       dist: xenial
-      compiler: clang
-    - os: linux
-      dist: xenial
-      compiler: gcc
+      compiler:
+        - clang
+        - gcc
     - os: osx
       compiler: clang
 

@@ -4,9 +4,15 @@ package(default_visibility = ["//fast_ta:__subpackages__",
 # this will vary from system to system. The best/simplist solution currently
 # is for each fast_ta developer to switch this to their own path.
 PYTHON_INCLUDE = [
-    "-I/usr/include/python3.7",
-    "-I/usr/include/",
-    "-I/usr/local/include/",
+    "-Iexternal/python",
+    "-Iexternal/include",
+    "-Iexternal/localinclude",
+]
+
+PYTHON_DEPS = [
+    "@python//:headers",
+    "@include//:headers",
+    "@localinclude//:headers",
 ]
 
 ##################### Structs #####################
@@ -27,6 +33,7 @@ cc_library(
     srcs = ["debug_tools.c"],
     hdrs = ["debug_tools.h"],
     copts = PYTHON_INCLUDE,
+    deps = PYTHON_DEPS,
 )
 
 cc_library(
@@ -34,6 +41,7 @@ cc_library(
     srcs = ["error_methods.c"],
     hdrs = ["error_methods.h"],
     copts = PYTHON_INCLUDE,
+    deps = PYTHON_DEPS,
 )
 
 cc_library(
@@ -89,7 +97,7 @@ cc_library(
     hdrs = ["funcs.h"],
     deps = [
         ":generic_simd",
-    ],
+    ]+PYTHON_DEPS,
     copts = PYTHON_INCLUDE
 )
 
@@ -99,7 +107,7 @@ cc_library(
     hdrs = ["momentum_backend.h"],
     deps = [
         ":funcs",
-    ],
+    ]+PYTHON_DEPS,
     copts = PYTHON_INCLUDE,
 )
 
@@ -110,7 +118,7 @@ cc_library(
     deps = [
         ":funcs",
         ":2darray",
-    ],
+    ]+PYTHON_DEPS,
     copts = PYTHON_INCLUDE,
 )
 
@@ -121,7 +129,7 @@ cc_library(
     deps = [
         ":funcs",
         ":2darray",
-    ],
+    ]+PYTHON_DEPS,
     copts = PYTHON_INCLUDE,
 )
 
@@ -180,7 +188,7 @@ cc_library(
     deps = [
         ":momentum_backend",
         ":parallel_momentum_backend",
-    ],
+    ]+PYTHON_DEPS,
     copts = PYTHON_INCLUDE,
 )
 
@@ -191,7 +199,7 @@ cc_library(
         ":volume_backend",
         ":error_methods",
         ":2darray",
-    ],
+    ]+PYTHON_DEPS,
     copts = PYTHON_INCLUDE,
 )
 
@@ -202,6 +210,6 @@ cc_library(
         ":volatility_backend",
         ":error_methods",
 	":2darray",
-    ],
+    ]+PYTHON_DEPS,
     copts = PYTHON_INCLUDE,
 )
