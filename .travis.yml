@@ -19,6 +19,7 @@ addons:
     packages:
       - wget
       - python3.7-dev
+      - csvtool
 
 branches:
   only:
@@ -35,3 +36,5 @@ script:
 after_success:
   - chmod +x ci/upload_codecov_${TRAVIS_OS_NAME}.sh
   - ./ci/upload_codecov_${TRAVIS_OS_NAME}.sh
+  - chmod +x ci/benchmark_${TRAVIS_OS_NAME}.sh
+  - ./ci/benchmark_${TRAVIS_OS_NAME}.sh

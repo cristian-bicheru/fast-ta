@@ -26,6 +26,15 @@ def bench(n, dtype):
     
     return times
 
+def bench_fast_ta(n, dtype):
+    data = np.array(range(n), dtype=dtype)
+
+    s = time.perf_counter()
+    fast_ta.volume.NVI(data, data)
+    times = time.perf_counter()-s
+    
+    return times
+
 if __name__ == '__main__':
     for dtype in [np.float32, np.float64]:
         t_max = 10**4

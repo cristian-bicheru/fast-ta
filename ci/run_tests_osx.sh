@@ -1,6 +1,6 @@
 simd=$(python3.7 -c "import detect_simd; print(detect_simd.detect())")
-echo -e "\x1B[1m\e[34mDetected SIMD Capabilities:"
-echo -e "\x1B[1m\e[34m"$simd
+echo -e "\x1B[1m\x1B[34mDetected SIMD Capabilities:"
+echo -e "\x1B[1m\x1B[34m"$simd
 
 bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99"
 sudo rm -r ~/.cache/bazel
