@@ -1,5 +1,3 @@
-cd ../
-
 curl -LO https://github.com/bazelbuild/bazel/releases/download/3.0.0/bazel-3.0.0-installer-darwin-x86_64.sh
 chmod +x bazel-3.0.0-installer-darwin-x86_64.sh
 ./bazel-3.0.0-installer-darwin-x86_64.sh --user
