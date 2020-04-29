@@ -136,7 +136,7 @@ cc_library(
 cc_test(
     name = "momentum_backend_tests",
     srcs = ["momentum_backend.test.cpp"],
-    copts = ["-Iexternal/gtest/include"],
+    copts = ["-isystem external/gtest/include"],
     deps = [
         "@gtest//:main",
         ":momentum_backend",
@@ -147,7 +147,7 @@ cc_test(
 cc_test(
     name = "volume_backend_tests",
     srcs = ["volume_backend.test.cpp"],
-    copts = ["-Iexternal/gtest/include"],
+    copts = ["-isystem external/gtest/include"],
     deps = [
         "@gtest//:main",
         ":volume_backend",
@@ -158,7 +158,7 @@ cc_test(
 cc_test(
     name = "volatility_backend_tests",
     srcs = ["volatility_backend.test.cpp"],
-    copts = ["-Iexternal/gtest/include"],
+    copts = ["-isystem external/gtest/include"],
     deps = [
         "@gtest//:main",
         ":volatility_backend",
