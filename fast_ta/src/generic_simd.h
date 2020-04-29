@@ -18,7 +18,6 @@
 int float_get_next_index(int len, int start);
 int double_get_next_index(int len, int start);
 
-
 /** Generic SIMD Support **/
 
 #ifdef AVX
@@ -326,6 +325,14 @@ int double_get_next_index(int len, int start);
 
     inline __attribute__((always_inline)) __double_vector _double_loadu(const double* addr) {
         return _mm512_loadu_pd(addr);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_loadu2(const double* A, const double* B) {
+        return _mm512_insertf64x4(_mm512_setzero_pd(), _mm256_insertf128_pd(_mm256_castpd128_pd256(_mm_loadu_pd(A)), _mm_loadu_pd(B), 1), 0);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_loadu2_from_float(const float* A, const float* B) {
+        return _double_loadu((double[4]) {A[0], A[1], B[0], B[1]});
     }
 
     inline __attribute__((always_inline)) __float_vector _float_add_vec(__float_vector A, __float_vector B) {
