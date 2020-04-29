@@ -4,9 +4,9 @@ Fast TA |version| Documentation
 
 Fast TA is an optimized, high-level technical analysis library used to 
 compute technical indicators on financial datasets. It is written entirely
-in C, and uses `AVX`_ vectorization as well. Fast TA is built with the `NumPy C API`_.
+in C, and uses `SIMD`_ vectorization as well. Fast TA is built with the `NumPy C API`_.
 
-.. _AVX: https://en.wikipedia.org/wiki/Advanced_Vector_Extensions
+.. _SIMD: https://en.wikipedia.org/wiki/SIMD
 .. _NumPy C API: https://docs.scipy.org/doc/numpy/reference/c-api.html
 
 

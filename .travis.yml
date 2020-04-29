@@ -1,5 +1,11 @@
 dist: xenial
 
+matrix:
+  include:
+    - os: linux
+      dist: xenial
+    - os: osx
+
 addons:
   apt:
     update: true
@@ -10,55 +16,18 @@ addons:
       - wget
       - python3.7-dev
 
+branches:
+  only:
+    - master
+
 before_install:
-  - wget https://github.com/bazelbuild/bazel/releases/download/3.0.0/bazel-3.0.0-installer-linux-x86_64.sh
-  - chmod +x bazel-3.0.0-installer-linux-x86_64.sh
-  - ./bazel-3.0.0-installer-linux-x86_64.sh --user
-  - export PATH="$PATH:$HOME/bin"
-  - wget https://bootstrap.pypa.io/get-pip.py
-  - python3.7 get-pip.py
-  - python3.7 -m pip install -U pip
-  - python3.7 -m pip install --upgrade setuptools
-  - python3.7 -m pip install --upgrade cython
-  - python3.7 -m pip install numpy detect-simd
-  - dest=$(python3.7 -c "import numpy; print(numpy.get_include()+'/numpy')")
-  - sudo ln -sfn $dest /usr/include/numpy
+  - chmod +x setup_environment_${TRAVIS_OS_NAME}.sh
+  - ./ci/setup_environment_${TRAVIS_OS_NAME}.sh
 
 script:
-  - simd=$(python3.7 -c "import detect_simd; print(detect_simd.detect())")
-  - echo $simd
-  - bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99" --collect_code_coverage
-  - mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/momentum_backend_tests/coverage.dat no_simd1.dat
-  - mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/volume_backend_tests/coverage.dat no_simd2.dat
-  - mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/volatility_backend_tests/coverage.dat no_simd3.dat
-  - sudo rm -r ~/.cache/bazel
-  - |
-    if [[ $simd == *"'SSE2': 1"* ]]; then echo "SSE2 Support Detected, Running Tests..."; bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99" --define=SSE2=1 --copt="-msse2" --collect_code_coverage; fi
-  - mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/momentum_backend_tests/coverage.dat sse21.dat
-  - mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/volume_backend_tests/coverage.dat sse22.dat
-  - mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/volatility_backend_tests/coverage.dat sse23.dat
-  - sudo rm -r ~/.cache/bazel
-  - |
-    if [[ $simd == *"'AVX': 1"* ]]; then echo "AVX Support Detected, Running Tests..."; bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99" --define=AVX=1 --copt="-mavx" --collect_code_coverage; fi
-  - mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/momentum_backend_tests/coverage.dat avx1.dat
-  - mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/volume_backend_tests/coverage.dat avx2.dat
-  - mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/volatility_backend_tests/coverage.dat avx3.dat
-  - sudo rm -r ~/.cache/bazel
-  - |
-    if [[ $simd == *"'AVX512': 1"* ]]; then echo "AVX512 Support Detected, Running Tests..."; bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99" --define=AVX512=1 --copt="-mavx512f" --collect_code_coverage; fi
-  - mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/momentum_backend_tests/coverage.dat avx5121.dat
-  - mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/volume_backend_tests/coverage.dat avx5122.dat
-  - mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/volatility_backend_tests/coverage.dat avx5123.dat
+  - chmod +x run_tests_${TRAVIS_OS_NAME}.sh
+  - ./ci/run_tests_${TRAVIS_OS_NAME}.sh
 
 after_success:
-  - curl --connect-timeout 10 --max-time 10 --retry 5 --retry-delay 0 --retry-max-time 120 https://codecov.io/bash -o uploader.sh
-  - chmod +x uploader.sh
-  - ./uploader.sh -f no_simd1.dat
-  - ./uploader.sh -f no_simd2.dat
-  - ./uploader.sh -f no_simd3.dat
-  - |
-    if [[ $simd == *"'SSE2': 1"* ]]; then ./uploader.sh -f sse21.dat; ./uploader.sh -f sse22.dat; ./uploader.sh -f sse23.dat; fi
-  - |
-    if [[ $simd == *"'AVX': 1"* ]]; then ./uploader.sh -f avx1.dat; ./uploader.sh -f avx2.dat; ./uploader.sh -f avx3.dat; fi
-  - |
-    if [[ $simd == *"'AVX512': 1"* ]]; then ./uploader.sh -f avx5121.dat; ./uploader.sh -f avx5122.dat; ./uploader.sh -f avx5123.dat; fi
+  - chmod +x upload_codecov_xenial.sh
+  - ./ci/upload_codecov_${TRAVIS_OS_NAME}.sh
