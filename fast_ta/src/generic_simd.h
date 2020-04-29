@@ -368,12 +368,12 @@ int double_get_next_index(int len, int start);
         return _mm512_set1_pd(a);
     }
 
-    inline __attribute__((always_inline)) __float_vector _float_set_vec(float a, float b, float c, float d) {
-        return _mm512_set_ps(a, b, c, d);
+    inline __attribute__((always_inline)) __float_vector _float_set_vec(float a, float b, float c, float d, float e, float f, float g, float h, float i, float j, float k, float l, float m, float n, float o, float p) {
+        return _mm512_set_ps(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p);
     }
 
-    inline __attribute__((always_inline)) __double_vector _double_set_vec(double a, double b) {
-        return _mm512_set_pd(a, b);
+    inline __attribute__((always_inline)) __double_vector _double_set_vec(double a, double b, double c, double d, double e, double f, double g, double h) {
+        return _mm512_set_pd(a, b, c, d, e, f, g, h);
     }
 
     inline __attribute__((always_inline)) __float_vector _float_abs_vec(__float_vector x, __float_vector sign_mask) {
