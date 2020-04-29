@@ -6,6 +6,7 @@ package(default_visibility = ["//fast_ta:__subpackages__",
 PYTHON_INCLUDE = [
     "-I/usr/include/python3.7",
     "-I/usr/include/",
+    "-I/usr/local/include/",
 ]
 
 ##################### Structs #####################
