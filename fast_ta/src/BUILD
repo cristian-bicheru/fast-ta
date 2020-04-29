@@ -4,9 +4,9 @@ package(default_visibility = ["//fast_ta:__subpackages__",
 # this will vary from system to system. The best/simplist solution currently
 # is for each fast_ta developer to switch this to their own path.
 PYTHON_INCLUDE = [
-    "-Iexternal/python",
-    "-Iexternal/include",
-    "-Iexternal/localinclude",
+    "-isystem external/python",
+    "-isystem external/include",
+    "-isystem external/localinclude",
 ]
 
 PYTHON_DEPS = [
