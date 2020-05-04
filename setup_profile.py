@@ -6,6 +6,7 @@ except ImportError:
     from distutils.core import setup, Extension
 
 import os
+import psutil
 
 if "profile" in os.listdir():
     import shutil
@@ -34,22 +35,23 @@ class FastTABuild(build_ext):
 
 common_backend = ['fast_ta/src/error_methods.c', 'fast_ta/src/funcs.c', 'fast_ta/src/2darray.c', 'fast_ta/src/generic_simd.c']
 profile_args = ['-lgcov', '-fprofile-generate=/'+os.getcwd()+'/profile', '-fbranch-probabilities']
-compile_args = ['-O3', '-march=native', '-mtune=native', '-malign-double', '-falign-loops=16',
-                '-fomit-frame-pointer', '-frename-registers', '-flto']+profile_args
-        
+compile_args = ['-O3', '-march=native', '-mtune=native', '-malign-double', '-falign-loops=32', '-floop-parallelize-all',
+                '-ftree-parallelize-loops='+str(psutil.cpu_count(logical=False)), '-fomit-frame-pointer', '-frename-registers',
+                '-flto']+profile_args
+
 momentum_ext = Extension('fast_ta/momentum',
                    sources=['fast_ta/src/momentum.c', 'fast_ta/src/momentum_backend.c',
                             'fast_ta/src/parallel_momentum_backend.c']+common_backend,
                    extra_compile_args=compile_args,
-                   extra_link_args = profile_args)
+                   extra_link_args = compile_args)
 volume_ext = Extension('fast_ta/volume',
                    sources=['fast_ta/src/volume.c', 'fast_ta/src/volume_backend.c']+common_backend,
                    extra_compile_args=compile_args,
-                   extra_link_args = profile_args)
+                   extra_link_args = compile_args)
 volatility_ext = Extension('fast_ta/volatility',
                    sources=['fast_ta/src/volatility.c', 'fast_ta/src/volatility_backend.c']+common_backend,
                    extra_compile_args=compile_args,
-                   extra_link_args = profile_args)
+                   extra_link_args = compile_args)
 
 setup(name = 'fast_ta',
       packages = ["fast_ta"],
