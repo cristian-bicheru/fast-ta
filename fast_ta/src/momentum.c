@@ -45,6 +45,7 @@ static PyObject* RSI(PyObject* self, PyObject* args, PyObject* kwargs) {
 
             Py_DECREF(arr);
             PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT64, rsi);
+            PyArray_ENABLEFLAGS((PyArrayObject *) ret, NPY_ARRAY_OWNDATA);
             return ret;
         }
         case NPY_FLOAT32: {
@@ -55,6 +56,7 @@ static PyObject* RSI(PyObject* self, PyObject* args, PyObject* kwargs) {
 
             Py_DECREF(arr);
             PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT32, rsi);
+            PyArray_ENABLEFLAGS((PyArrayObject *) ret, NPY_ARRAY_OWNDATA);
             return ret;
         }
         default:
@@ -115,6 +117,7 @@ static PyObject* AO(PyObject* self, PyObject* args, PyObject* kwargs) {
             Py_DECREF(_high);
             Py_DECREF(_low);
             PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT64, ao);
+            PyArray_ENABLEFLAGS((PyArrayObject *) ret, NPY_ARRAY_OWNDATA);
             return ret;
         }
         case NPY_FLOAT32: {
@@ -126,6 +129,7 @@ static PyObject* AO(PyObject* self, PyObject* args, PyObject* kwargs) {
             Py_DECREF(_high);
             Py_DECREF(_low);
             PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT32, ao);
+            PyArray_ENABLEFLAGS((PyArrayObject *) ret, NPY_ARRAY_OWNDATA);
             return ret;
         }
         default:
@@ -171,6 +175,7 @@ static PyObject* KAMA(PyObject* self, PyObject* args, PyObject* kwargs) {
 
             Py_DECREF(_close);
             PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT64, kama);
+            PyArray_ENABLEFLAGS((PyArrayObject *) ret, NPY_ARRAY_OWNDATA);
             return ret;
         }
         case NPY_FLOAT32: {
@@ -180,6 +185,7 @@ static PyObject* KAMA(PyObject* self, PyObject* args, PyObject* kwargs) {
 
             Py_DECREF(_close);
             PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT32, kama);
+            PyArray_ENABLEFLAGS((PyArrayObject *) ret, NPY_ARRAY_OWNDATA);
             return ret;
         }
         default:
@@ -219,6 +225,7 @@ static PyObject* ROC(PyObject* self, PyObject* args, PyObject* kwargs) {
 
             Py_DECREF(_close);
             PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT64, roc);
+            PyArray_ENABLEFLAGS((PyArrayObject *) ret, NPY_ARRAY_OWNDATA);
             return ret;
         }
         case NPY_FLOAT32: {
@@ -228,6 +235,7 @@ static PyObject* ROC(PyObject* self, PyObject* args, PyObject* kwargs) {
 
             Py_DECREF(_close);
             PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT32, roc);
+            PyArray_ENABLEFLAGS((PyArrayObject *) ret, NPY_ARRAY_OWNDATA);
             return ret;
         }
         default:
@@ -297,6 +305,7 @@ static PyObject* STOCHASTIC_OSCILLATOR(PyObject* self, PyObject* args, PyObject*
             Py_DECREF(low);
             Py_DECREF(close);
             PyObject* ret = PyArray_SimpleNewFromData(2, dims, NPY_FLOAT64, so);
+            PyArray_ENABLEFLAGS((PyArrayObject *) ret, NPY_ARRAY_OWNDATA);
             return ret;
         }
         case NPY_FLOAT32: {
@@ -311,6 +320,7 @@ static PyObject* STOCHASTIC_OSCILLATOR(PyObject* self, PyObject* args, PyObject*
             Py_DECREF(low);
             Py_DECREF(close);
             PyObject* ret = PyArray_SimpleNewFromData(2, dims, NPY_FLOAT32, so);
+            PyArray_ENABLEFLAGS((PyArrayObject *) ret, NPY_ARRAY_OWNDATA);
             return ret;
         }
         default:
@@ -353,6 +363,7 @@ static PyObject* TSI(PyObject* self, PyObject* args, PyObject* kwargs) {
 
             Py_DECREF(_close);
             PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT64, tsi);
+            PyArray_ENABLEFLAGS((PyArrayObject *) ret, NPY_ARRAY_OWNDATA);
             return ret;
         }
         case NPY_FLOAT32: {
@@ -362,6 +373,7 @@ static PyObject* TSI(PyObject* self, PyObject* args, PyObject* kwargs) {
 
             Py_DECREF(_close);
             PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT32, tsi);
+            PyArray_ENABLEFLAGS((PyArrayObject *) ret, NPY_ARRAY_OWNDATA);
             return ret;
         }
         default:
@@ -442,6 +454,7 @@ static PyObject* ULTIMATE_OSCILLATOR(PyObject* self, PyObject* args, PyObject* k
             Py_DECREF(_low);
             Py_DECREF(_close);
             PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT64, uo);
+            PyArray_ENABLEFLAGS((PyArrayObject *) ret, NPY_ARRAY_OWNDATA);
             return ret;
         }
         case NPY_FLOAT32: {
@@ -455,6 +468,7 @@ static PyObject* ULTIMATE_OSCILLATOR(PyObject* self, PyObject* args, PyObject* k
             Py_DECREF(_low);
             Py_DECREF(_close);
             PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT32, uo);
+            PyArray_ENABLEFLAGS((PyArrayObject *) ret, NPY_ARRAY_OWNDATA);
             return ret;
         }
         default:
@@ -520,6 +534,7 @@ static PyObject* WILLIAMS_R(PyObject* self, PyObject* args, PyObject* kwargs) {
             Py_DECREF(low);
             Py_DECREF(close);
             PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT64, wr);
+            PyArray_ENABLEFLAGS((PyArrayObject *) ret, NPY_ARRAY_OWNDATA);
             return ret;
         }
         case NPY_FLOAT32: {
@@ -533,6 +548,7 @@ static PyObject* WILLIAMS_R(PyObject* self, PyObject* args, PyObject* kwargs) {
             Py_DECREF(low);
             Py_DECREF(close);
             PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT32, wr);
+            PyArray_ENABLEFLAGS((PyArrayObject *) ret, NPY_ARRAY_OWNDATA);
             return ret;
         }
         default:

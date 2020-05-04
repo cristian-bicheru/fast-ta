@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <malloc.h>
 #include <stdio.h>
 
 #include "funcs.h"
@@ -187,16 +188,14 @@ float* _KAMA_FLOAT(const float* close, int n1, int n2, int n3, int len) {
 }
 
 double* _ROC_DOUBLE(const double* close, int n, int len) {
-    double* roc = malloc(len*sizeof(double));
-    _double_sub_arr(close + n, close, len - n, roc + n);
-    _double_div_arr(roc+n, close, len-n, roc+n);
-    _double_mul(roc+n, len-n, 100., roc+n);
+    double* roc = malloc( len*sizeof(double));
+    _intrin_fast_double_roc(close, roc, len, n);
     _double_set_nan(roc, n);
     return roc;
 }
 
 float* _ROC_FLOAT(const float* close, int n, int len) {
-    float* roc = malloc(len*sizeof(float));
+    float* roc = malloc( len*sizeof(float));
     _float_sub_arr(close + n, close, len - n, roc + n);
     _float_div_arr(roc+n, close, len-n, roc+n);
     _float_mul(roc+n, len-n, 100.f, roc+n);

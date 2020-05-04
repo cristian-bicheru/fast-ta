@@ -1,5 +1,6 @@
 #pragma once
 #include <math.h>
+#include <float.h>
 
 #ifndef max
 #define max(a,b) ((a) > (b) ? (a) : (b))
@@ -23,11 +24,18 @@ int double_get_next_index(int len, int start);
 #ifdef AVX
 /** AVX Support **/
     #include <immintrin.h>
+
     #define __float_vector __m256
     #define __double_vector __m256d
+    #define __int_vector __m256i
     #define FLOAT_VEC_SIZE 8
     #define DOUBLE_VEC_SIZE 4
     #define simd_malloc(size) (alligned_malloc(256, size))
+
+    extern const float fltmax[8];
+    extern const float nfltmax[8];
+    extern const double dblmax[4];
+    extern const double ndblmax[4];
 
     inline __attribute__((always_inline)) void _float_storeu(float* addr, const __float_vector A) {
         _mm256_storeu_ps(addr, A);
@@ -43,6 +51,26 @@ int double_get_next_index(int len, int start);
 
     inline __attribute__((always_inline)) __double_vector _double_loadu(const double* addr) {
         return _mm256_loadu_pd(addr);
+    }
+
+    inline __attribute__((always_inline)) __int_vector _int_loadu(const void* addr) {
+        return _mm256_loadu_si256((__int_vector*) addr);
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_maskload(const float* addr, const __int_vector mask) {
+        return _mm256_maskload_ps(addr, mask);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_maskload(const double* addr, const __int_vector mask) {
+        return _mm256_maskload_pd(addr, mask);
+    }
+
+    inline __attribute__((always_inline)) void _float_maskstore(float* addr, const __int_vector mask, const __float_vector A) {
+        _mm256_maskstore_ps(addr, mask, A);
+    }
+
+    inline __attribute__((always_inline)) void _double_maskstore(double* addr, const __int_vector mask, const __double_vector A) {
+        _mm256_maskstore_pd(addr, mask, A);
     }
 
     inline __attribute__((always_inline)) __float_vector _float_add_vec(__float_vector A, __float_vector B) {
@@ -117,12 +145,28 @@ int double_get_next_index(int len, int start);
         return _mm256_max_pd(A, B);
     }
 
+    inline __attribute__((always_inline)) __float_vector _float_mask_max_vec(__float_vector A, __float_vector B, __int_vector mask) {
+        return _mm256_blendv_ps(_mm256_loadu_ps(nfltmax), _mm256_max_ps(A, B), (__m256) mask);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_mask_max_vec(__double_vector A, __double_vector B, __int_vector mask) {
+        return _mm256_blendv_pd(_mm256_loadu_pd(ndblmax), _mm256_max_pd(A, B), (__m256d) mask);
+    }
+
     inline __attribute__((always_inline)) __float_vector _float_min_vec(__float_vector A, __float_vector B) {
         return _mm256_min_ps(A, B);
     }
 
     inline __attribute__((always_inline)) __double_vector _double_min_vec(__double_vector A, __double_vector B) {
         return _mm256_min_pd(A, B);
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_mask_min_vec(__float_vector A, __float_vector B, __int_vector mask) {
+        return _mm256_blendv_ps(_mm256_loadu_ps(fltmax), _mm256_min_ps(A, B), (__m256) mask);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_mask_min_vec(__double_vector A, __double_vector B, __int_vector mask) {
+        return _mm256_blendv_pd(_mm256_loadu_pd(dblmax), _mm256_min_pd(A, B), (__m256d) mask);
     }
 
     inline __attribute__((always_inline)) __float_vector _float_setzero_vec() {
@@ -170,6 +214,7 @@ int double_get_next_index(int len, int start);
     #include <immintrin.h>
     #define __float_vector __m128
     #define __double_vector __m128d
+    #define __int_vector __m128i
     #define FLOAT_VEC_SIZE 4
     #define DOUBLE_VEC_SIZE 2
     #define simd_malloc(size) (alligned_malloc(128, size))
@@ -188,6 +233,38 @@ int double_get_next_index(int len, int start);
 
     inline __attribute__((always_inline)) __double_vector _double_loadu(const double* addr) {
         return _mm_loadu_pd(addr);
+    }
+
+    inline __attribute__((always_inline)) __int_vector _int_loadu(const void* addr) {
+        return _mm_loadu_si128((__int_vector*) addr);
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_maskload(const float* addr, const __int_vector mask) {
+        return _mm_set_ps(mask[0] != 0 ? addr[0] : 0,
+                          mask[32] != 0 ? addr[1] : 0,
+                          mask[64] != 0 ? addr[2] : 0,
+                          mask[96] != 0 ? addr[3] : 0);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_maskload(const double* addr, const __int_vector mask) {
+        return _mm_set_pd(mask[0] != 0 ? addr[0] : 0,
+                          mask[32] != 0 ? addr[1] : 0);
+    }
+
+    inline __attribute__((always_inline)) void _float_maskstore(float* addr, const __int_vector mask, const __float_vector A) {
+        for (int i = 0; i < FLOAT_VEC_SIZE; i++) {
+            if (mask[i*32] != 0) {
+                addr[i] = A[i];
+            }
+        }
+    }
+
+    inline __attribute__((always_inline)) void _double_maskstore(double* addr, const __int_vector mask, const __double_vector A) {
+        for (int i = 0; i < DOUBLE_VEC_SIZE; i++) {
+            if (mask[i*32] != 0) {
+                addr[i] = A[i];
+            }
+        }
     }
 
     inline __attribute__((always_inline)) __float_vector _float_add_vec(__float_vector A, __float_vector B) {
@@ -254,12 +331,40 @@ int double_get_next_index(int len, int start);
         return _mm_max_pd(A, B);
     }
 
+    inline __attribute__((always_inline)) __float_vector _float_mask_max_vec(__float_vector A, __float_vector B, __int_vector mask) {
+        __m128 v = _mm_max_ps(A, B);
+        return _mm_set_ps(mask[0] != 0 ? v[0] : -FLT_MAX,
+                          mask[32] != 0 ? v[1] : -FLT_MAX,
+                          mask[64] != 0 ? v[2] : -FLT_MAX,
+                          mask[96] != 0 ? v[3] : -FLT_MAX);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_mask_max_vec(__double_vector A, __double_vector B, __int_vector mask) {
+        __m128d v = _mm_max_pd(A, B);
+        return _mm_set_pd(mask[0] != 0 ? v[0] : -DBL_MAX,
+                          mask[32] != 0 ? v[1] : -DBL_MAX);
+    }
+
     inline __attribute__((always_inline)) __float_vector _float_min_vec(__float_vector A, __float_vector B) {
         return _mm_min_ps(A, B);
     }
 
     inline __attribute__((always_inline)) __double_vector _double_min_vec(__double_vector A, __double_vector B) {
         return _mm_min_pd(A, B);
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_mask_min_vec(__float_vector A, __float_vector B, __int_vector mask) {
+        __m128 v = _mm_min_ps(A, B);
+        return _mm_set_ps(mask[0] != 0 ? v[0] : FLT_MAX,
+                          mask[32] != 0 ? v[1] : FLT_MAX,
+                          mask[64] != 0 ? v[2] : FLT_MAX,
+                          mask[96] != 0 ? v[3] : FLT_MAX);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_mask_min_vec(__double_vector A, __double_vector B, __int_vector mask) {
+        __m128d v = _mm_min_pd(A, B);
+        return _mm_set_pd(mask[0] != 0 ? v[0] : DBL_MAX,
+                          mask[32] != 0 ? v[1] : DBL_MAX);
     }
 
     inline __attribute__((always_inline)) __float_vector _float_setzero_vec() {
@@ -305,8 +410,10 @@ int double_get_next_index(int len, int start);
 #elif defined(AVX512)
 /** AVX512 Support **/
     #include <immintrin.h>
+
     #define __float_vector __m512
     #define __double_vector __m512d
+    #define __int_vector __mmask16
     #define FLOAT_VEC_SIZE 16
     #define DOUBLE_VEC_SIZE 8
     #define simd_malloc(size) (alligned_malloc(512, size))
@@ -325,6 +432,26 @@ int double_get_next_index(int len, int start);
 
     inline __attribute__((always_inline)) __double_vector _double_loadu(const double* addr) {
         return _mm512_loadu_pd(addr);
+    }
+
+    inline __attribute__((always_inline)) __int_vector _int_loadu(const void* addr) {
+        return _load_mask16((__int_vector*) addr);
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_maskload(const float* addr, const __int_vector mask) {
+        return _mm512_mask_loadu_ps(_mm512_setzero_ps(), mask, addr);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_maskload(const double* addr, const __int_vector mask) {
+        return _mm512_mask_loadu_pd(_mm512_setzero_pd(), (__mmask8) mask, addr);
+    }
+
+    inline __attribute__((always_inline)) void _float_maskstore(float* addr, const __int_vector mask, const __float_vector A) {
+        _mm512_mask_storeu_ps(addr, mask, A);
+    }
+
+    inline __attribute__((always_inline)) void _double_maskstore(double* addr, const __int_vector mask, __double_vector A) {
+        _mm512_mask_storeu_pd(addr, mask, A);
     }
 
     inline __attribute__((always_inline)) __double_vector _double_loadu2(const double* A, const double* B) {
@@ -399,12 +526,28 @@ int double_get_next_index(int len, int start);
         return _mm512_max_pd(A, B);
     }
 
+    inline __attribute__((always_inline)) __float_vector _float_mask_max_vec(__float_vector A, __float_vector B, __int_vector mask) {
+        return _mm512_mask_max_ps(_mm512_set1_ps(-FLT_MAX), mask, A, B);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_mask_max_vec(__double_vector A, __double_vector B, __int_vector mask) {
+        return _mm512_mask_max_ps(_mm512_set1_ps(-DBL_MAX), (__mmask8) mask, A, B);
+    }
+
     inline __attribute__((always_inline)) __float_vector _float_min_vec(__float_vector A, __float_vector B) {
         return _mm512_min_ps(A, B);
     }
 
     inline __attribute__((always_inline)) __double_vector _double_min_vec(__double_vector A, __double_vector B) {
         return _mm512_min_pd(A, B);
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_mask_min_vec(__float_vector A, __float_vector B, __int_vector mask) {
+        return _mm512_mask_min_ps(_mm512_set1_ps(FLT_MAX), mask, A, B);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_mask_min_vec(__double_vector A, __double_vector B, __int_vector mask) {
+        return _mm512_mask_min_ps(_mm512_set1_ps(DBL_MAX), (__mmask8) mask, A, B);
     }
 
     inline __attribute__((always_inline)) __float_vector _float_setzero_vec() {
@@ -449,6 +592,7 @@ int double_get_next_index(int len, int start);
 
 #else
 /** No SIMD Support **/
+    #define __int_vector int
     #define __float_vector float
     #define __double_vector double
     #define FLOAT_VEC_SIZE 1
@@ -469,6 +613,26 @@ int double_get_next_index(int len, int start);
 
     inline __attribute__((always_inline))  __double_vector _double_loadu(const double* addr) {
         return addr[0];
+    }
+
+    inline __attribute__((always_inline)) __int_vector _int_loadu(const void* addr) {
+        return ((int*) addr)[0];
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_maskload(const float* addr, const __int_vector mask) {
+        return mask != 0 ? addr[0] : 0;
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_maskload(const double* addr, const __int_vector mask) {
+        return mask != 0 ? addr[0] : 0;
+    }
+
+    inline __attribute__((always_inline)) void _float_maskstore(float* addr, const __int_vector mask, const __float_vector A) {
+        mask != 0 ? addr[0] = A: 0;
+    }
+
+    inline __attribute__((always_inline)) void _double_maskstore(double* addr, const __int_vector mask, __double_vector A) {
+        mask != 0 ? addr[0] = A: 0;
     }
 
     inline __attribute__((always_inline)) __float_vector _float_add_vec(const __float_vector A, const __float_vector B) {
@@ -527,12 +691,28 @@ int double_get_next_index(int len, int start);
         return max(A, B);
     }
 
+    inline __attribute__((always_inline)) __float_vector _float_mask_max_vec(__float_vector A, __float_vector B, __int_vector mask) {
+        return mask != 0 ? max(A, B) : -FLT_MAX;
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_mask_max_vec(__double_vector A, __double_vector B, __int_vector mask) {
+        return mask != 0 ? max(A, B) : -DBL_MAX;
+    }
+
     inline __attribute__((always_inline)) __float_vector _float_min_vec(const __float_vector A,const  __float_vector B) {
         return min(A, B);
     }
 
     inline __attribute__((always_inline)) __double_vector _double_min_vec(const __double_vector A, const __double_vector B) {
         return min(A, B);
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_mask_min_vec(__float_vector A, __float_vector B, __int_vector mask) {
+        return mask != 0 ? min(A, B) : FLT_MAX;
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_mask_min_vec(__double_vector A, __double_vector B, __int_vector mask) {
+        return mask != 0 ? min(A, B) : DBL_MAX;
     }
 
     inline __attribute__((always_inline)) __float_vector _float_setzero_vec() {

@@ -1,11 +1,17 @@
 from Cython.Distutils import build_ext
+
 try:
     from setuptools import setup, Extension
 except ImportError:
     from distutils.core import setup, Extension
+
 import os
-import psutil
-    
+
+if "profile" in os.listdir():
+    import shutil
+    shutil.rmtree("profile")
+
+
 class FastTABuild(build_ext):
     def run(self):
         import numpy
@@ -25,25 +31,25 @@ class FastTABuild(build_ext):
             self.extensions[0].extra_compile_args.append('-msse2')
         build_ext.run(self)
 
-common_backend = ['fast_ta/src/error_methods.c', 'fast_ta/src/funcs.c', 'fast_ta/src/2darray.c', 'fast_ta/src/generic_simd.c']
-compile_args = ['-O3', '-march=native', '-mtune=native', '-malign-double', '-falign-loops=32', '-floop-parallelize-all',
-                '-ftree-parallelize-loops='+str(psutil.cpu_count(logical=False)), '-fomit-frame-pointer', '-frename-registers',
-                '-flto', '-fprofile-use=/'+os.getcwd()+'/profile']
-link_args = compile_args
 
+common_backend = ['fast_ta/src/error_methods.c', 'fast_ta/src/funcs.c', 'fast_ta/src/2darray.c', 'fast_ta/src/generic_simd.c']
+profile_args = ['-lgcov', '-fprofile-generate=/'+os.getcwd()+'/profile', '-fbranch-probabilities']
+compile_args = ['-O3', '-march=native', '-mtune=native', '-malign-double', '-falign-loops=16',
+                '-fomit-frame-pointer', '-frename-registers', '-flto']+profile_args
+        
 momentum_ext = Extension('fast_ta/momentum',
                    sources=['fast_ta/src/momentum.c', 'fast_ta/src/momentum_backend.c',
                             'fast_ta/src/parallel_momentum_backend.c']+common_backend,
                    extra_compile_args=compile_args,
-                   extra_link_args = link_args)
+                   extra_link_args = profile_args)
 volume_ext = Extension('fast_ta/volume',
                    sources=['fast_ta/src/volume.c', 'fast_ta/src/volume_backend.c']+common_backend,
                    extra_compile_args=compile_args,
-                   extra_link_args = link_args)
+                   extra_link_args = profile_args)
 volatility_ext = Extension('fast_ta/volatility',
                    sources=['fast_ta/src/volatility.c', 'fast_ta/src/volatility_backend.c']+common_backend,
                    extra_compile_args=compile_args,
-                   extra_link_args = link_args)
+                   extra_link_args = profile_args)
 
 setup(name = 'fast_ta',
       packages = ["fast_ta"],

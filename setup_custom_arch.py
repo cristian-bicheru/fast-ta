@@ -8,10 +8,17 @@ class FastTABuild(build_ext):
     def run(self):
         import numpy
         self.include_dirs.append(numpy.get_include())
+        if self.define:
+            if any(["AVX512" == x[0] for x in self.define]):
+                self.extensions[0].extra_compile_args.append('-mavx512f')
+            elif any(["AVX" == x[0] for x in self.define]):
+                self.extensions[0].extra_compile_args.append('-mavx')
+            elif any(["SSE2" == x[0] for x in self.define]):
+                self.extensions[0].extra_compile_args.append('-msse2')
         build_ext.run(self)
 
 common_backend = ['fast_ta/src/error_methods.c', 'fast_ta/src/funcs.c', 'fast_ta/src/2darray.c', 'fast_ta/src/generic_simd.c']
-compile_args = ['-O2', '-ffast-math', '-march=native', '-mno-align-double',
+compile_args = ['-O3', '-ffast-math', '-march=native',
                 '-fomit-frame-pointer', '-frename-registers']
         
 momentum_ext = Extension('fast_ta/momentum',

@@ -124,6 +124,7 @@ TEST(momentum_backend, KAMAFloat) {
 TEST(momentum_backend, ROCDouble) {
     double* out = _ROC_DOUBLE(SAMPLE_CLOSE_DOUBLE, 12, data_len);
     for (int i=12; i<data_len; i++) {
+        //printf("%f %f\n", ROC_REF_DOUBLE[i], out[i]);
         ASSERT_DOUBLE_EQ(ROC_REF_DOUBLE[i], out[i]);
     }
 
@@ -131,7 +132,12 @@ TEST(momentum_backend, ROCDouble) {
 }
 
 TEST(momentum_backend, ROCFloat) {
-    float* out =  _ROC_FLOAT(SAMPLE_CLOSE_FLOAT, 12, data_len);
+    float* out;
+    for (int i = 0; i < 1000000; i++) {
+        out = _ROC_FLOAT(SAMPLE_CLOSE_FLOAT, 12, data_len);
+        free(out);
+    }
+    out =  _ROC_FLOAT(SAMPLE_CLOSE_FLOAT, 12, data_len);
     double max_fp_error = get_max_fp_error(ROC_REF_DOUBLE, data_len);
     for (int i=12; i<data_len; i++) {
         ASSERT_NEAR(ROC_REF_FLOAT[i], out[i], max_fp_error);

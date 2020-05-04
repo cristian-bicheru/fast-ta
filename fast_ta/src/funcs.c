@@ -3,8 +3,32 @@
 #include <math.h>
 #include <stdlib.h>
 #include <numpy/npy_math.h>
+#include <float.h>
 
 #include "funcs.h"
+
+__int_vector _double_create_mask(int len) {
+    int imax = double_get_next_index(len, 0);
+
+    uint64_t intm[DOUBLE_VEC_SIZE] = {0};
+
+    for (int i = 0; i < len-imax; i++) {
+        intm[i] = -1;
+    }
+
+    return _int_loadu(intm);
+}
+__int_vector _float_create_mask(int len) {
+    int imax = float_get_next_index(len, 0);
+
+    uint32_t intm[FLOAT_VEC_SIZE] = {0};
+
+    for (int i = 0; i < len-imax; i++) {
+        intm[i] = -1;
+    }
+
+    return _int_loadu(intm);
+}
 
 void _double_ema(const double* arr, int len, double alpha, double* outarr) {
     for (int i = 1; i < len; i++) {
@@ -200,6 +224,42 @@ _double_sub_arr(const double *arr1, const double *arr2, int len, double *arr3) {
     }
     for (int i = double_get_next_index(len, 0); i<len; i++) {
         arr3[i] = arr1[i]-arr2[i];
+    }
+}
+/** FOR BENCHMARKING PURPOSES
+void _fast_double_roc(const double* close, double* roc, int len, int n) {
+    const double pct[4] = {100., 100., 100., 100.};
+    asm volatile("vmovupd   (%4), %%ymm2;"
+                 "l1:"
+                 "vmovupd   (%%ebx), %%ymm0;"
+                 "vmovupd   (%%ecx), %%ymm1;"
+                 "vsubpd    %%ymm1, %%ymm0, %%ymm0;"
+                 "vdivpd    %%ymm1, %%ymm0, %%ymm0;"
+                 "vmulpd    %%ymm0, %%ymm2, %%ymm0;"
+                 "vmovupd   %%ymm0, (%%edx);"
+                 "addl      $32, %%ebx;"
+                 "addl      $32, %%ecx;"
+                 "addl      $32, %%edx;"
+                 "dec       %%eax;"
+                 "jnz       l1;"
+    :: "a" ((len-n)/4), "b" (close+n), "c" (close), "d" (roc+n), "g" (pct)
+    : "%ymm0", "%ymm1", "%ymm2");
+
+    for (int i = double_get_next_index(len, n); i<len; i++) {
+        roc[i] = (close[i]/close[i-n]-1.)*100;
+    }
+}
+**/
+void _intrin_fast_double_roc(const double* close, double* roc, int len, int n) {
+    const __double_vector mpct = _double_set1_vec(100.);
+    __double_vector v1;
+    for (int i = n; i <= len - DOUBLE_VEC_SIZE; i += DOUBLE_VEC_SIZE) {
+        v1 = _double_loadu(&close[i-n]);
+        _double_storeu(&roc[i], _double_mul_vec(mpct,
+                _double_div_vec(_double_sub_vec(_double_loadu(&close[i]), v1), v1)));
+    }
+    for (int i = double_get_next_index(len, n); i<len; i++) {
+        roc[i] = (close[i]/close[i-n]-1.)*100;
     }
 }
 
@@ -425,8 +485,11 @@ void _float_abs(const float* arr, int len, float* outarr) {
 
 void _double_running_max(const double* arr, int len, int window, double* outarr) {
     __double_vector v;
+    #if (DOUBLE_VEC_SIZE > 1)
+    const int jmax = double_get_next_index(window, 0);
+    const __int_vector opmask = _double_create_mask(window);
+    #endif
     double m = arr[0];
-    int jmax = double_get_next_index(window, 0);
 
     for (int i = 0; i < window; i++) {
         m = max(m, arr[i]);
@@ -439,14 +502,15 @@ void _double_running_max(const double* arr, int len, int window, double* outarr)
             v = _double_max_vec(v, _double_loadu(&arr[i+j]));
         }
 
+        #if (DOUBLE_VEC_SIZE > 1)
+        v = _double_mask_max_vec(v, _double_maskload(&arr[i+jmax], opmask), opmask);
+        #endif
+
         m = _double_index_vec(v, 0);
         for (int j = 1; j < DOUBLE_VEC_SIZE; j++) {
             m = max(m, _double_index_vec(v, j));
         }
 
-        for (int j = jmax; j < window; j++) {
-            m = max(m, arr[i+j]);
-        }
         outarr[i+window-1] = m;
     }
 }
@@ -454,7 +518,10 @@ void _double_running_max(const double* arr, int len, int window, double* outarr)
 void _float_running_max(const float* arr, int len, int window, float* outarr) {
     __float_vector v;
     float m = arr[0];
-    int jmax = float_get_next_index(window, 0);
+    #if (FLOAT_VEC_SIZE > 1)
+    const int jmax = float_get_next_index(window, 0);
+    const __int_vector opmask = _float_create_mask(window);
+    #endif
 
     for (int i = 0; i < window; i++) {
         m = max(m, arr[i]);
@@ -467,14 +534,15 @@ void _float_running_max(const float* arr, int len, int window, float* outarr) {
             v = _float_max_vec(v, _float_loadu(&arr[i+j]));
         }
 
+        #if (FLOAT_VEC_SIZE > 1)
+        v = _float_mask_max_vec(v, _float_maskload(&arr[i+jmax], opmask), opmask);
+        #endif
+
         m = _float_index_vec(v, 0);
         for (int j = 1; j < FLOAT_VEC_SIZE; j++) {
             m = max(m, _float_index_vec(v, j));
         }
 
-        for (int j = jmax; j < window; j++) {
-            m = max(m, arr[i+j]);
-        }
         outarr[i+window-1] = m;
     }
 }
@@ -482,7 +550,10 @@ void _float_running_max(const float* arr, int len, int window, float* outarr) {
 void _double_running_min(const double* arr, int len, int window, double* outarr) {
     __double_vector v;
     double m = arr[0];
+    #if (DOUBLE_VEC_SIZE > 1)
     int jmax = double_get_next_index(window, 0);
+    __int_vector opmask = _double_create_mask(window);
+    #endif
 
     for (int i = 0; i < window+1; i++) {
         m = min(m, arr[i]);
@@ -495,14 +566,15 @@ void _double_running_min(const double* arr, int len, int window, double* outarr)
             v = _double_min_vec(v, _double_loadu(&arr[i+j]));
         }
 
+        #if (DOUBLE_VEC_SIZE > 1)
+        v = _double_mask_min_vec(v, _double_maskload(&arr[i+jmax], opmask), opmask);
+        #endif
+
         m = _double_index_vec(v, 0);
         for (int j = 1; j < DOUBLE_VEC_SIZE; j++) {
             m = min(m, _double_index_vec(v, j));
         }
 
-        for (int j = jmax; j < window; j++) {
-            m = min(m, arr[i+j]);
-        }
         outarr[i+window-1] = m;
     }
 }
@@ -510,7 +582,10 @@ void _double_running_min(const double* arr, int len, int window, double* outarr)
 void _float_running_min(const float* arr, int len, int window, float* outarr) {
     __float_vector v;
     float m = arr[0];
-    int jmax = float_get_next_index(window, 0);
+    #if (FLOAT_VEC_SIZE > 1)
+    const int jmax = float_get_next_index(window, 0);
+    const __int_vector opmask = _float_create_mask(window);
+    #endif
 
     for (int i = 0; i < window; i++) {
         m = min(m, arr[i]);
@@ -523,14 +598,15 @@ void _float_running_min(const float* arr, int len, int window, float* outarr) {
             v = _float_min_vec(v, _float_loadu(&arr[i+j]));
         }
 
+        #if (FLOAT_VEC_SIZE > 1)
+        v = _float_mask_min_vec(v, _float_maskload(&arr[i+jmax], opmask), opmask);
+        #endif
+
         m = _float_index_vec(v, 0);
         for (int j = 1; j < FLOAT_VEC_SIZE; j++) {
             m = min(m, _float_index_vec(v, j));
         }
 
-        for (int j = jmax; j < window; j++) {
-            m = min(m, arr[i+j]);
-        }
         outarr[i+window-1] = m;
     }
 }

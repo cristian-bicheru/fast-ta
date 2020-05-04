@@ -69,7 +69,8 @@ static PyObject* ATR(PyObject* self, PyObject* args, PyObject* kwargs) {
             Py_DECREF(_low);
             Py_DECREF(_close);
             PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT64, atr);
-            return ret;
+            PyArray_ENABLEFLAGS((PyArrayObject *) ret, NPY_ARRAY_OWNDATA); 
+			return ret;
         }
         case NPY_FLOAT32: {
             float* high = PyArray_DATA(_high);
@@ -82,7 +83,8 @@ static PyObject* ATR(PyObject* self, PyObject* args, PyObject* kwargs) {
             Py_DECREF(_low);
             Py_DECREF(_close);
             PyObject* ret = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT32, atr);
-            return ret;
+            PyArray_ENABLEFLAGS((PyArrayObject *) ret, NPY_ARRAY_OWNDATA); 
+			return ret;
         }
         default:
             raise_dtype_error();
@@ -125,7 +127,8 @@ static PyObject* BOL(PyObject* self, PyObject* args, PyObject* kwargs) {
             Py_DECREF(_close);
             PyObject* ret = PyArray_SimpleNewFromData(2, dims, NPY_FLOAT64, bol[0]);
             free(bol);
-            return ret;
+            PyArray_ENABLEFLAGS((PyArrayObject *) ret, NPY_ARRAY_OWNDATA); 
+			return ret;
         }
         case NPY_FLOAT32: {
             float* close = PyArray_DATA(_close);
@@ -135,7 +138,8 @@ static PyObject* BOL(PyObject* self, PyObject* args, PyObject* kwargs) {
             Py_DECREF(_close);
             PyObject* ret = PyArray_SimpleNewFromData(2, dims, NPY_FLOAT32, bol[0]);
             free(bol);
-            return ret;
+            PyArray_ENABLEFLAGS((PyArrayObject *) ret, NPY_ARRAY_OWNDATA); 
+			return ret;
         }
         default:
             raise_dtype_error();
@@ -193,7 +197,8 @@ static PyObject* DC(PyObject* self, PyObject* args, PyObject* kwargs) {
             Py_DECREF(_low);
             PyObject* ret = PyArray_SimpleNewFromData(2, dims, NPY_FLOAT64, dc[0]);
             free(dc);
-            return ret;
+            PyArray_ENABLEFLAGS((PyArrayObject *) ret, NPY_ARRAY_OWNDATA); 
+			return ret;
         }
         case NPY_FLOAT32: {
             float* high = PyArray_DATA(_high);
@@ -205,7 +210,8 @@ static PyObject* DC(PyObject* self, PyObject* args, PyObject* kwargs) {
             Py_DECREF(_low);
             PyObject* ret = PyArray_SimpleNewFromData(2, dims, NPY_FLOAT32, dc[0]);
             free(dc);
-            return ret;
+            PyArray_ENABLEFLAGS((PyArrayObject *) ret, NPY_ARRAY_OWNDATA); 
+			return ret;
         }
         default:
             raise_dtype_error();
@@ -284,7 +290,8 @@ static PyObject* KC(PyObject* self, PyObject* args, PyObject* kwargs) {
             Py_DECREF(_close);
             PyObject* ret = PyArray_SimpleNewFromData(2, dims, NPY_FLOAT64, kc[0]);
             free(kc);
-            return ret;
+			PyArray_ENABLEFLAGS((PyArrayObject *) ret, NPY_ARRAY_OWNDATA); 
+			return ret;
         }
         case NPY_FLOAT32: {
             float* high = PyArray_DATA(_high);
@@ -298,7 +305,8 @@ static PyObject* KC(PyObject* self, PyObject* args, PyObject* kwargs) {
             Py_DECREF(_close);
             PyObject* ret = PyArray_SimpleNewFromData(2, dims, NPY_FLOAT32, kc[0]);
             free(kc);
-            return ret;
+            PyArray_ENABLEFLAGS((PyArrayObject *) ret, NPY_ARRAY_OWNDATA); 
+			return ret;
         }
         default:
             raise_dtype_error();

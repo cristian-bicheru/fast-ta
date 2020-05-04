@@ -16,7 +16,7 @@ def bench(n, dtype):
     data = np.array(range(n), dtype=dtype)
 
     s = time.perf_counter()
-    fast_ta.volume.NVI(data, data)
+    fast_ta.volume.VPT(data, data)
     times[0] = time.perf_counter()-s
     
     data = pandas.Series(data)
@@ -30,7 +30,7 @@ def bench_fast_ta(n, dtype):
     data = np.array(range(n), dtype=dtype)
 
     s = time.perf_counter()
-    fast_ta.volume.NVI(data, data)
+    fast_ta.volume.VPT(data, data)
     times = time.perf_counter()-s
     
     return times

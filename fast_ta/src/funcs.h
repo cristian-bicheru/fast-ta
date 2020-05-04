@@ -2,6 +2,15 @@
 
 #include <stdlib.h>
 #include "generic_simd.h"
+void _fast_double_roc(const double* close, double* roc, int len, int n);
+void _intrin_fast_double_roc(const double* close, double* roc, int len, int n);
+/**
+ * Create Vector Mask As Described In Issue #18
+ * @param len
+ * @return
+ */
+__int_vector _double_create_mask(int len);
+__int_vector _float_create_mask(int len);
 
 /**
  * Exponential Moving Average

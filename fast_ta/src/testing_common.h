@@ -24,7 +24,7 @@ void load_data_sixes(const char* path, double* out) {
 
     f = fopen(path, "r");
     if (f == nullptr) {
-        std::cerr << "Unable to open path " << path;
+        std::cerr << "Unable to open path " << path << std::endl;
         exit(1);
     }
 
@@ -61,7 +61,7 @@ void load_data_fours(const char* path, double* out) {
 // computed as precision * length of dataset, this ensures that even if floating
 // point errors add up, it should remain bounded by the max_fp_error
 double get_max_fp_error(const double* x, int len) {
-    return get_abs_max(x, len)*len*1e-7;
+    return get_abs_max(x, len)*len*FLT_EPSILON;
 }
 
 double SAMPLE_OPEN_DOUBLE[data_len] = {0};
