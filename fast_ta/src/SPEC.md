@@ -1,4 +1,4 @@
-### Coding Specifications
+# Coding Specifications
 ## General Specs:
  * A quick docstring should be provided for each function in its' respective header file.
  * Functions should generally try to return/store to aligned arrays. This because we handle the creation of return arrays in our code, and they are always aligned. When returning 2D arrays this is not possible, as NumPy arrays are memory contigous by spec. But, in all other cases, aligned store instructions should be used.
