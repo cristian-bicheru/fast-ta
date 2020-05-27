@@ -1,6 +1,9 @@
 #pragma once
 #include <math.h>
 #include <float.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
 
 #ifndef max
 #define max(a,b) ((a) > (b) ? (a) : (b))
@@ -10,14 +13,46 @@
 #define min(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
+// Static Assertions in C
+// SEE SPEC.md FOR USAGE
+#define _STATIC_ASSERT_CONCAT(a,b,c) a##_##b##_AT_LINE_##c
+#define STATIC_ASSERT(assertion, msg) _STATIC_ASSERT(assertion, __LINE__, msg)
+#define _STATIC_ASSERT(assertion, line, msg) \
+    typedef char _STATIC_ASSERT_CONCAT(STATIC_ASSERTION_FAILURE, msg, line)[1]; \
+    typedef char _STATIC_ASSERT_CONCAT(STATIC_ASSERTION_FAILURE, msg, line)[(assertion)?1:2];
+
 /**
- * Find The First Index Not Covered By Vector
+ * Find The First Index Not Covered By SIMD Vector
  * @param len
  * @param start
  * @return
  */
-int float_get_next_index(int len, int start);
 int double_get_next_index(int len, int start);
+int float_get_next_index(int len, int start);
+
+/**
+ * Aligned Malloc Wrapper
+ * @param len
+ * @return
+ */
+double* double_malloc(int len);
+float* float_malloc(int len);
+
+/**
+ * Check If Pointer Is Aligned
+ * @param arr
+ * @return
+ */
+bool check_double_align(const double* arr);
+bool check_float_align(const float* arr);
+
+/**
+ * Get Positive Offset To Next Aligned Address Of Aligned Array
+ * @param addr
+ * @return
+ */
+int64_t double_next_aligned_pointer(const double* addr);
+int64_t float_next_aligned_pointer(const float* addr);
 
 /** Generic SIMD Support **/
 
@@ -45,6 +80,14 @@ int double_get_next_index(int len, int start);
         _mm256_storeu_pd(addr, A);
     }
 
+    inline __attribute__((always_inline)) void _float_store(float* addr, const __float_vector A) {
+        _mm256_stream_ps(addr, A);
+    }
+
+    inline __attribute__((always_inline)) void _double_store(double* addr, const __double_vector A) {
+        _mm256_stream_pd(addr, A);
+    }
+
     inline __attribute__((always_inline)) __float_vector _float_loadu(const float* addr) {
         return _mm256_loadu_ps(addr);
     }
@@ -52,6 +95,24 @@ int double_get_next_index(int len, int start);
     inline __attribute__((always_inline)) __double_vector _double_loadu(const double* addr) {
         return _mm256_loadu_pd(addr);
     }
+
+    #ifndef AVX2
+        inline __attribute__((always_inline)) __float_vector _float_load(const float* addr) {
+            return _mm256_load_ps(addr);
+        }
+
+        inline __attribute__((always_inline)) __double_vector _double_load(const double* addr) {
+            return _mm256_load_pd(addr);
+        }
+    #else
+        inline __attribute__((always_inline)) __float_vector _float_load(const float* addr) {
+            return _mm256_stream_load_si256((const __m256i *) addr);
+        }
+
+        inline __attribute__((always_inline)) __double_vector _double_load(const double* addr) {
+            return _mm256_stream_load_si256((const __m256i *) addr);
+        }
+    #endif
 
     inline __attribute__((always_inline)) __int_vector _int_loadu(const void* addr) {
         return _mm256_loadu_si256((__int_vector*) addr);
@@ -131,10 +192,6 @@ int double_get_next_index(int len, int start);
 
     inline __attribute__((always_inline)) __double_vector _double_loadu2(const double* A, const double* B) {
         return _mm256_insertf128_pd(_mm256_castpd128_pd256(_mm_loadu_pd(A)), _mm_loadu_pd(B), 1);
-    }
-
-    inline __attribute__((always_inline)) __double_vector _double_loadu2_from_float(const float* A, const float* B) {
-        return _double_loadu((double[4]) {A[0], A[1], B[0], B[1]});
     }
 
     inline __attribute__((always_inline)) __float_vector _float_max_vec(__float_vector A, __float_vector B) {
@@ -227,6 +284,14 @@ int double_get_next_index(int len, int start);
         _mm_storeu_pd(addr, A);
     }
 
+    inline __attribute__((always_inline)) void _float_store(float* addr, const __float_vector A) {
+        _mm_stream_ps(addr, A);
+    }
+
+    inline __attribute__((always_inline)) void _double_store(double* addr, const __double_vector A) {
+        _mm_stream_pd(addr, A);
+    }
+
     inline __attribute__((always_inline)) __float_vector _float_loadu(const float* addr) {
         return _mm_loadu_ps(addr);
     }
@@ -234,6 +299,24 @@ int double_get_next_index(int len, int start);
     inline __attribute__((always_inline)) __double_vector _double_loadu(const double* addr) {
         return _mm_loadu_pd(addr);
     }
+
+    #ifndef SSE41
+        inline __attribute__((always_inline)) __float_vector _float_load(const float* addr) {
+            return _mm_load_ps(addr);
+        }
+
+        inline __attribute__((always_inline)) __double_vector _double_load(const double* addr) {
+            return _mm_load_pd(addr);
+        }
+    #else
+        inline __attribute__((always_inline)) __float_vector _float_load(const float* addr) {
+            return (__float_vector) _mm_stream_load_si128((__m128i *) addr);
+        }
+
+        inline __attribute__((always_inline)) __double_vector _double_load(const double* addr) {
+            return (__double_vector) _mm_stream_load_si128((__m128i *) addr);
+        }
+    #endif
 
     inline __attribute__((always_inline)) __int_vector _int_loadu(const void* addr) {
         return _mm_loadu_si128((__int_vector*) addr);
@@ -410,6 +493,7 @@ int double_get_next_index(int len, int start);
 #elif defined(AVX512)
 /** AVX512 Support **/
     #include <immintrin.h>
+    #include <avx512fintrin.h>
 
     #define __float_vector __m512
     #define __double_vector __m512d
@@ -426,6 +510,14 @@ int double_get_next_index(int len, int start);
         _mm512_storeu_pd(addr, A);
     }
 
+    inline __attribute__((always_inline)) void _float_store(float* addr, const __float_vector A) {
+        _mm512_stream_ps(addr, A);
+    }
+
+    inline __attribute__((always_inline)) void _double_store(double* addr, const __double_vector A) {
+        _mm512_stream_pd(addr, A);
+    }
+
     inline __attribute__((always_inline)) __float_vector _float_loadu(const float* addr) {
         return _mm512_loadu_ps(addr);
     }
@@ -435,7 +527,15 @@ int double_get_next_index(int len, int start);
     }
 
     inline __attribute__((always_inline)) __int_vector _int_loadu(const void* addr) {
-        return _load_mask16((__int_vector*) addr);
+        return __builtin_ia32_kmovw((__int_vector) addr);
+    }
+
+    inline __attribute__((always_inline)) __float_vector _float_load(const float* addr) {
+        return _mm512_stream_load_si512(addr);
+    }
+
+    inline __attribute__((always_inline)) __double_vector _double_load(const double* addr) {
+        return _mm512_stream_load_si512(addr);
     }
 
     inline __attribute__((always_inline)) __float_vector _float_maskload(const float* addr, const __int_vector mask) {

@@ -4,7 +4,7 @@
 #include "testing_common.h"
 
 extern "C" {
-    #include "volatility_backend.h"
+    #include "volatility/volatility_backend.h"
 }
 
 double ATR_REF_DOUBLE[data_len] = {0};
@@ -51,6 +51,11 @@ TEST(momentum_backend, ATRFloat) {
 }
 
 TEST(momentum_backend, BOLDouble) {
+    for (int i = 0; i < 10000; i++) {
+        double** out = _BOL_DOUBLE(SAMPLE_CLOSE_DOUBLE, data_len, 20, 2);
+        free(out[0]);
+        free(out);
+    }
     double** out = _BOL_DOUBLE(SAMPLE_CLOSE_DOUBLE, data_len, 20, 2);
     for (int i=0; i<data_len; i++) {
         ASSERT_DOUBLE_EQ(BOLL_REF_DOUBLE[i], out[0][i]);

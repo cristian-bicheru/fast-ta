@@ -24,7 +24,7 @@ copyright = '2020, Cristian Bicheru, Calder White'
 author = 'Cristian Bicheru, Calder White'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.0'
+release = '0.1.3'
 
 
 # -- General configuration ---------------------------------------------------

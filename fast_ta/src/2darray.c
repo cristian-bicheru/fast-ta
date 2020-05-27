@@ -1,11 +1,12 @@
 #include <stdlib.h>
+#include "generic_simd.h"
 
 /**
   * NOTE: Numpy Expects Arrays To Be Memory-contiguous
   */
 
 double** double_malloc2d(int n, int len) {
-    double* arr = malloc(n*len*sizeof(double));
+    double* arr = double_malloc(n*len);
     double** ptrs = malloc(n*sizeof(double*));
     ptrs[0] = arr;
 
@@ -22,7 +23,7 @@ void double_free2d(double** ptrarr) {
 }
 
 float** float_malloc2d(int n, int len) {
-    float* arr = malloc(n*len*sizeof(float));
+    float* arr = float_malloc(n*len);
     float** ptrs = malloc(n*sizeof(float*));
     ptrs[0] = arr;
 

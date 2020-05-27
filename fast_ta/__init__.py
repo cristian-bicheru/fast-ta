@@ -1,5 +1,5 @@
 try:
-    from fast_ta import momentum, volume, volatility
+    from fast_ta import core, momentum, volume, volatility
 except ImportError:
     raise ImportError("Run setup.py to build library before importing.")
 

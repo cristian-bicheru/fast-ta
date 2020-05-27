@@ -6,26 +6,23 @@
 #include <stdlib.h>
 
 #include "numpy/arrayobject.h"
-#include "momentum_backend.h"
-#include "parallel_momentum_backend.h"
+#include "momentum/momentum_backend.h"
 #include "error_methods.h"
+#include "generic_simd.h"
 
 static PyObject* RSI(PyObject* self, PyObject* args, PyObject* kwargs) {
     PyObject* in;
     int window_size = 14;
-    int thread_count = 1;
 
     static char *kwlist[] = {
         "close",
         "n",
-        "threads",
         NULL
     };
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|ii:RSI", kwlist,
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|i:RSI", kwlist,
                           &in,
-                          &window_size,
-                          &thread_count)) {
+                          &window_size)) {
         printf("Exception\n");
         return NULL;
     }
@@ -39,8 +36,7 @@ static PyObject* RSI(PyObject* self, PyObject* args, PyObject* kwargs) {
     switch(type) {
         case NPY_FLOAT64: {
             double* close = PyArray_DATA(arr);
-            double* rsi = _PARALLEL_RSI_DOUBLE(close, close_len, window_size,
-                                               thread_count);
+            double* rsi = _RSI_DOUBLE(close, close_len, window_size);
             npy_intp dims[1] = {close_len};
 
             Py_DECREF(arr);
@@ -50,8 +46,7 @@ static PyObject* RSI(PyObject* self, PyObject* args, PyObject* kwargs) {
         }
         case NPY_FLOAT32: {
             float* close = PyArray_DATA(arr);
-            float* rsi = _PARALLEL_RSI_FLOAT(close, close_len, window_size,
-                                             thread_count);
+            float* rsi = _RSI_FLOAT(close, close_len, window_size);
             npy_intp dims[1] = {close_len};
 
             Py_DECREF(arr);
@@ -111,6 +106,13 @@ static PyObject* AO(PyObject* self, PyObject* args, PyObject* kwargs) {
         case NPY_FLOAT64: {
             double* high = PyArray_DATA(_high);
             double* low = PyArray_DATA(_low);
+
+            if (!check_double_align(high) ||
+                !check_double_align(low)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             double* ao = _AO_DOUBLE(high, low, n1, n2, high_len);
             npy_intp dims[1] = {high_len};
 
@@ -123,6 +125,13 @@ static PyObject* AO(PyObject* self, PyObject* args, PyObject* kwargs) {
         case NPY_FLOAT32: {
             float* high = PyArray_DATA(_high);
             float* low = PyArray_DATA(_low);
+
+            if (!check_float_align(high) ||
+                !check_float_align(low)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             float* ao = _AO_FLOAT(high, low, n1, n2, high_len);
             npy_intp dims[1] = {high_len};
 
@@ -170,6 +179,12 @@ static PyObject* KAMA(PyObject* self, PyObject* args, PyObject* kwargs) {
     switch(type1) {
         case NPY_FLOAT64: {
             double* close = PyArray_DATA(_close);
+
+            if (!check_double_align(close)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             double* kama = _KAMA_DOUBLE(close, n1, n2, n3, len);
             npy_intp dims[1] = {len};
 
@@ -180,6 +195,12 @@ static PyObject* KAMA(PyObject* self, PyObject* args, PyObject* kwargs) {
         }
         case NPY_FLOAT32: {
             float* close = PyArray_DATA(_close);
+
+            if (!check_float_align(close)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             float* kama = _KAMA_FLOAT(close, n1, n2, n3, len);
             npy_intp dims[1] = {len};
 
@@ -220,6 +241,12 @@ static PyObject* ROC(PyObject* self, PyObject* args, PyObject* kwargs) {
     switch(type1) {
         case NPY_FLOAT64: {
             double* close = PyArray_DATA(_close);
+
+            if (!check_double_align(close)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             double* roc = _ROC_DOUBLE(close, n, len);
             npy_intp dims[1] = {len};
 
@@ -230,6 +257,12 @@ static PyObject* ROC(PyObject* self, PyObject* args, PyObject* kwargs) {
         }
         case NPY_FLOAT32: {
             float* close = PyArray_DATA(_close);
+
+            if (!check_float_align(close)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             float* roc = _ROC_FLOAT(close, n, len);
             npy_intp dims[1] = {len};
 
@@ -297,6 +330,14 @@ static PyObject* STOCHASTIC_OSCILLATOR(PyObject* self, PyObject* args, PyObject*
             double* high = PyArray_DATA(_high);
             double* low = PyArray_DATA(_low);
             double* close = PyArray_DATA(_close);
+
+            if (!check_double_align(close) ||
+                !check_double_align(high) ||
+                !check_double_align(low)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             double* so = _STOCHASTIC_OSCILLATOR_DOUBLE(high,
                     low, close, n, d, len);
             npy_intp dims[2] = {2, len};
@@ -312,6 +353,14 @@ static PyObject* STOCHASTIC_OSCILLATOR(PyObject* self, PyObject* args, PyObject*
             float* high = PyArray_DATA(_high);
             float* low = PyArray_DATA(_low);
             float* close = PyArray_DATA(_close);
+
+            if (!check_float_align(close) ||
+                !check_float_align(high) ||
+                !check_float_align(low)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             float* so = _STOCHASTIC_OSCILLATOR_FLOAT(high,
                                                      low, close, n, d, len);
             npy_intp dims[2] = {2, len};
@@ -358,6 +407,12 @@ static PyObject* TSI(PyObject* self, PyObject* args, PyObject* kwargs) {
     switch(type1) {
         case NPY_FLOAT64: {
             double* close = PyArray_DATA(_close);
+
+            if (!check_double_align(close)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             double* tsi = _TSI_DOUBLE(close, r, s, len);
             npy_intp dims[1] = {len};
 
@@ -368,6 +423,12 @@ static PyObject* TSI(PyObject* self, PyObject* args, PyObject* kwargs) {
         }
         case NPY_FLOAT32: {
             float* close = PyArray_DATA(_close);
+
+            if (!check_float_align(close)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             float* tsi = _TSI_FLOAT(close, r, s, len);
             npy_intp dims[1] = {len};
 
@@ -447,6 +508,14 @@ static PyObject* ULTIMATE_OSCILLATOR(PyObject* self, PyObject* args, PyObject* k
             double* high = PyArray_DATA(_high);
             double* low = PyArray_DATA(_low);
             double* close = PyArray_DATA(_close);
+
+            if (!check_double_align(close) ||
+                !check_double_align(high) ||
+                !check_double_align(low)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             double* uo = _ULTIMATE_OSCILLATOR_DOUBLE(high, low, close, s, m, l, ws, wm, wl, len);
             npy_intp dims[1] = {len};
 
@@ -461,6 +530,14 @@ static PyObject* ULTIMATE_OSCILLATOR(PyObject* self, PyObject* args, PyObject* k
             float* high = PyArray_DATA(_high);
             float* low = PyArray_DATA(_low);
             float* close = PyArray_DATA(_close);
+
+            if (!check_float_align(close) ||
+                !check_float_align(high) ||
+                !check_float_align(low)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             float* uo = _ULTIMATE_OSCILLATOR_FLOAT(high, low, close, s, m, l, ws, wm, wl, len);
             npy_intp dims[1] = {len};
 
@@ -527,6 +604,14 @@ static PyObject* WILLIAMS_R(PyObject* self, PyObject* args, PyObject* kwargs) {
             double* high = PyArray_DATA(_high);
             double* low = PyArray_DATA(_low);
             double* close = PyArray_DATA(_close);
+
+            if (!check_double_align(close) ||
+                !check_double_align(high) ||
+                !check_double_align(low)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             double* wr = _WILLIAMS_R_DOUBLE(high, low, close, n, len);
             npy_intp dims[1] = {len};
 
@@ -541,6 +626,14 @@ static PyObject* WILLIAMS_R(PyObject* self, PyObject* args, PyObject* kwargs) {
             float* high = PyArray_DATA(_high);
             float* low = PyArray_DATA(_low);
             float* close = PyArray_DATA(_close);
+
+            if (!check_float_align(close) ||
+                !check_float_align(high) ||
+                !check_float_align(low)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             float* wr = _WILLIAMS_R_FLOAT(high, low, close, n, len);
             npy_intp dims[1] = {len};
 

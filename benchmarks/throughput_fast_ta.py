@@ -41,7 +41,7 @@ with open("results/throughput_fast_ta.csv", "w") as f:
         print("Calculating throughput of", name+'...')
         row = [name]
         for dtype in ["np.float32", "np.float64"]:
-            times = timeit.timeit(execs, number=iterations, setup="import fast_ta; import numpy as np; data = np.array(range("+str(num_elements)+"), dtype="+dtype+")")
+            times = timeit.timeit(execs, number=iterations, setup="import fast_ta; import numpy as np; data = fast_ta.core.align(np.array(range("+str(num_elements)+"), dtype="+dtype+"))")
             row.append("{:.3e}".format(num_elements/times*iterations))
 
         writer.writerow(row)

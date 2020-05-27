@@ -14,34 +14,42 @@ class FastTABuild(build_ext):
         simd = detect_simd.detect()
         if not self.define:
             self.define = []
-        if simd['AVX512'] == 1:
+        if simd['AVX512F'] == 1:
             self.define.append(('AVX512', '1'))
             self.extensions[0].extra_compile_args.append('-mavx512f')
         elif simd['AVX'] == 1:
             self.define.append(('AVX', '1'))
+            if simd['AVX2'] == 1:
+                self.define.append(('AVX2', '1'))
+                self.extensions[0].extra_compile_args.append('-mavx2')
             self.extensions[0].extra_compile_args.append('-mavx')
         elif simd['SSE2'] == 1:
             self.define.append(('SSE2', '1'))
+            if simd['SSE41']:
+                self.define.append(('SSE41', '1'))
+                self.extensions[0].extra_compile_args.append('-msse4.1')
             self.extensions[0].extra_compile_args.append('-msse2')
         build_ext.run(self)
 
-common_backend = ['fast_ta/src/error_methods.c', 'fast_ta/src/funcs.c', 'fast_ta/src/2darray.c', 'fast_ta/src/generic_simd.c']
-compile_args = ['-O3', '-march=native', '-mtune=native', '-malign-double', '-falign-loops=32', '-floop-parallelize-all',
-                '-ftree-parallelize-loops='+str(psutil.cpu_count(logical=False)), '-fomit-frame-pointer', '-frename-registers',
-                '-flto', '-fprofile-use=/'+os.getcwd()+'/profile']
+common_backend = ['fast_ta/src/error_methods.c', 'fast_ta/src/funcs/funcs.c', 'fast_ta/src/funcs/funcs_unaligned.c', 'fast_ta/src/2darray.c', 'fast_ta/src/generic_simd.c']
+compile_args = ['-O3', '-march=native', '-mtune=native', '-malign-double', '-falign-loops=32','-fomit-frame-pointer', '-frename-registers',
+                '-flto']
 link_args = compile_args
 
+core_ext = Extension('fast_ta/core',
+                   sources=['fast_ta/src/core.c', 'fast_ta/src/core/core_backend.c']+common_backend,
+                   extra_compile_args=compile_args,
+                   extra_link_args = link_args)
 momentum_ext = Extension('fast_ta/momentum',
-                   sources=['fast_ta/src/momentum.c', 'fast_ta/src/momentum_backend.c',
-                            'fast_ta/src/parallel_momentum_backend.c']+common_backend,
+                   sources=['fast_ta/src/momentum.c', 'fast_ta/src/momentum/momentum_backend.c']+common_backend,
                    extra_compile_args=compile_args,
                    extra_link_args = link_args)
 volume_ext = Extension('fast_ta/volume',
-                   sources=['fast_ta/src/volume.c', 'fast_ta/src/volume_backend.c']+common_backend,
+                   sources=['fast_ta/src/volume.c', 'fast_ta/src/volume/volume_backend.c']+common_backend,
                    extra_compile_args=compile_args,
                    extra_link_args = link_args)
 volatility_ext = Extension('fast_ta/volatility',
-                   sources=['fast_ta/src/volatility.c', 'fast_ta/src/volatility_backend.c']+common_backend,
+                   sources=['fast_ta/src/volatility.c', 'fast_ta/src/volatility/volatility_backend.c']+common_backend,
                    extra_compile_args=compile_args,
                    extra_link_args = link_args)
 
@@ -84,4 +92,4 @@ setup(name = 'fast_ta',
         'Source': 'https://github.com/cristian-bicheru/fast-ta',
       },
       cmdclass = {'build_ext': FastTABuild},
-      ext_modules=[momentum_ext, volume_ext, volatility_ext])
+      ext_modules=[core_ext, momentum_ext, volume_ext, volatility_ext])

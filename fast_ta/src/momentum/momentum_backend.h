@@ -14,10 +14,8 @@
  *                  to accomodate the prelim count.
  * @return          RSI Indicator Time Series
  */
-double* _RSI_DOUBLE(const double* close, double* out, int close_len,
-                    int window_size, int prelim);
-float* _RSI_FLOAT(const float* close, float* out, int close_len,
-                  int window_size, int prelim);
+double* _RSI_DOUBLE(const double* close, int close_len, int _n);
+float* _RSI_FLOAT(const float* close, int close_len, int _n);
 
 /**
  * Computes Awesome Oscillator Indicator On Data

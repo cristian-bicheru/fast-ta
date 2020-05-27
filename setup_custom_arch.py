@@ -15,21 +15,31 @@ class FastTABuild(build_ext):
                 self.extensions[0].extra_compile_args.append('-mavx')
             elif any(["SSE2" == x[0] for x in self.define]):
                 self.extensions[0].extra_compile_args.append('-msse2')
+            elif any(["AVX2" == x[0] for x in self.define]):
+                self.define.append(('AVX', '1'))
+                self.extensions[0].extra_compile_args.append('-mavx')
+                self.extensions[0].extra_compile_args.append('-mavx2')
+            elif any(["SSE41" == x[0] for x in self.define]):
+                self.define.append(('SSE2', '1'))
+                self.extensions[0].extra_compile_args.append('-msse2')
+                self.extensions[0].extra_compile_args.append('-msse4.1')
         build_ext.run(self)
 
-common_backend = ['fast_ta/src/error_methods.c', 'fast_ta/src/funcs.c', 'fast_ta/src/2darray.c', 'fast_ta/src/generic_simd.c']
+common_backend = ['fast_ta/src/error_methods.c', 'fast_ta/src/funcs/funcs.c', 'fast_ta/src/funcs/funcs_unaligned.c', 'fast_ta/src/2darray.c', 'fast_ta/src/generic_simd.c']
 compile_args = ['-O3', '-ffast-math', '-march=native',
                 '-fomit-frame-pointer', '-frename-registers']
-        
+
+core_ext = Extension('fast_ta/core',
+                   sources=['fast_ta/src/core.c', 'fast_ta/src/core/core_backend.c']+common_backend,
+                   extra_compile_args=compile_args)
 momentum_ext = Extension('fast_ta/momentum',
-                   sources=['fast_ta/src/momentum.c', 'fast_ta/src/momentum_backend.c',
-                            'fast_ta/src/parallel_momentum_backend.c']+common_backend,
+                   sources=['fast_ta/src/momentum.c', 'fast_ta/src/momentum/momentum_backend.c']+common_backend,
                    extra_compile_args=compile_args)
 volume_ext = Extension('fast_ta/volume',
-                   sources=['fast_ta/src/volume.c', 'fast_ta/src/volume_backend.c']+common_backend,
+                   sources=['fast_ta/src/volume.c', 'fast_ta/src/volume/volume_backend.c']+common_backend,
                    extra_compile_args=compile_args)
 volatility_ext = Extension('fast_ta/volatility',
-                   sources=['fast_ta/src/volatility.c', 'fast_ta/src/volatility_backend.c']+common_backend,
+                   sources=['fast_ta/src/volatility.c', 'fast_ta/src/volatility/volatility_backend.c']+common_backend,
                    extra_compile_args=compile_args)
 
 setup(name = 'fast_ta',
@@ -71,4 +81,4 @@ setup(name = 'fast_ta',
         'Source': 'https://github.com/cristian-bicheru/fast-ta',
       },
       cmdclass = {'build_ext': FastTABuild},
-      ext_modules=[momentum_ext, volume_ext, volatility_ext])
+      ext_modules=[core_ext, momentum_ext, volume_ext, volatility_ext])

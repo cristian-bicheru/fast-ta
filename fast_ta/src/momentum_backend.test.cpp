@@ -4,7 +4,7 @@
 #include "testing_common.h"
 
 extern "C" {
-    #include "momentum_backend.h"
+    #include "momentum/momentum_backend.h"
 }
 
 double RSI_REF_DOUBLE[data_len] = {0};
@@ -34,48 +34,22 @@ float UO_REF_FLOAT[data_len] = {0};
 double WR_REF_DOUBLE[data_len] = {0};
 float WR_REF_FLOAT[data_len] = {0};
 
-TEST(momentum_backend, RSIDouble_SelfAllocated) {
+TEST(momentum_backend, RSIDouble) {
     int window_size = 14;
-
-    double* out = _RSI_DOUBLE(SAMPLE_CLOSE_DOUBLE, nullptr, data_len, window_size, 0);
+    double max_dp_error = get_max_dp_error(RSI_REF_DOUBLE, data_len);
+    double* out = _RSI_DOUBLE(SAMPLE_CLOSE_DOUBLE, data_len, window_size);
     for (int i=0; i<data_len; i++) {
-        ASSERT_DOUBLE_EQ(RSI_REF_DOUBLE[i], out[i]);
+        ASSERT_NEAR(RSI_REF_DOUBLE[i], out[i], max_dp_error);
     }
 
     free(out);
 }
 
-TEST(momentum_backend, RSIDouble_PreAllocated) {
-    int window_size = 14;
-    double* out = (double*)malloc(data_len*sizeof(double));
-
-    _RSI_DOUBLE(SAMPLE_CLOSE_DOUBLE, out, data_len, window_size, 0);
-    for (int i=0; i<data_len; i++) {
-        ASSERT_DOUBLE_EQ(RSI_REF_DOUBLE[i], out[i]);
-    }
-
-    free(out);
-}
-
-TEST(momentum_backend, RSIFloat_SelfAllocated) {
+TEST(momentum_backend, RSIFloat) {
     int window_size = 14;
 
-    float* out = _RSI_FLOAT(SAMPLE_CLOSE_FLOAT, nullptr, data_len, window_size, 0);
+    float* out = _RSI_FLOAT(SAMPLE_CLOSE_FLOAT, data_len, window_size);
     double max_fp_error = get_max_fp_error(RSI_REF_DOUBLE, data_len);
-    for (int i=0; i<data_len; i++) {
-        // keeping this since it's nice for debugging.
-        //printf("%d %f %f %f\n", i, RSI_REF_FLOAT[i], out[i], out[i] - RSI_REF_FLOAT[i]);
-        ASSERT_NEAR(RSI_REF_FLOAT[i], out[i], max_fp_error);
-    }
-
-    free(out);
-}
-
-TEST(momentum_backend, RSIFloat_PreAllocated) {
-    int window_size = 14;
-    float* out = (float*)malloc(data_len*sizeof(float));
-    double max_fp_error = get_max_fp_error(RSI_REF_DOUBLE, data_len);
-    _RSI_FLOAT(SAMPLE_CLOSE_FLOAT, out, data_len, window_size, 0);
     for (int i=0; i<data_len; i++) {
         ASSERT_NEAR(RSI_REF_FLOAT[i], out[i], max_fp_error);
     }
@@ -85,8 +59,9 @@ TEST(momentum_backend, RSIFloat_PreAllocated) {
 
 TEST(momentum_backend, AODouble) {
     double* out =  _AO_DOUBLE(SAMPLE_HIGH_DOUBLE, SAMPLE_LOW_DOUBLE, 5, 34, data_len);
+    double max_dp_error = get_max_dp_error(AO_REF_DOUBLE, data_len);
     for (int i=0; i<data_len; i++) {
-        ASSERT_DOUBLE_EQ(AO_REF_DOUBLE[i], out[i]);
+        ASSERT_NEAR(AO_REF_DOUBLE[i], out[i], max_dp_error);
     }
 
     free(out);
@@ -104,8 +79,9 @@ TEST(momentum_backend, AOFloat) {
 
 TEST(momentum_backend, KAMADouble) {
     double* out =  _KAMA_DOUBLE(SAMPLE_CLOSE_DOUBLE, 10, 2, 30, data_len);
+    double max_dp_error = get_max_dp_error(KAMA_REF_DOUBLE, data_len);
     for (int i=0; i<data_len; i++) {
-        ASSERT_DOUBLE_EQ(KAMA_REF_DOUBLE[i], out[i]);
+        ASSERT_NEAR(KAMA_REF_DOUBLE[i], out[i], max_dp_error);
     }
 
     free(out);
@@ -123,9 +99,9 @@ TEST(momentum_backend, KAMAFloat) {
 
 TEST(momentum_backend, ROCDouble) {
     double* out = _ROC_DOUBLE(SAMPLE_CLOSE_DOUBLE, 12, data_len);
+    double max_dp_error = get_max_dp_error(ROC_REF_DOUBLE, data_len);
     for (int i=12; i<data_len; i++) {
-        //printf("%f %f\n", ROC_REF_DOUBLE[i], out[i]);
-        ASSERT_DOUBLE_EQ(ROC_REF_DOUBLE[i], out[i]);
+        ASSERT_NEAR(ROC_REF_DOUBLE[i], out[i], max_dp_error);
     }
 
     free(out);
@@ -148,9 +124,11 @@ TEST(momentum_backend, ROCFloat) {
 
 TEST(momentum_backend, STOCHDouble) {
     double* out = _STOCHASTIC_OSCILLATOR_DOUBLE(SAMPLE_HIGH_DOUBLE, SAMPLE_LOW_DOUBLE, SAMPLE_CLOSE_DOUBLE, 14, 3, data_len);
+    double max_dp_error1 = get_max_dp_error(STOCH_REF_DOUBLE, data_len);
+    double max_dp_error2 = get_max_dp_error(STOCH_SIGNAL_REF_DOUBLE, data_len);
     for (int i=0; i<data_len; i++) {
-        ASSERT_DOUBLE_EQ(STOCH_REF_DOUBLE[i], out[i]);
-        ASSERT_DOUBLE_EQ(STOCH_SIGNAL_REF_DOUBLE[i], out[i+data_len]);
+        ASSERT_NEAR(STOCH_REF_DOUBLE[i], out[i], max_dp_error1);
+        ASSERT_NEAR(STOCH_SIGNAL_REF_DOUBLE[i], out[i+data_len], max_dp_error2);
     }
 
     free(out);
@@ -170,8 +148,9 @@ TEST(momentum_backend, STOCHFloat) {
 
 TEST(momentum_backend, TSIDouble) {
     double* out = _TSI_DOUBLE(SAMPLE_CLOSE_DOUBLE, 25, 13, data_len);
+    double max_dp_error = get_max_dp_error(KAMA_REF_DOUBLE, data_len);
     for (int i=1; i<data_len; i++) {
-        ASSERT_DOUBLE_EQ(TSI_REF_DOUBLE[i], out[i]);
+        ASSERT_NEAR(TSI_REF_DOUBLE[i], out[i], max_dp_error);
     }
 
     free(out);
@@ -189,8 +168,9 @@ TEST(momentum_backend, TSIFloat) {
 
 TEST(momentum_backend, UODouble) {
     double* out = _ULTIMATE_OSCILLATOR_DOUBLE(SAMPLE_HIGH_DOUBLE, SAMPLE_LOW_DOUBLE, SAMPLE_CLOSE_DOUBLE, 7, 14, 28, 4, 2, 1, data_len);
+    double max_dp_error = get_max_dp_error(UO_REF_DOUBLE, data_len);
     for (int i=28; i<data_len; i++) {
-        ASSERT_DOUBLE_EQ(UO_REF_DOUBLE[i], out[i]);
+        ASSERT_NEAR(UO_REF_DOUBLE[i], out[i], max_dp_error);
     }
 
     free(out);
@@ -208,8 +188,9 @@ TEST(momentum_backend, UOFloat) {
 
 TEST(momentum_backend, WRDouble) {
     double* out = _WILLIAMS_R_DOUBLE(SAMPLE_HIGH_DOUBLE, SAMPLE_LOW_DOUBLE, SAMPLE_CLOSE_DOUBLE, 14, data_len);
+    double max_dp_error = get_max_dp_error(WR_REF_DOUBLE, data_len);
     for (int i=0; i<data_len; i++) {
-        ASSERT_DOUBLE_EQ(WR_REF_DOUBLE[i], out[i]);
+        ASSERT_NEAR(WR_REF_DOUBLE[i], out[i], max_dp_error);
     }
 
     free(out);

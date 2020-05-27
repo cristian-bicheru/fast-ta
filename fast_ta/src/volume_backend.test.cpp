@@ -4,7 +4,7 @@
 #include "testing_common.h"
 
 extern "C" {
-    #include "volume_backend.h"
+    #include "volume/volume_backend.h"
 }
 
 double ADI_REF_DOUBLE[data_len] = {0};

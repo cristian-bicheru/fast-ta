@@ -1,12 +1,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "funcs.h"
-#include "2darray.h"
+#include "../funcs/funcs_unaligned.h"
+#include "../funcs/funcs.h"
+#include "../2darray.h"
 
 double* _ADI_DOUBLE(const double* high, const double* low, const double* close,
                     const double* volume, int len) {
-    double* adi = malloc(len*sizeof(double));
+    double* adi = double_malloc(len);
 
     _double_memcpy(close, len, adi);
     _double_mul(adi, len, 2., adi);
@@ -22,7 +23,7 @@ double* _ADI_DOUBLE(const double* high, const double* low, const double* close,
 
 float* _ADI_FLOAT(const float* high, const float* low, const float* close,
                   const float* volume, int len) {
-    float* adi = malloc(len*sizeof(float));
+    float* adi = float_malloc(len);
 
     _float_memcpy(close, len, adi);
     _float_mul(adi, len, 2.f, adi);
@@ -37,7 +38,7 @@ float* _ADI_FLOAT(const float* high, const float* low, const float* close,
 
 double* _CMF_DOUBLE(const double* high, const double* low, const double* close,
                     const double* volume, int len, int n) {
-    double* cmf = malloc(len*sizeof(double));
+    double* cmf = double_malloc(len);
 
     _double_memcpy(close, len, cmf);
     _double_mul(cmf, len, 2.f, cmf);
@@ -51,7 +52,7 @@ double* _CMF_DOUBLE(const double* high, const double* low, const double* close,
 }
 float* _CMF_FLOAT(const float* high, const float* low, const float* close,
                   const float* volume, int len, int n) {
-    float* cmf = malloc(len*sizeof(float));
+    float* cmf = float_malloc(len);
 
     _float_memcpy(close, len, cmf);
     _float_mul(cmf, len, 2.f, cmf);
@@ -71,9 +72,9 @@ double** _EMV_DOUBLE(const double* high, const double* low,
     double* temp2 = arr[1];
 
     _double_pairwise_mean(high, low, len, temp1);
-    _double_sub_arr(temp1+1, temp1, len-1, temp2+1);
+    _double_sub_arr_unaligned(temp1+1, temp1, len-1, temp2+1);
     _double_sub_arr(high, low, len, temp1);
-    _double_mul_arr(temp2, temp1, len, temp1);
+    _double_mul_arr_unaligned(temp2, temp1, len, temp1);
     _double_div_arr(temp1, volume, len, temp1);
     _double_mul(temp1, len, 100000000., temp1);
 
@@ -92,9 +93,9 @@ float** _EMV_FLOAT(const float* high, const float* low,
     float* temp2 = arr[1];
 
     _float_pairwise_mean(high, low, len, temp1);
-    _float_sub_arr(temp1+1, temp1, len-1, temp2+1);
+    _float_sub_arr_unaligned(temp1+1, temp1, len-1, temp2+1);
     _float_sub_arr(high, low, len, temp1);
-    _float_mul_arr(temp2, temp1, len, temp1);
+    _float_mul_arr_unaligned(temp2, temp1, len, temp1);
     _float_div_arr(temp1, volume, len, temp1);
     _float_mul(temp1, len, 100000000.f, temp1);
 
@@ -107,9 +108,9 @@ float** _EMV_FLOAT(const float* high, const float* low,
 }
 
 double* _FI_DOUBLE(const double* close, const double* volume, int len, int n) {
-    double* fi = malloc(len*sizeof(double));
-    _double_sub_arr(close+1, close, len-1, fi+1);
-    _double_mul_arr(fi+1, volume+1, len-1, fi+1);
+    double* fi = double_malloc(len);
+    _double_sub_arr_unaligned(close+1, close, len-1, fi+1);
+    _double_mul_arr(fi, volume, len, fi);
     _double_ema(fi+1, len-1, 2./(n+1.), fi+1);
 
     _double_set_nan(fi, 1);
@@ -118,9 +119,9 @@ double* _FI_DOUBLE(const double* close, const double* volume, int len, int n) {
 }
 
 float* _FI_FLOAT(const float* close, const float* volume, int len, int n) {
-    float* fi = malloc(len*sizeof(float));
-    _float_sub_arr(close+1, close, len-1, fi+1);
-    _float_mul_arr(fi+1, volume+1, len-1, fi+1);
+    float* fi = float_malloc(len);
+    _float_sub_arr_unaligned(close+1, close, len-1, fi+1);
+    _float_mul_arr(fi, volume, len, fi);
     _float_ema(fi+1, len-1, 2.f/(n+1.f), fi+1);
 
     _float_set_nan(fi, 1);
@@ -130,7 +131,7 @@ float* _FI_FLOAT(const float* close, const float* volume, int len, int n) {
 
 double* _MFI_DOUBLE(const double* high, const double* low, const double* close,
                     const double* volume, int len, int n) {
-    double* temp1 = malloc(len*sizeof(double));
+    double* temp1 = double_malloc(len);
     _double_mfi_algo(high, low, close, volume, n, len, temp1+n);
     _double_add(temp1+n, len-n, 1., temp1+n);
     _double_recip(temp1+n, len-n, temp1+n);
@@ -142,7 +143,7 @@ double* _MFI_DOUBLE(const double* high, const double* low, const double* close,
 
 float* _MFI_FLOAT(const float* high, const float* low, const float* close,
                   const float* volume, int len, int n) {
-    float* temp1 = malloc(len*sizeof(float));
+    float* temp1 = float_malloc(len);
     _float_mfi_algo(high, low, close, volume, n, len, temp1+n);
     _float_add(temp1+n, len-n, 1.f, temp1+n);
     _float_recip(temp1+n, len-n, temp1+n);
@@ -153,50 +154,50 @@ float* _MFI_FLOAT(const float* high, const float* low, const float* close,
 }
 
 double* _NVI_DOUBLE(const double* close, const double* volume, int len) {
-    double* nvi = malloc(len*sizeof(double));
+    double* nvi = double_malloc(len);
     _double_nvi(close, volume, len, nvi);
     return nvi;
 }
 
 float* _NVI_FLOAT(const float* close, const float* volume, int len) {
-    float* nvi = malloc(len*sizeof(float));
+    float* nvi = float_malloc(len);
     _float_nvi(close, volume, len, nvi);
     return nvi;
 }
 
 double* _OBV_DOUBLE(const double* close, const double* volume, int len) {
-    double* obv = malloc(len*sizeof(double));
+    double* obv = double_malloc(len);
     _double_obv(close, volume, len, obv);
     return obv;
 }
 
 float* _OBV_FLOAT(const float* close, const float* volume, int len) {
-    float* obv = malloc(len*sizeof(float));
+    float* obv = float_malloc(len);
     _float_obv(close, volume, len, obv);
     return obv;
 }
 
 double* _VPT_DOUBLE(const double* close, const double* volume, int len) {
-    double* vpt = malloc(len*sizeof(double));
+    double* vpt = double_malloc(len);
     _double_vpt(close, volume, len, vpt);
     return vpt;
 }
 
 float* _VPT_FLOAT(const float* close, const float* volume, int len) {
-    float* vpt = malloc(len*sizeof(float));
+    float* vpt = float_malloc(len);
     _float_vpt(close, volume, len, vpt);
     return vpt;
 }
 
 double* _VWAP_DOUBLE(const double* high, const double* low, const double* close,
                      const double* volume, int len, int n) {
-    double* vwap = malloc(len*sizeof(double));
+    double* vwap = double_malloc(len);
     _double_vwap(high, low, close, volume, n, len, vwap);
     return vwap;
 }
 float* _VWAP_FLOAT(const float* high, const float* low, const float* close,
                    const float* volume, int len, int n) {
-    float* vwap = malloc(len*sizeof(float));
+    float* vwap = float_malloc(len);
     _float_vwap(high, low, close, volume, n, len, vwap);
     return vwap;
 

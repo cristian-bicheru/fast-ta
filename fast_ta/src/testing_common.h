@@ -1,5 +1,6 @@
 #pragma once
 #include <cmath>
+#include "generic_simd.h"
 
 #ifndef max
 #define max(a,b) ((a) > (b) ? (a) : (b))
@@ -64,20 +65,24 @@ double get_max_fp_error(const double* x, int len) {
     return get_abs_max(x, len)*len*FLT_EPSILON;
 }
 
-double SAMPLE_OPEN_DOUBLE[data_len] = {0};
-float SAMPLE_OPEN_FLOAT[data_len] = {0};
+double get_max_dp_error(const double* x, int len) {
+    return get_abs_max(x, len)*len*DBL_EPSILON;
+}
 
-double SAMPLE_CLOSE_DOUBLE[data_len] = {0};
-float SAMPLE_CLOSE_FLOAT[data_len] = {0};
+alignas(sizeof(double)*DOUBLE_VEC_SIZE) double SAMPLE_OPEN_DOUBLE[data_len] = {0};
+alignas(sizeof(float)*FLOAT_VEC_SIZE) float SAMPLE_OPEN_FLOAT[data_len] = {0};
 
-double SAMPLE_HIGH_DOUBLE[data_len] = {0};
-float SAMPLE_HIGH_FLOAT[data_len] = {0};
+alignas(sizeof(double)*DOUBLE_VEC_SIZE) double SAMPLE_CLOSE_DOUBLE[data_len] = {0};
+alignas(sizeof(float)*FLOAT_VEC_SIZE) float SAMPLE_CLOSE_FLOAT[data_len] = {0};
 
-double SAMPLE_LOW_DOUBLE[data_len] = {0};
-float SAMPLE_LOW_FLOAT[data_len] = {0};
+alignas(sizeof(double)*DOUBLE_VEC_SIZE) double SAMPLE_HIGH_DOUBLE[data_len] = {0};
+alignas(sizeof(float)*FLOAT_VEC_SIZE) float SAMPLE_HIGH_FLOAT[data_len] = {0};
 
-double SAMPLE_VOLUME_DOUBLE[data_len] = {0};
-float SAMPLE_VOLUME_FLOAT[data_len] = {0};
+alignas(sizeof(double)*DOUBLE_VEC_SIZE) double SAMPLE_LOW_DOUBLE[data_len] = {0};
+alignas(sizeof(float)*FLOAT_VEC_SIZE) float SAMPLE_LOW_FLOAT[data_len] = {0};
+
+alignas(sizeof(double)*DOUBLE_VEC_SIZE) double SAMPLE_VOLUME_DOUBLE[data_len] = {0};
+alignas(sizeof(float)*FLOAT_VEC_SIZE) float SAMPLE_VOLUME_FLOAT[data_len] = {0};
 
 void populate_float_arrays() {
     // init all the float arrays from the double arrays

@@ -1,9 +1,10 @@
 #pragma once
 
 #include <stdlib.h>
-#include "generic_simd.h"
-void _fast_double_roc(const double* close, double* roc, int len, int n);
+#include "../generic_simd.h"
+
 void _intrin_fast_double_roc(const double* close, double* roc, int len, int n);
+void _intrin_fast_float_roc(const float* close, float* roc, int len, int n);
 /**
  * Create Vector Mask As Described In Issue #18
  * @param len
@@ -70,6 +71,7 @@ void _float_sma(const float* arr, int len, int window, float* outarr);
 void _double_sub_arr(const double *arr1, const double *arr2, int len, double *arr3);
 void _float_sub_arr(const float *arr1, const float *arr2, int len, float *arr3);
 
+
 /**
  * Periodic Volatility Sum
  * @param arr1
@@ -131,24 +133,6 @@ void _float_square(const float* arr, int len, float* outarr);
  */
 void _double_abs(const double* arr, int len, double* outarr);
 void _float_abs(const float* arr, int len, float* outarr);
-
-/**
- * Vectorized Max of A Rolling Window Over An Array
- * @param arr
- * @param len
- * @param window
- */
-void _double_running_max(const double* arr, int len, int window, double* outarr);
-void _float_running_max(const float* arr, int len, int window, float* outarr);
-
-/**
- * Vectorized Min of A Rolling Window Over An Array
- * @param arr
- * @param len
- * @param window
- */
-void _double_running_min(const double* arr, int len, int window, double* outarr);
-void _float_running_min(const float* arr, int len, int window, float* outarr);
 
 /**
  * Set Values to NaN

@@ -11,3 +11,7 @@ void raise_dtype_error() {
 void raise_error(char* msg) {
     PyErr_SetString(PyExc_TypeError, msg);
 }
+
+void raise_alignment_error() {
+    PyErr_SetString(PyExc_TypeError, "Input Array Unaligned");
+}

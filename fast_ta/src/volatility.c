@@ -7,8 +7,9 @@
 
 #include "2darray.h"
 #include "numpy/arrayobject.h"
-#include "volatility_backend.h"
+#include "volatility/volatility_backend.h"
 #include "error_methods.h"
+#include "generic_simd.h"
 
 static PyObject* ATR(PyObject* self, PyObject* args, PyObject* kwargs) {
     PyObject* in1;
@@ -62,6 +63,14 @@ static PyObject* ATR(PyObject* self, PyObject* args, PyObject* kwargs) {
             double* high = PyArray_DATA(_high);
             double* low = PyArray_DATA(_low);
             double* close = PyArray_DATA(_close);
+
+            if (!check_double_align(close) ||
+                !check_double_align(high) ||
+                !check_double_align(low)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             double* atr = _ATR_DOUBLE(high, low, close, len, n);
             npy_intp dims[1] = {len};
 
@@ -76,6 +85,14 @@ static PyObject* ATR(PyObject* self, PyObject* args, PyObject* kwargs) {
             float* high = PyArray_DATA(_high);
             float* low = PyArray_DATA(_low);
             float* close = PyArray_DATA(_close);
+
+            if (!check_float_align(close) ||
+                !check_float_align(high) ||
+                !check_float_align(low)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             float* atr = _ATR_FLOAT(high, low, close, len, n);
             npy_intp dims[1] = {len};
 
@@ -121,6 +138,12 @@ static PyObject* BOL(PyObject* self, PyObject* args, PyObject* kwargs) {
     switch(type1) {
         case NPY_FLOAT64: {
             double* close = PyArray_DATA(_close);
+
+            if (!check_double_align(close)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             double** bol = _BOL_DOUBLE(close, len, n, ndev);
             npy_intp dims[2] = {3, len};
 
@@ -132,6 +155,12 @@ static PyObject* BOL(PyObject* self, PyObject* args, PyObject* kwargs) {
         }
         case NPY_FLOAT32: {
             float* close = PyArray_DATA(_close);
+
+            if (!check_float_align(close)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             float** bol = _BOL_FLOAT(close, len, n, ndev);
             npy_intp dims[2] = {3, len};
 
@@ -190,6 +219,13 @@ static PyObject* DC(PyObject* self, PyObject* args, PyObject* kwargs) {
         case NPY_FLOAT64: {
             double* high = PyArray_DATA(_high);
             double* low = PyArray_DATA(_low);
+
+            if (!check_double_align(high) ||
+                !check_double_align(low)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             double** dc = _DC_DOUBLE(high, low, len, n);
             npy_intp dims[2] = {3, len};
 
@@ -203,6 +239,13 @@ static PyObject* DC(PyObject* self, PyObject* args, PyObject* kwargs) {
         case NPY_FLOAT32: {
             float* high = PyArray_DATA(_high);
             float* low = PyArray_DATA(_low);
+
+            if (!check_float_align(high) ||
+                !check_float_align(low)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             float** dc = _DC_FLOAT(high, low, len, n);
             npy_intp dims[2] = {3, len};
 
@@ -282,6 +325,14 @@ static PyObject* KC(PyObject* self, PyObject* args, PyObject* kwargs) {
             double* high = PyArray_DATA(_high);
             double* low = PyArray_DATA(_low);
             double* close = PyArray_DATA(_close);
+
+            if (!check_double_align(close) ||
+                !check_double_align(high) ||
+                !check_double_align(low)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             double** kc = _KC_DOUBLE(high, low, close, len, n1, n2, num_channels);
             npy_intp dims[2] = {2*num_channels+1, len};
 
@@ -297,6 +348,14 @@ static PyObject* KC(PyObject* self, PyObject* args, PyObject* kwargs) {
             float* high = PyArray_DATA(_high);
             float* low = PyArray_DATA(_low);
             float* close = PyArray_DATA(_close);
+
+            if (!check_float_align(close) ||
+                !check_float_align(high) ||
+                !check_float_align(low)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             float** kc = _KC_FLOAT(high, low, close, len, n1, n2, num_channels);
             npy_intp dims[2] = {2*num_channels+1, len};
 

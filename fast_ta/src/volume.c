@@ -6,8 +6,9 @@
 #include <stdlib.h>
 
 #include "numpy/arrayobject.h"
-#include "volume_backend.h"
+#include "volume/volume_backend.h"
 #include "error_methods.h"
+#include "generic_simd.h"
 
 static PyObject* ADI(PyObject* self, PyObject* args, PyObject* kwargs) {
     PyObject* in1;
@@ -67,6 +68,15 @@ static PyObject* ADI(PyObject* self, PyObject* args, PyObject* kwargs) {
             double* low = PyArray_DATA(_low);
             double* close = PyArray_DATA(_close);
             double* volume = PyArray_DATA(_volume);
+
+            if (!check_double_align(close) ||
+                !check_double_align(high) ||
+                !check_double_align(low) ||
+                !check_double_align(volume)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             double* adi = _ADI_DOUBLE(high, low, close, volume, len);
             npy_intp dims[1] = {len};
 
@@ -83,6 +93,15 @@ static PyObject* ADI(PyObject* self, PyObject* args, PyObject* kwargs) {
             float* low = PyArray_DATA(_low);
             float* close = PyArray_DATA(_close);
             float* volume = PyArray_DATA(_volume);
+
+            if (!check_float_align(close) ||
+                !check_float_align(high) ||
+                !check_float_align(low) ||
+                !check_float_align(volume)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             float* adi = _ADI_FLOAT(high, low, close, volume, len);
             npy_intp dims[1] = {len};
 
@@ -161,6 +180,15 @@ static PyObject* CMF(PyObject* self, PyObject* args, PyObject* kwargs) {
             double* low = PyArray_DATA(_low);
             double* close = PyArray_DATA(_close);
             double* volume = PyArray_DATA(_volume);
+
+            if (!check_double_align(close) ||
+                !check_double_align(high) ||
+                !check_double_align(low) ||
+                !check_double_align(volume)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             double* cmf = _CMF_DOUBLE(high, low, close, volume, len, n);
             npy_intp dims[1] = {len};
 
@@ -177,6 +205,15 @@ static PyObject* CMF(PyObject* self, PyObject* args, PyObject* kwargs) {
             float* low = PyArray_DATA(_low);
             float* close = PyArray_DATA(_close);
             float* volume = PyArray_DATA(_volume);
+
+            if (!check_float_align(close) ||
+                !check_float_align(high) ||
+                !check_float_align(low) ||
+                !check_float_align(volume)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             float* cmf = _CMF_FLOAT(high, low, close, volume, len, n);
             npy_intp dims[1] = {len};
 
@@ -246,6 +283,14 @@ static PyObject* EMV(PyObject* self, PyObject* args, PyObject* kwargs) {
             double* high = PyArray_DATA(_high);
             double* low = PyArray_DATA(_low);
             double* volume = PyArray_DATA(_volume);
+
+            if (!check_double_align(high) ||
+                !check_double_align(low) ||
+                !check_double_align(volume)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             double** emv = _EMV_DOUBLE(high, low, volume, len, n);
             npy_intp dims[2] = {2, len};
 
@@ -261,6 +306,14 @@ static PyObject* EMV(PyObject* self, PyObject* args, PyObject* kwargs) {
             float* high = PyArray_DATA(_high);
             float* low = PyArray_DATA(_low);
             float* volume = PyArray_DATA(_volume);
+
+            if (!check_float_align(high) ||
+                !check_float_align(low) ||
+                !check_float_align(volume)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             float** emv = _EMV_FLOAT(high, low, volume, len, n);
             npy_intp dims[2] = {2, len};
             Py_DECREF(_high);
@@ -320,6 +373,13 @@ static PyObject* FI(PyObject* self, PyObject* args, PyObject* kwargs) {
         case NPY_FLOAT64: {
             double* close = PyArray_DATA(_close);
             double* volume = PyArray_DATA(_volume);
+
+            if (!check_double_align(close) ||
+                !check_double_align(volume)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             double* fi = _FI_DOUBLE(close, volume, len, n);
             npy_intp dims[1] = {len};
 
@@ -332,6 +392,13 @@ static PyObject* FI(PyObject* self, PyObject* args, PyObject* kwargs) {
         case NPY_FLOAT32: {
             float* close = PyArray_DATA(_close);
             float* volume = PyArray_DATA(_volume);
+
+            if (!check_float_align(close) ||
+                !check_float_align(volume)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             float* fi = _FI_FLOAT(close, volume, len, n);
             npy_intp dims[1] = {len};
 
@@ -408,6 +475,15 @@ static PyObject* MFI(PyObject* self, PyObject* args, PyObject* kwargs) {
             double* low = PyArray_DATA(_low);
             double* close = PyArray_DATA(_close);
             double* volume = PyArray_DATA(_volume);
+
+            if (!check_double_align(close) ||
+                !check_double_align(high) ||
+                !check_double_align(low) ||
+                !check_double_align(volume)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             double* mfi = _MFI_DOUBLE(high, low, close, volume, len, n);
             npy_intp dims[1] = {len};
 
@@ -424,6 +500,15 @@ static PyObject* MFI(PyObject* self, PyObject* args, PyObject* kwargs) {
             float* low = PyArray_DATA(_low);
             float* close = PyArray_DATA(_close);
             float* volume = PyArray_DATA(_volume);
+
+            if (!check_float_align(close) ||
+                !check_float_align(high) ||
+                !check_float_align(low) ||
+                !check_float_align(volume)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             float* mfi = _MFI_FLOAT(high, low, close, volume, len, n);
             npy_intp dims[1] = {len};
 
@@ -481,6 +566,13 @@ static PyObject* NVI(PyObject* self, PyObject* args, PyObject* kwargs) {
         case NPY_FLOAT64: {
             double* close = PyArray_DATA(_close);
             double* volume = PyArray_DATA(_volume);
+
+            if (!check_double_align(close) ||
+                !check_double_align(volume)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             double* nvi = _NVI_DOUBLE(close, volume, len);
             npy_intp dims[1] = {len};
 
@@ -493,6 +585,13 @@ static PyObject* NVI(PyObject* self, PyObject* args, PyObject* kwargs) {
         case NPY_FLOAT32: {
             float* close = PyArray_DATA(_close);
             float* volume = PyArray_DATA(_volume);
+
+            if (!check_float_align(close) ||
+                !check_float_align(volume)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             float* nvi = _NVI_FLOAT(close, volume, len);
             npy_intp dims[1] = {len};
 
@@ -549,6 +648,13 @@ static PyObject* OBV(PyObject* self, PyObject* args, PyObject* kwargs) {
         case NPY_FLOAT64: {
             double* close = PyArray_DATA(_close);
             double* volume = PyArray_DATA(_volume);
+
+            if (!check_double_align(close) ||
+                !check_double_align(volume)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             double* obv = _OBV_DOUBLE(close, volume, len);
             npy_intp dims[1] = {len};
 
@@ -561,6 +667,13 @@ static PyObject* OBV(PyObject* self, PyObject* args, PyObject* kwargs) {
         case NPY_FLOAT32: {
             float* close = PyArray_DATA(_close);
             float* volume = PyArray_DATA(_volume);
+
+            if (!check_float_align(close) ||
+                !check_float_align(volume)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             float* obv = _OBV_FLOAT(close, volume, len);
             npy_intp dims[1] = {len};
 
@@ -616,6 +729,13 @@ static PyObject* VPT(PyObject* self, PyObject* args, PyObject* kwargs) {
         case NPY_FLOAT64: {
             double* close = PyArray_DATA(_close);
             double* volume = PyArray_DATA(_volume);
+
+            if (!check_double_align(close) ||
+                !check_double_align(volume)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             double* vpt = _VPT_DOUBLE(close, volume, len);
             npy_intp dims[1] = {len};
 
@@ -628,6 +748,13 @@ static PyObject* VPT(PyObject* self, PyObject* args, PyObject* kwargs) {
         case NPY_FLOAT32: {
             float* close = PyArray_DATA(_close);
             float* volume = PyArray_DATA(_volume);
+
+            if (!check_float_align(close) ||
+                !check_float_align(volume)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             float* vpt = _VPT_FLOAT(close, volume, len);
             npy_intp dims[1] = {len};
 
@@ -704,6 +831,15 @@ static PyObject* VWAP(PyObject* self, PyObject* args, PyObject* kwargs) {
             double* low = PyArray_DATA(_low);
             double* close = PyArray_DATA(_close);
             double* volume = PyArray_DATA(_volume);
+
+            if (!check_double_align(close) ||
+                !check_double_align(high) ||
+                !check_double_align(low) ||
+                !check_double_align(volume)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             double* vwap = _VWAP_DOUBLE(high, low, close, volume, len, n);
             npy_intp dims[1] = {len};
 
@@ -720,6 +856,15 @@ static PyObject* VWAP(PyObject* self, PyObject* args, PyObject* kwargs) {
             float* low = PyArray_DATA(_low);
             float* close = PyArray_DATA(_close);
             float* volume = PyArray_DATA(_volume);
+
+            if (!check_float_align(close) ||
+                !check_float_align(high) ||
+                !check_float_align(low) ||
+                !check_float_align(volume)) {
+                raise_alignment_error();
+                return NULL;
+            }
+
             float* vwap = _VWAP_FLOAT(high, low, close, volume, len, n);
             npy_intp dims[1] = {len};
 
