@@ -9,7 +9,7 @@
 #include "numpy/arrayobject.h"
 #include "volatility/volatility_backend.h"
 #include "error_methods.h"
-#include "generic_simd.h"
+#include "generic_simd/generic_simd.h"
 
 static PyObject* ATR(PyObject* self, PyObject* args, PyObject* kwargs) {
     PyObject* in1;

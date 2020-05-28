@@ -31,7 +31,7 @@ float KCM_REF_FLOAT[data_len] = {0};
 double KCH_REF_DOUBLE[data_len] = {0};
 float KCH_REF_FLOAT[data_len] = {0};
 
-TEST(momentum_backend, ATRDouble) {
+TEST(volatility_backend, ATRDouble) {
     double* out = _ATR_DOUBLE(SAMPLE_HIGH_DOUBLE, SAMPLE_LOW_DOUBLE, SAMPLE_CLOSE_DOUBLE, data_len, 14);
     for (int i=0; i<data_len; i++) {
         ASSERT_DOUBLE_EQ(ATR_REF_DOUBLE[i], out[i]);
@@ -40,7 +40,7 @@ TEST(momentum_backend, ATRDouble) {
     free(out);
 }
 
-TEST(momentum_backend, ATRFloat) {
+TEST(volatility_backend, ATRFloat) {
     float* out = _ATR_FLOAT(SAMPLE_HIGH_FLOAT, SAMPLE_LOW_FLOAT, SAMPLE_CLOSE_FLOAT, data_len, 14);
     double max_fp_error = get_max_fp_error(ATR_REF_DOUBLE, data_len);
     for (int i=0; i<data_len; i++) {
@@ -50,7 +50,7 @@ TEST(momentum_backend, ATRFloat) {
     free(out);
 }
 
-TEST(momentum_backend, BOLDouble) {
+TEST(volatility_backend, BOLDouble) {
     for (int i = 0; i < 10000; i++) {
         double** out = _BOL_DOUBLE(SAMPLE_CLOSE_DOUBLE, data_len, 20, 2);
         free(out[0]);
@@ -66,7 +66,7 @@ TEST(momentum_backend, BOLDouble) {
     free(out);
 }
 
-TEST(momentum_backend, BOLFloat) {
+TEST(volatility_backend, BOLFloat) {
     float** out = _BOL_FLOAT(SAMPLE_CLOSE_FLOAT, data_len, 20, 2);
     double max_fp_error1 = get_max_fp_error(BOLL_REF_DOUBLE, data_len);
     double max_fp_error2 = get_max_fp_error(BOLM_REF_DOUBLE, data_len);
@@ -81,7 +81,7 @@ TEST(momentum_backend, BOLFloat) {
     free(out);
 }
 
-TEST(momentum_backend, DCDouble) {
+TEST(volatility_backend, DCDouble) {
     double** out = _DC_DOUBLE(SAMPLE_HIGH_DOUBLE, SAMPLE_LOW_DOUBLE, data_len, 20);
     for (int i=0; i<data_len; i++) {
         ASSERT_DOUBLE_EQ(DCL_REF_DOUBLE[i], out[0][i]);
@@ -92,7 +92,7 @@ TEST(momentum_backend, DCDouble) {
     free(out);
 }
 
-TEST(momentum_backend, DCFloat) {
+TEST(volatility_backend, DCFloat) {
     float** out = _DC_FLOAT(SAMPLE_HIGH_FLOAT, SAMPLE_LOW_FLOAT, data_len, 20);
     double max_fp_error1 = get_max_fp_error(DCL_REF_DOUBLE, data_len);
     double max_fp_error2 = get_max_fp_error(DCM_REF_DOUBLE, data_len);
@@ -107,7 +107,7 @@ TEST(momentum_backend, DCFloat) {
     free(out);
 }
 
-TEST(momentum_backend, KCDouble) {
+TEST(volatility_backend, KCDouble) {
     double** out = _KC_DOUBLE(SAMPLE_HIGH_DOUBLE, SAMPLE_LOW_DOUBLE, SAMPLE_CLOSE_DOUBLE, data_len, 14, 10, 1);
     for (int i=0; i<data_len; i++) {
         ASSERT_DOUBLE_EQ(KCL_REF_DOUBLE[i], out[0][i]);
@@ -118,7 +118,7 @@ TEST(momentum_backend, KCDouble) {
     free(out);
 }
 
-TEST(momentum_backend, KCFloat) {
+TEST(volatility_backend, KCFloat) {
     float** out = _KC_FLOAT(SAMPLE_HIGH_FLOAT, SAMPLE_LOW_FLOAT, SAMPLE_CLOSE_FLOAT, data_len, 14, 10, 1);
     double max_fp_error1 = get_max_fp_error(KCL_REF_DOUBLE, data_len);
     double max_fp_error2 = get_max_fp_error(KCM_REF_DOUBLE, data_len);

@@ -37,7 +37,7 @@ float VPT_REF_FLOAT[data_len] = {0};
 double VWAP_REF_DOUBLE[data_len] = {0};
 float VWAP_REF_FLOAT[data_len] = {0};
 
-TEST(momentum_backend, ADIDouble) {
+TEST(volume_backend, ADIDouble) {
     double* out = _ADI_DOUBLE(SAMPLE_HIGH_DOUBLE, SAMPLE_LOW_DOUBLE, SAMPLE_CLOSE_DOUBLE, SAMPLE_VOLUME_DOUBLE, data_len);
     for (int i=0; i<data_len; i++) {
         ASSERT_DOUBLE_EQ(ADI_REF_DOUBLE[i], out[i]);
@@ -46,7 +46,7 @@ TEST(momentum_backend, ADIDouble) {
     free(out);
 }
 
-TEST(momentum_backend, ADIFloat) {
+TEST(volume_backend, ADIFloat) {
     float* out = _ADI_FLOAT(SAMPLE_HIGH_FLOAT, SAMPLE_LOW_FLOAT, SAMPLE_CLOSE_FLOAT, SAMPLE_VOLUME_FLOAT, data_len);
     double max_fp_error = get_max_fp_error(ADI_REF_DOUBLE, data_len);
     for (int i=0; i<data_len; i++) {
@@ -56,7 +56,7 @@ TEST(momentum_backend, ADIFloat) {
     free(out);
 }
 
-TEST(momentum_backend, CMFDouble) {
+TEST(volume_backend, CMFDouble) {
     double* out = _CMF_DOUBLE(SAMPLE_HIGH_DOUBLE, SAMPLE_LOW_DOUBLE, SAMPLE_CLOSE_DOUBLE, SAMPLE_VOLUME_DOUBLE, data_len, 20);
     for (int i=0; i<data_len; i++) {
         ASSERT_DOUBLE_EQ(CMF_REF_DOUBLE[i], out[i]);
@@ -65,7 +65,7 @@ TEST(momentum_backend, CMFDouble) {
     free(out);
 }
 
-TEST(momentum_backend, CMFFloat) {
+TEST(volume_backend, CMFFloat) {
     float* out = _CMF_FLOAT(SAMPLE_HIGH_FLOAT, SAMPLE_LOW_FLOAT, SAMPLE_CLOSE_FLOAT, SAMPLE_VOLUME_FLOAT, data_len, 20);
     double max_fp_error = get_max_fp_error(CMF_REF_DOUBLE, data_len);
     for (int i=0; i<data_len; i++) {
@@ -75,7 +75,7 @@ TEST(momentum_backend, CMFFloat) {
     free(out);
 }
 
-TEST(momentum_backend, EMVDouble) {
+TEST(volume_backend, EMVDouble) {
     double** out = _EMV_DOUBLE(SAMPLE_HIGH_DOUBLE, SAMPLE_LOW_DOUBLE, SAMPLE_VOLUME_DOUBLE, data_len, 14);
     for (int i=1; i<data_len; i++) {
         ASSERT_DOUBLE_EQ(EMV_REF_DOUBLE[i], out[0][i]);
@@ -86,7 +86,7 @@ TEST(momentum_backend, EMVDouble) {
     free(out);
 }
 
-TEST(momentum_backend, EMVFloat) {
+TEST(volume_backend, EMVFloat) {
     float** out = _EMV_FLOAT(SAMPLE_HIGH_FLOAT, SAMPLE_LOW_FLOAT, SAMPLE_VOLUME_FLOAT, data_len, 14);
     double max_fp_error1 = get_max_fp_error(EMV_REF_DOUBLE, data_len);
     double max_fp_error2 = get_max_fp_error(EMV_SMA_REF_DOUBLE, data_len);
@@ -99,7 +99,7 @@ TEST(momentum_backend, EMVFloat) {
     free(out);
 }
 
-TEST(momentum_backend, FIDouble) {
+TEST(volume_backend, FIDouble) {
     double* out = _FI_DOUBLE(SAMPLE_CLOSE_DOUBLE, SAMPLE_VOLUME_DOUBLE, data_len, 13);
     for (int i=1; i<data_len; i++) {
         ASSERT_DOUBLE_EQ(FI_REF_DOUBLE[i], out[i]);
@@ -108,7 +108,7 @@ TEST(momentum_backend, FIDouble) {
     free(out);
 }
 
-TEST(momentum_backend, FIFloat) {
+TEST(volume_backend, FIFloat) {
     float* out = _FI_FLOAT(SAMPLE_CLOSE_FLOAT, SAMPLE_VOLUME_FLOAT, data_len, 13);
     double max_fp_error = get_max_fp_error(FI_REF_DOUBLE, data_len);
     for (int i=1; i<data_len; i++) {
@@ -118,7 +118,7 @@ TEST(momentum_backend, FIFloat) {
     free(out);
 }
 
-TEST(momentum_backend, MFIDouble) {
+TEST(volume_backend, MFIDouble) {
     double* out = _MFI_DOUBLE(SAMPLE_HIGH_DOUBLE, SAMPLE_LOW_DOUBLE, SAMPLE_CLOSE_DOUBLE, SAMPLE_VOLUME_DOUBLE, data_len, 14);
     for (int i=14; i<data_len; i++) {
         ASSERT_DOUBLE_EQ(MFI_REF_DOUBLE[i], out[i]);
@@ -127,7 +127,7 @@ TEST(momentum_backend, MFIDouble) {
     free(out);
 }
 
-TEST(momentum_backend, MFIFloat) {
+TEST(volume_backend, MFIFloat) {
     float* out = _MFI_FLOAT(SAMPLE_HIGH_FLOAT, SAMPLE_LOW_FLOAT, SAMPLE_CLOSE_FLOAT, SAMPLE_VOLUME_FLOAT, data_len, 14);
     double max_fp_error = get_max_fp_error(MFI_REF_DOUBLE, data_len);
     for (int i=14; i<data_len; i++) {
@@ -137,7 +137,7 @@ TEST(momentum_backend, MFIFloat) {
     free(out);
 }
 
-TEST(momentum_backend, NVIDouble) {
+TEST(volume_backend, NVIDouble) {
     double* out = _NVI_DOUBLE(SAMPLE_CLOSE_DOUBLE, SAMPLE_VOLUME_DOUBLE, data_len);
     for (int i=14; i<data_len; i++) {
         ASSERT_DOUBLE_EQ(NVI_REF_DOUBLE[i], out[i]);
@@ -146,7 +146,7 @@ TEST(momentum_backend, NVIDouble) {
     free(out);
 }
 
-TEST(momentum_backend, NVIFloat) {
+TEST(volume_backend, NVIFloat) {
     float* out = _NVI_FLOAT(SAMPLE_CLOSE_FLOAT, SAMPLE_VOLUME_FLOAT, data_len);
     double max_fp_error = get_max_fp_error(MFI_REF_DOUBLE, data_len);
     for (int i=14; i<data_len; i++) {
@@ -156,7 +156,7 @@ TEST(momentum_backend, NVIFloat) {
     free(out);
 }
 
-TEST(momentum_backend, OBVDouble) {
+TEST(volume_backend, OBVDouble) {
     double* out = _OBV_DOUBLE(SAMPLE_CLOSE_DOUBLE, SAMPLE_VOLUME_DOUBLE, data_len);
     for (int i=14; i<data_len; i++) {
         ASSERT_DOUBLE_EQ(OBV_REF_DOUBLE[i], out[i]);
@@ -165,7 +165,7 @@ TEST(momentum_backend, OBVDouble) {
     free(out);
 }
 
-TEST(momentum_backend, OBVFloat) {
+TEST(volume_backend, OBVFloat) {
     float* out = _OBV_FLOAT(SAMPLE_CLOSE_FLOAT, SAMPLE_VOLUME_FLOAT, data_len);
     double max_fp_error = get_max_fp_error(OBV_REF_DOUBLE, data_len);
     for (int i=14; i<data_len; i++) {
@@ -175,7 +175,7 @@ TEST(momentum_backend, OBVFloat) {
     free(out);
 }
 
-TEST(momentum_backend, VPTDouble) {
+TEST(volume_backend, VPTDouble) {
     double* out = _VPT_DOUBLE(SAMPLE_CLOSE_DOUBLE, SAMPLE_VOLUME_DOUBLE, data_len);
     for (int i=14; i<data_len; i++) {
         ASSERT_DOUBLE_EQ(VPT_REF_DOUBLE[i], out[i]);
@@ -184,7 +184,7 @@ TEST(momentum_backend, VPTDouble) {
     free(out);
 }
 
-TEST(momentum_backend, VPTFloat) {
+TEST(volume_backend, VPTFloat) {
     float* out = _VPT_FLOAT(SAMPLE_CLOSE_FLOAT, SAMPLE_VOLUME_FLOAT, data_len);
     double max_fp_error = get_max_fp_error(VPT_REF_DOUBLE, data_len);
     for (int i=14; i<data_len; i++) {
@@ -194,7 +194,7 @@ TEST(momentum_backend, VPTFloat) {
     free(out);
 }
 
-TEST(momentum_backend, VWAPDouble) {
+TEST(volume_backend, VWAPDouble) {
     double* out = _VWAP_DOUBLE(SAMPLE_HIGH_DOUBLE, SAMPLE_LOW_DOUBLE, SAMPLE_CLOSE_DOUBLE, SAMPLE_VOLUME_DOUBLE, data_len, 14);
     for (int i=14; i<data_len; i++) {
         ASSERT_DOUBLE_EQ(VWAP_REF_DOUBLE[i], out[i]);
@@ -203,7 +203,7 @@ TEST(momentum_backend, VWAPDouble) {
     free(out);
 }
 
-TEST(momentum_backend, VWAPFloat) {
+TEST(volume_backend, VWAPFloat) {
     float* out = _VWAP_FLOAT(SAMPLE_HIGH_FLOAT, SAMPLE_LOW_FLOAT, SAMPLE_CLOSE_FLOAT, SAMPLE_VOLUME_FLOAT, data_len, 14);
     double max_fp_error = get_max_fp_error(VWAP_REF_DOUBLE, data_len);
     for (int i=14; i<data_len; i++) {

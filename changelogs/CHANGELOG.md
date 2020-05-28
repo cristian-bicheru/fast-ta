@@ -9,6 +9,9 @@ A summary of notable changes to the Fast TA library will be documented in this f
  * Reorganized fast_ta/src folder.
  * Increased memory efficiency of several algorithms.
  * Added testing tolerance for double precision.
+ * Implemented new algorithm for running max/min.
+ * Added option to toggle use of reciprocal instructions.
+ * Moved generic_simd to its own repository.
 ### Added
  * Added changleogs/CHANGELOG.md (changelog).
  * Added fast_ta/src/SPEC.md (coding specifications).

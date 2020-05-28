@@ -8,7 +8,7 @@
 #include "numpy/arrayobject.h"
 #include "volume/volume_backend.h"
 #include "error_methods.h"
-#include "generic_simd.h"
+#include "generic_simd/generic_simd.h"
 
 static PyObject* ADI(PyObject* self, PyObject* args, PyObject* kwargs) {
     PyObject* in1;

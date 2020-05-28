@@ -1,6 +1,6 @@
 #pragma once
 #include <cmath>
-#include "generic_simd.h"
+#include "generic_simd/generic_simd.h"
 
 #ifndef max
 #define max(a,b) ((a) > (b) ? (a) : (b))

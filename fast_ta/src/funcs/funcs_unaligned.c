@@ -399,10 +399,6 @@ void _float_abs_unaligned(const float* arr, int len, float* outarr) {
 
 void _double_running_max_unaligned(const double* arr, int len, int window, double* outarr) {
     __double_vector v;
-#if (DOUBLE_VEC_SIZE > 1)
-    const int jmax = double_get_next_index(window, 0);
-    const __int_vector opmask = _double_create_mask(window);
-#endif
     double m = arr[0];
 
     for (int i = 0; i < window; i++) {
@@ -410,118 +406,98 @@ void _double_running_max_unaligned(const double* arr, int len, int window, doubl
         outarr[i] = m;
     }
 
-    for (int i = 0; i < len-window+1; i++) {
+    for (int i = 0; i <= len-window+1 - DOUBLE_VEC_SIZE; i += DOUBLE_VEC_SIZE) {
         v = _double_loadu(&arr[i]);
-        for (int j = DOUBLE_VEC_SIZE; j <= window - DOUBLE_VEC_SIZE; j += DOUBLE_VEC_SIZE) {
+        for (int j = 0; j < window; j++) {
             v = _double_max_vec(v, _double_loadu(&arr[i+j]));
         }
+        _double_storeu(&outarr[i+window-1], v);
+    }
 
-#if (DOUBLE_VEC_SIZE > 1)
-        v = _double_mask_max_vec(v, _double_maskload(&arr[i+jmax], opmask), opmask);
-#endif
-
-        m = _double_index_vec(v, 0);
-        for (int j = 1; j < DOUBLE_VEC_SIZE; j++) {
-            m = max(m, _double_index_vec(v, j));
+    for (int i = double_get_next_index(len-window+1, 0); i < len-window+1; i++) {
+        m = arr[i];
+        for (int j = 0; j < window; j++) {
+            m = max(m, arr[i+j]);
         }
-
-        outarr[i+window-1] = m;
+        outarr[i] = m;
     }
 }
 
 void _float_running_max_unaligned(const float* arr, int len, int window, float* outarr) {
     __float_vector v;
     float m = arr[0];
-#if (FLOAT_VEC_SIZE > 1)
-    const int jmax = float_get_next_index(window, 0);
-    const __int_vector opmask = _float_create_mask(window);
-#endif
 
     for (int i = 0; i < window; i++) {
         m = max(m, arr[i]);
         outarr[i] = m;
     }
 
-    for (int i = 0; i < len-window+1; i++) {
+    for (int i = 0; i <= len-window+1 - FLOAT_VEC_SIZE; i += FLOAT_VEC_SIZE) {
         v = _float_loadu(&arr[i]);
-        for (int j = FLOAT_VEC_SIZE; j <= window - FLOAT_VEC_SIZE; j += FLOAT_VEC_SIZE) {
+        for (int j = 0; j < window; j++) {
             v = _float_max_vec(v, _float_loadu(&arr[i+j]));
         }
+        _float_storeu(&outarr[i+window-1], v);
+    }
 
-#if (FLOAT_VEC_SIZE > 1)
-        v = _float_mask_max_vec(v, _float_maskload(&arr[i+jmax], opmask), opmask);
-#endif
-
-        m = _float_index_vec(v, 0);
-        for (int j = 1; j < FLOAT_VEC_SIZE; j++) {
-            m = max(m, _float_index_vec(v, j));
+    for (int i = float_get_next_index(len-window+1, 0); i < len-window+1; i++) {
+        m = arr[i];
+        for (int j = 0; j < window; j++) {
+            m = max(m, arr[i+j]);
         }
-
-        outarr[i+window-1] = m;
+        outarr[i] = m;
     }
 }
 
 void _double_running_min_unaligned(const double* arr, int len, int window, double* outarr) {
     __double_vector v;
     double m = arr[0];
-#if (DOUBLE_VEC_SIZE > 1)
-    int jmax = double_get_next_index(window, 0);
-    __int_vector opmask = _double_create_mask(window);
-#endif
-
-    for (int i = 0; i < window+1; i++) {
-        m = min(m, arr[i]);
-        outarr[i] = m;
-    }
-
-    for (int i = 0; i < len-window+1; i++) {
-        v = _double_loadu(&arr[i]);
-        for (int j = DOUBLE_VEC_SIZE; j <= window - DOUBLE_VEC_SIZE; j += DOUBLE_VEC_SIZE) {
-            v = _double_min_vec(v, _double_loadu(&arr[i+j]));
-        }
-
-#if (DOUBLE_VEC_SIZE > 1)
-        v = _double_mask_min_vec(v, _double_maskload(&arr[i+jmax], opmask), opmask);
-#endif
-
-        m = _double_index_vec(v, 0);
-        for (int j = 1; j < DOUBLE_VEC_SIZE; j++) {
-            m = min(m, _double_index_vec(v, j));
-        }
-
-        outarr[i+window-1] = m;
-    }
-}
-
-void _float_running_min_unaligned(const float* arr, int len, int window, float* outarr) {
-    __float_vector v;
-    float m = arr[0];
-#if (FLOAT_VEC_SIZE > 1)
-    const int jmax = float_get_next_index(window, 0);
-    const __int_vector opmask = _float_create_mask(window);
-#endif
 
     for (int i = 0; i < window; i++) {
         m = min(m, arr[i]);
         outarr[i] = m;
     }
 
-    for (int i = 0; i < len-window+1; i++) {
+    for (int i = 0; i <= len-window+1 - DOUBLE_VEC_SIZE; i += DOUBLE_VEC_SIZE) {
+        v = _double_loadu(&arr[i]);
+        for (int j = 0; j < window; j++) {
+            v = _double_min_vec(v, _double_loadu(&arr[i+j]));
+        }
+        _double_storeu(&outarr[i+window-1], v);
+    }
+
+    for (int i = double_get_next_index(len-window+1, 0); i < len-window+1; i++) {
+        m = arr[i];
+        for (int j = 0; j < window; j++) {
+            m = min(m, arr[i+j]);
+        }
+        outarr[i] = m;
+    }
+}
+
+void _float_running_min_unaligned(const float* arr, int len, int window, float* outarr) {
+    __float_vector v;
+    float m = arr[0];
+
+    for (int i = 0; i < window; i++) {
+        m = min(m, arr[i]);
+        outarr[i] = m;
+    }
+
+    for (int i = 0; i <= len-window+1 - FLOAT_VEC_SIZE; i += FLOAT_VEC_SIZE) {
         v = _float_loadu(&arr[i]);
-        for (int j = FLOAT_VEC_SIZE; j <= window - FLOAT_VEC_SIZE; j += FLOAT_VEC_SIZE) {
+        for (int j = 0; j < window; j++) {
             v = _float_min_vec(v, _float_loadu(&arr[i+j]));
         }
+        _float_storeu(&outarr[i+window-1], v);
+    }
 
-#if (FLOAT_VEC_SIZE > 1)
-        v = _float_mask_min_vec(v, _float_maskload(&arr[i+jmax], opmask), opmask);
-#endif
-
-        m = _float_index_vec(v, 0);
-        for (int j = 1; j < FLOAT_VEC_SIZE; j++) {
-            m = min(m, _float_index_vec(v, j));
+    for (int i = float_get_next_index(len-window+1, 0); i < len-window+1; i++) {
+        m = arr[i];
+        for (int j = 0; j < window; j++) {
+            m = min(m, arr[i+j]);
         }
-
-        outarr[i+window-1] = m;
+        outarr[i] = m;
     }
 }
 

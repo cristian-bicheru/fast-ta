@@ -1,5 +1,5 @@
 #include "core_backend.h"
-#include "../generic_simd.h"
+#include "../generic_simd/generic_simd.h"
 
 double* _ALIGN_DOUBLE(const double* data, int len) {
     double* ret = double_malloc(len);

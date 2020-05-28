@@ -46,8 +46,8 @@ cc_library(
 
 cc_library(
     name = "generic_simd",
-    srcs = ["generic_simd.c"],
-    hdrs = ["generic_simd.h"],
+    srcs = ["generic_simd/generic_simd.c"],
+    hdrs = ["generic_simd/generic_simd.h"],
 )
 
 cc_library(
@@ -93,8 +93,18 @@ cc_library(
 ##################### Core Library #####################
 cc_library(
     name = "funcs",
-    srcs = ["funcs.c"],
-    hdrs = ["funcs.h"],
+    srcs = ["funcs/funcs.c"],
+    hdrs = ["funcs/funcs.h"],
+    deps = [
+        ":generic_simd",
+    ]+PYTHON_DEPS,
+    copts = PYTHON_INCLUDE
+)
+
+cc_library(
+    name = "core_backend",
+    srcs = ["core/core_backend.c"],
+    hdrs = ["core/core_backend.h"],
     deps = [
         ":generic_simd",
     ]+PYTHON_DEPS,
@@ -103,8 +113,8 @@ cc_library(
 
 cc_library(
     name = "momentum_backend",
-    srcs = ["momentum_backend.c"],
-    hdrs = ["momentum_backend.h"],
+    srcs = ["momentum/momentum_backend.c"],
+    hdrs = ["momentum/momentum_backend.h"],
     deps = [
         ":funcs",
     ]+PYTHON_DEPS,
@@ -113,8 +123,8 @@ cc_library(
 
 cc_library(
     name = "volume_backend",
-    srcs = ["volume_backend.c"],
-    hdrs = ["volume_backend.h"],
+    srcs = ["volume/volume_backend.c"],
+    hdrs = ["volume/volume_backend.h"],
     deps = [
         ":funcs",
         ":2darray",
@@ -124,8 +134,8 @@ cc_library(
 
 cc_library(
     name = "volatility_backend",
-    srcs = ["volatility_backend.c"],
-    hdrs = ["volatility_backend.h"],
+    srcs = ["volatility/volatility_backend.c"],
+    hdrs = ["volatility/volatility_backend.h"],
     deps = [
         ":funcs",
         ":2darray",
@@ -183,11 +193,23 @@ cc_library(
 )
 
 cc_library(
+    name = "core",
+    srcs = ["core.c"],
+    deps = [
+        ":core_backend",
+        ":error_methods",
+        ":2darray",
+    ]+PYTHON_DEPS,
+    copts = PYTHON_INCLUDE,
+)
+
+cc_library(
     name = "momentum",
     srcs = ["momentum.c"],
     deps = [
         ":momentum_backend",
-        ":parallel_momentum_backend",
+        ":error_methods",
+        ":2darray",
     ]+PYTHON_DEPS,
     copts = PYTHON_INCLUDE,
 )

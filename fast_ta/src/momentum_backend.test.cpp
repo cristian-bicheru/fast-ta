@@ -148,7 +148,7 @@ TEST(momentum_backend, STOCHFloat) {
 
 TEST(momentum_backend, TSIDouble) {
     double* out = _TSI_DOUBLE(SAMPLE_CLOSE_DOUBLE, 25, 13, data_len);
-    double max_dp_error = get_max_dp_error(KAMA_REF_DOUBLE, data_len);
+    double max_dp_error = get_max_dp_error(TSI_REF_DOUBLE, data_len);
     for (int i=1; i<data_len; i++) {
         ASSERT_NEAR(TSI_REF_DOUBLE[i], out[i], max_dp_error);
     }

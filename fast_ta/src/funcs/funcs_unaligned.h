@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdlib.h>
-#include "../generic_simd.h"
+#include "../generic_simd/generic_simd.h"
 
 void _intrin_fast_double_roc_unaligned(const double* close, double* roc, int len, int n);
 void _intrin_fast_float_roc_unaligned(const float* close, float* roc, int len, int n);

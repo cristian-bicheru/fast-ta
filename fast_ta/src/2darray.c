@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "generic_simd.h"
+#include "generic_simd/generic_simd.h"
 
 /**
   * NOTE: Numpy Expects Arrays To Be Memory-contiguous

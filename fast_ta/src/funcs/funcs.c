@@ -281,7 +281,7 @@ void _intrin_fast_double_roc(const double* close, double* roc, int len, int n) {
         _double_store(&roc[i], _double_mul_vec(mpct,
                                                _double_div_vec(_double_sub_vec(_double_load(&close[i]), v1), v1)));
     }
-    for (int i = double_get_next_index(len, n); i<len; i++) {
+    for (int i = double_get_next_index(len, n+offset); i<len; i++) {
         roc[i] = (close[i]/close[i-n]-1.)*100.;
     }
 }
@@ -301,7 +301,7 @@ void _intrin_fast_float_roc(const float* close, float* roc, int len, int n) {
         _float_store(&roc[i], _float_mul_vec(mpct,
                                              _float_div_vec(_float_sub_vec(_float_load(&close[i]), v1), v1)));
     }
-    for (int i = float_get_next_index(len, n); i<len; i++) {
+    for (int i = float_get_next_index(len, n+offset); i<len; i++) {
         roc[i] = (close[i]/close[i-n]-1.f)*100.f;
     }
 }

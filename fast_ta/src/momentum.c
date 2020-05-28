@@ -8,7 +8,7 @@
 #include "numpy/arrayobject.h"
 #include "momentum/momentum_backend.h"
 #include "error_methods.h"
-#include "generic_simd.h"
+#include "generic_simd/generic_simd.h"
 
 static PyObject* RSI(PyObject* self, PyObject* args, PyObject* kwargs) {
     PyObject* in;
