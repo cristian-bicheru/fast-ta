@@ -5,39 +5,107 @@ echo -e "\e[1m\e[34m"$simd
 echo -e "\e[1m\e[34mTesting with Clang..."
 export CC=clang
 
-bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99"
-sudo rm -r ~/.cache/bazel
+mkdir build && cd build
+cmake ..
+make -j
+cd ..
+./build/momentum_test
+./build/volatility_test
+./build/volume_test
+rm -r build/*
 
-if [[ $simd == *"'SSE2': 1"* ]]; then echo "SSE2 Support Detected, Running Tests..."; bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99" --define=SSE2=1 --copt="-msse2"; fi
-sudo rm -r ~/.cache/bazel
+if [[ $simd == *"'SSE2': 1"* ]]
+then
+  echo "SSE2 Support Detected, Running Tests...";
+  cd build
+  cmake -DSSE2=1 ..
+  make -j
+  cd ..
+  ./build/momentum_test
+  ./build/volatility_test
+  ./build/volume_test
+fi
+rm -r build/*
 
-if [[ $simd == *"'AVX': 1"* ]]; then echo "AVX Support Detected, Running Tests..."; bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99" --define=AVX=1 --copt="-mavx"; fi
-sudo rm -r ~/.cache/bazel
+if [[ $simd == *"'AVX': 1"* ]]
+then
+  echo "AVX Support Detected, Running Tests...";
+  cd build
+  cmake -DAVX=1 ..
+  make -j
+  cd ..
+  ./build/momentum_test
+  ./build/volatility_test
+  ./build/volume_test
+fi
+rm -r build/*
 
-if [[ $simd == *"'AVX512': 1"* ]]; then echo "AVX512 Support Detected, Running Tests..."; bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99" --define=AVX512=1 --copt="-mavx512f"; fi
+if [[ $simd == *"'AVX512': 1"* ]]
+then
+  echo "AVX512 Support Detected, Running Tests...";
+  cd build
+  cmake -DAVX512=1 ..
+  make -j
+  cd ..
+  ./build/momentum_test
+  ./build/volatility_test
+  ./build/volume_test
+fi
+rm -r build/*
+
+
+
+
 
 echo -e "\e[1m\e[34mTesting with GCC..."
 export CC=gcc
 
-bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99" --collect_code_coverage
-mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/momentum_backend_tests/coverage.dat no_simd1.dat
-mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/volume_backend_tests/coverage.dat no_simd2.dat
-mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/volatility_backend_tests/coverage.dat no_simd3.dat
-sudo rm -r ~/.cache/bazel
+cd build
+cmake -DCMAKE_BUILD_TYPE=Debug ..
+make -j
+cd ..
+./build/momentum_test
+gcov build/CMakeFiles/momentum_test.dir/fast_ta/src/momentum_backend.test.cpp.o
+./build/volatility_test
+gcov build/CMakeFiles/volatility_test.dir/fast_ta/src/volatility_backend.test.cpp.o
+./build/volume_test
+gcov build/CMakeFiles/volume_test.dir/fast_ta/src/volume_backend.test.cpp.o
+rm -r build/*
 
-if [[ $simd == *"'SSE2': 1"* ]]; then echo "SSE2 Support Detected, Running Tests..."; bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99" --define=SSE2=1 --copt="-msse2" --collect_code_coverage; fi
-mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/momentum_backend_tests/coverage.dat sse21.dat
-mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/volume_backend_tests/coverage.dat sse22.dat
-mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/volatility_backend_tests/coverage.dat sse23.dat
-sudo rm -r ~/.cache/bazel
+if [[ $simd == *"'SSE2': 1"* ]]
+then
+  echo "SSE2 Support Detected, Running Tests...";
+  cd build
+  cmake -DCMAKE_BUILD_TYPE=Debug -DSSE2=1 ..
+  make -j
+  cd ..
+  ./build/momentum_test
+  ./build/volatility_test
+  ./build/volume_test
+fi
+rm -r build/*
 
-if [[ $simd == *"'AVX': 1"* ]]; then echo "AVX Support Detected, Running Tests..."; bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99" --define=AVX=1 --copt="-mavx" --collect_code_coverage; fi
-mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/momentum_backend_tests/coverage.dat avx1.dat
-mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/volume_backend_tests/coverage.dat avx2.dat
-mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/volatility_backend_tests/coverage.dat avx3.dat
-sudo rm -r ~/.cache/bazel
+if [[ $simd == *"'AVX': 1"* ]]
+then
+  echo "AVX Support Detected, Running Tests...";
+  cd build
+  cmake -DCMAKE_BUILD_TYPE=Debug -DAVX=1 ..
+  make -j
+  cd ..
+  ./build/momentum_test
+  ./build/volatility_test
+  ./build/volume_test
+fi
+rm -r build/*
 
-if [[ $simd == *"'AVX512': 1"* ]]; then echo "AVX512 Support Detected, Running Tests..."; bazel test //fast_ta/src/... --noshow_loading_progress --noshow_progress --conlyopt="-std=c99" --define=AVX512=1 --copt="-mavx512f" --collect_code_coverage; fi
-mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/momentum_backend_tests/coverage.dat avx5121.dat
-mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/volume_backend_tests/coverage.dat avx5122.dat
-mv bazel-out/k8-fastbuild/testlogs/fast_ta/src/volatility_backend_tests/coverage.dat avx5123.dat
+if [[ $simd == *"'AVX512': 1"* ]]
+then
+  echo "AVX512 Support Detected, Running Tests...";
+  cd build
+  cmake -DCMAKE_BUILD_TYPE=Debug -DAVX512=1 ..
+  make -j
+  cd ..
+  ./build/momentum_test
+  ./build/volatility_test
+  ./build/volume_test
+fi

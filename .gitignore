@@ -138,9 +138,4 @@ dmypy.json
 cython_debug/
 
 # CLion (CMake disclusion temporary)
-.idea/
-CMakeLists.txt
 cmake-build-debug/
-
-# fast_ta additions
-bazel-*
