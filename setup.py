@@ -31,7 +31,7 @@ class FastTABuild(build_ext):
             self.extensions[0].extra_compile_args.append('-msse2')
         build_ext.run(self)
 
-common_backend = ['fast_ta/src/error_methods.c', 'fast_ta/src/funcs/funcs.c', 'fast_ta/src/funcs/funcs_unaligned.c', 'fast_ta/src/2darray.c', 'fast_ta/src/generic_simd.c']
+common_backend = ['fast_ta/src/error_methods.c', 'fast_ta/src/funcs/funcs.c', 'fast_ta/src/funcs/funcs_unaligned.c', 'fast_ta/src/2darray.c', 'fast_ta/src/generic_simd/generic_simd.c']
 compile_args = ['-O3', '-march=native', '-mtune=native', '-malign-double', '-falign-loops=32','-fomit-frame-pointer', '-frename-registers',
                 '-flto']
 link_args = compile_args

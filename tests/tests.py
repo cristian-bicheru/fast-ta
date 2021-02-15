@@ -75,7 +75,7 @@ def rsi():
     plt.clf()
     plt.title("RSI "+str(close_data.dtype))
     plt.plot(fast_ta.momentum.RSI(close=close_data, n = 14))
-    plt.plot(ta.momentum.RSIIndicator(pandas.Series(close_data), n=14).rsi())
+    plt.plot(ta.momentum.RSIIndicator(pandas.Series(close_data), window=14).rsi())
     if args.show_plots:
         plt.show()
     if args.save_plots:
@@ -84,7 +84,7 @@ def rsi():
 def ao():
     plt.clf()
     plt.title("AO "+str(high_data.dtype))
-    plt.plot(ta.momentum.AwesomeOscillatorIndicator(pandas.Series(high_data), pandas.Series(low_data)).ao())
+    plt.plot(ta.momentum.AwesomeOscillatorIndicator(pandas.Series(high_data), pandas.Series(low_data)).awesome_oscillator())
     plt.plot(fast_ta.momentum.AO(high=high_data, low=low_data, s = 5, l = 34))
     if args.show_plots:
         plt.show()
@@ -105,7 +105,7 @@ def roc():
     plt.clf()
     plt.title("ROC "+str(close_data.dtype))
     plt.plot(fast_ta.momentum.ROC(close = close_data, n = 12))
-    plt.plot(list(ta.momentum.ROCIndicator(pandas.Series(close_data), n=12).roc()))
+    plt.plot(list(ta.momentum.ROCIndicator(pandas.Series(close_data), window=12).roc()))
     if args.show_plots:
         plt.show()
     if args.save_plots:
@@ -144,11 +144,11 @@ def tsi():
 
 def uo():
     plt.clf()
-    plt.title("Ultimate Oscillator (NOTE: TA'S IMPLEMENTATION IS BROKEN, USE TRADINGVIEW TO VALIDATE) "+str(close_data.dtype))
+    plt.title("Ultimate Oscillator "+str(close_data.dtype))
     so = fast_ta.momentum.UltimateOscillator(high=high_data, low=low_data, close=close_data, s = 7, m = 14, l = 28, ws = 4, wm = 2, wl = 1)
     plt.plot(so)
-    #sot = ta.momentum.UltimateOscillator(pandas.Series(high_data), pandas.Series(low_data), pandas.Series(close_data))
-    #plt.plot(sot.uo())
+    sot = ta.momentum.UltimateOscillator(pandas.Series(high_data), pandas.Series(low_data), pandas.Series(close_data))
+    plt.plot(sot.ultimate_oscillator())
     if args.show_plots:
         plt.show()
     if args.save_plots:
@@ -160,7 +160,7 @@ def wr():
     so = fast_ta.momentum.WilliamsR(high=high_data, low=low_data, close=close_data, n=14)
     plt.plot(so)
     sot = ta.momentum.WilliamsRIndicator(pandas.Series(high_data), pandas.Series(low_data), pandas.Series(close_data))
-    plt.plot(sot.wr())
+    plt.plot(sot.williams_r())
     if args.show_plots:
         plt.show()
     if args.save_plots:
@@ -260,12 +260,13 @@ def obv():
         plt.savefig("tests/plots/OBV " + str(close_data.dtype) + ".svg")
         
 def vpt():
+    # DIFF, believe TA's implementation is broken
     plt.clf()
-    plt.title("Volume-price trend (VPT) (NOTE: TA'S IMPLEMENTATION IS BROKEN, USE TRADINGVIEW TO VALIDATE) "+str(close_data.dtype))
+    plt.title("Volume-price trend (VPT) "+str(close_data.dtype))
     so = fast_ta.volume.VPT(close=close_data, volume=volume_data)
     plt.plot(so)
     sot = ta.volume.VolumePriceTrendIndicator(pandas.Series(close_data), pandas.Series(volume_data))
-    #plt.plot(sot.volume_price_trend())
+    plt.plot(sot.volume_price_trend())
     if args.show_plots:
         plt.show()
     if args.save_plots:
@@ -284,6 +285,7 @@ def vwap():
         plt.savefig("tests/plots/VWAP " + str(close_data.dtype) + ".svg")
         
 def atr():
+    # slight diff vs TA, they zero out the first n values
     plt.clf()
     plt.title("Average True Range (ATR) "+str(close_data.dtype))
     so = fast_ta.volatility.ATR(high=high_data, low=low_data, close=close_data, n=14)
@@ -326,14 +328,13 @@ def bol():
         plt.savefig("tests/plots/BOL LBAND " + str(close_data.dtype) + ".svg")
 
 def dc():
-    # For testing purposes, we specify the high and low data to be the close data
-    # since that is how the ta lib does it, however this should only be done if
-    # high/low data does not exist.
+    # TA API modifications ***
+    # artifacts in computation? otherwise it lines up.
     plt.clf()
     plt.title("Donchian Channel hband "+str(close_data.dtype))
-    so = fast_ta.volatility.DC(high = close_data, low = close_data, n = 20)
+    so = fast_ta.volatility.DC(high = high_data, low = low_data, n = 20)
     plt.plot(so[0])
-    sot = ta.volatility.DonchianChannel(pandas.Series(close_data))
+    sot = ta.volatility.DonchianChannel(high = pandas.Series(high_data), low = pandas.Series(low_data), close = pandas.Series(close_data), window = 20)
     plt.plot(sot.donchian_channel_hband())
     if args.show_plots:
         plt.show()
@@ -350,11 +351,12 @@ def dc():
         plt.savefig("tests/plots/DC LBAND " + str(close_data.dtype) + ".svg")
 
 def kc():
+    # DIFF
     plt.clf()
     plt.title("Keltner Channel hband "+str(close_data.dtype))
-    so = fast_ta.volatility.KC(high=high_data, low=low_data, close=close_data, n1=14, n2=10, num_channels=1)
+    so = fast_ta.volatility.KC(high=high_data, low=low_data, close=close_data, n1=20, n2=10, num_channels=1)
     plt.plot(so[2])
-    sot = ta.volatility.KeltnerChannel(pandas.Series(high_data), pandas.Series(low_data), pandas.Series(close_data), ov=False)
+    sot = ta.volatility.KeltnerChannel(pandas.Series(high_data), pandas.Series(low_data), pandas.Series(close_data), original_version=False)
     plt.plot(sot.keltner_channel_hband())
     if args.show_plots:
         plt.show()
