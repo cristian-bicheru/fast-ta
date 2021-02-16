@@ -1,12 +1,22 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.12)
 project(fast-ta)
 
 if (DEFINED SSE2)
     add_definitions(-DSSE2)
 endif()
 
+if (DEFINED SSE41)
+    add_definitions(-DSSE2)
+    add_definitions(-DSSE41)
+endif()
+
 if (DEFINED AVX)
     add_definitions(-DAVX)
+endif()
+
+if (DEFINED AVX2)
+    add_definitions(-DAVX)
+    add_definitions(-DAVX2)
 endif()
 
 if (DEFINED AVX512)
@@ -14,6 +24,28 @@ if (DEFINED AVX512)
 endif()
 
 find_package(Python3 COMPONENTS Interpreter Development)
+if (NOT DEFINED Python3_INCLUDE_DIRS OR NOT DEFINED Python3_NumPy_INCLUDE_DIRS)
+    execute_process(COMMAND "python" "scripts/find_includes.py"
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+            OUTPUT_VARIABLE PYTHON_INCLUDES
+            RESULT_VARIABLE FIND_RESULT)
+    if (NOT FIND_RESULT EQUAL 0)
+        execute_process(COMMAND "python3" "scripts/find_includes.py"
+                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                OUTPUT_VARIABLE PYTHON_INCLUDES
+                RESULT_VARIABLE FIND_RESULT)
+        if (NOT FIND_RESULT EQUAL 0)
+            message(FATAL_ERROR "Failed to find python or numpy include directories!")
+        endif()
+    endif()
+    string(REPLACE "\n" ";" PYTHON_INCLUDES ${PYTHON_INCLUDES})
+else()
+    set(PYTHON_INCLUDES "${Python3_INCLUDE_DIRS}; ${Python3_NumPy_INCLUDE_DIRS}")
+endif()
+list(GET PYTHON_INCLUDES 0 PY_INCLUDE)
+message("Using Python headers at: ${PY_INCLUDE}")
+list(GET PYTHON_INCLUDES 1 NUMPY_INCLUDE)
+message("Using NumPy headers at: ${NUMPY_INCLUDE}")
 
 set(CMAKE_C_STANDARD 11)
 set(COMMON_BACKEND fast_ta/src/error_methods.c fast_ta/src/funcs/funcs.c fast_ta/src/funcs/funcs_unaligned.c fast_ta/src/2darray.c fast_ta/src/generic_simd/generic_simd.c)
@@ -30,10 +62,10 @@ add_library(core SHARED ${COMMON_BACKEND} fast_ta/src/core.c fast_ta/src/core/co
 add_library(momentum SHARED ${COMMON_BACKEND} fast_ta/src/momentum.c fast_ta/src/momentum/momentum_backend.c)
 add_library(volume SHARED ${COMMON_BACKEND} fast_ta/src/volume.c fast_ta/src/volume/volume_backend.c)
 add_library(volatility SHARED ${COMMON_BACKEND} fast_ta/src/volatility.c fast_ta/src/volatility/volatility_backend.c)
-target_include_directories(core PRIVATE ${Python3_NumPy_INCLUDE_DIRS} ${Python3_INCLUDE_DIRS})
-target_include_directories(momentum PRIVATE ${Python3_NumPy_INCLUDE_DIRS} ${Python3_INCLUDE_DIRS})
-target_include_directories(volume PRIVATE ${Python3_NumPy_INCLUDE_DIRS} ${Python3_INCLUDE_DIRS})
-target_include_directories(volatility PRIVATE ${Python3_NumPy_INCLUDE_DIRS} ${Python3_INCLUDE_DIRS})
+target_include_directories(core PRIVATE ${PYTHON_INCLUDES})
+target_include_directories(momentum PRIVATE ${PYTHON_INCLUDES})
+target_include_directories(volume PRIVATE ${PYTHON_INCLUDES})
+target_include_directories(volatility PRIVATE ${PYTHON_INCLUDES})
 
 # Download and unpack googletest at configure time
 configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
@@ -64,16 +96,16 @@ include(CodeCoverage.cmake)
 APPEND_COVERAGE_COMPILER_FLAGS()
 
 add_executable(momentum_test fast_ta/src/momentum_backend.test.cpp ${COMMON_BACKEND} fast_ta/src/momentum/momentum_backend.c)
-target_include_directories(momentum_test PRIVATE ${Python3_NumPy_INCLUDE_DIRS} ${Python3_INCLUDE_DIRS})
+target_include_directories(momentum_test PRIVATE ${PYTHON_INCLUDES})
 target_link_libraries(momentum_test gtest_main)
 add_test(NAME momentum_test COMMAND momentum_test)
 
 add_executable(volatility_test fast_ta/src/volatility_backend.test.cpp ${COMMON_BACKEND} fast_ta/src/volatility/volatility_backend.c)
-target_include_directories(volatility_test PRIVATE ${Python3_NumPy_INCLUDE_DIRS} ${Python3_INCLUDE_DIRS})
+target_include_directories(volatility_test PRIVATE ${PYTHON_INCLUDES})
 target_link_libraries(volatility_test gtest_main)
 add_test(NAME volatility_test COMMAND volatility_test)
 
 add_executable(volume_test fast_ta/src/volume_backend.test.cpp ${COMMON_BACKEND} fast_ta/src/volume/volume_backend.c)
-target_include_directories(volume_test PRIVATE ${Python3_NumPy_INCLUDE_DIRS} ${Python3_INCLUDE_DIRS})
+target_include_directories(volume_test PRIVATE ${PYTHON_INCLUDES})
 target_link_libraries(volume_test gtest_main)
 add_test(NAME volume_test COMMAND volume_test)
