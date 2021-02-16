@@ -621,10 +621,10 @@ void _double_tsi_fast_ema(double* pc, double* apc, int len, int r, int s) {
         ema = _double_mul_vec(ema, am);
         ema = _double_add_vec(v, ema);
 
-        pc[i-1] = ema[0];
-        pc[i] = ema[1];
-        apc[i-1] = ema[2];
-        apc[i] = ema[3];
+        pc[i-1] = _double_index_vec(ema, 0);
+        pc[i] = _double_index_vec(ema, 1);
+        apc[i-1] = _double_index_vec(ema, 2);
+        apc[i] = _double_index_vec(ema, 3);
     }
 
     pc[len-1] = pc[len-2]*(1.-alpha2)+pc[len-1]*(alpha2);
@@ -661,10 +661,10 @@ void _float_tsi_fast_ema(float* pc, float* apc, int len, int r, int s) {
         ema = _double_mul_vec(ema, am);
         ema = _double_add_vec(v, ema);
 
-        pc[i-1] = ema[0];
-        pc[i] = ema[1];
-        apc[i-1] = ema[2];
-        apc[i] = ema[3];
+        pc[i-1] = _double_index_vec(ema, 0);
+        pc[i] = _double_index_vec(ema, 1);
+        apc[i-1] = _double_index_vec(ema, 2);
+        apc[i] = _double_index_vec(ema, 3);
     }
 
     pc[len-1] = pc[len-2]*(1.-alpha2)+pc[len-1]*(alpha2);
