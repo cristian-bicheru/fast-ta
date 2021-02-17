@@ -4,7 +4,6 @@ try:
 except ImportError:
     from distutils.core import setup, Extension
 import os
-import psutil
     
 class FastTABuild(build_ext):
     def run(self):
@@ -16,38 +15,56 @@ class FastTABuild(build_ext):
             self.define = []
         if simd['AVX512F'] == 1:
             self.define.append(('AVX512', '1'))
-            self.extensions[0].extra_compile_args.append('-mavx512f')
+            if os.name == 'nt':
+                self.extensions[0].extra_compile_args.append('/arch:AVX512')
+            else:
+                self.extensions[0].extra_compile_args.append('-mavx512f')
         elif simd['AVX'] == 1:
             self.define.append(('AVX', '1'))
             if simd['AVX2'] == 1:
                 self.define.append(('AVX2', '1'))
-                self.extensions[0].extra_compile_args.append('-mavx2')
-            self.extensions[0].extra_compile_args.append('-mavx')
+                if os.name == 'nt':
+                    self.extensions[0].extra_compile_args.append('/arch:AVX2')
+                else:
+                    self.extensions[0].extra_compile_args.append('-mavx2')
+            if os.name == 'nt':
+                self.extensions[0].extra_compile_args.append('/arch:AVX')
+            else:
+                self.extensions[0].extra_compile_args.append('-mavx')
         elif simd['SSE2'] == 1:
             self.define.append(('SSE2', '1'))
             if simd['SSE41']:
                 self.define.append(('SSE41', '1'))
-                self.extensions[0].extra_compile_args.append('-msse4.1')
-            self.extensions[0].extra_compile_args.append('-msse2')
+                if os.name != 'nt':
+                    self.extensions[0].extra_compile_args.append('-msse4.1')
+            if os.name == 'nt':
+                self.extensions[0].extra_compile_args.append('/arch:SSE2')
+            else:
+                self.extensions[0].extra_compile_args.append('-msse2')
         build_ext.run(self)
 
-common_backend = ['fast_ta/src/error_methods.c', 'fast_ta/src/funcs/funcs.c', 'fast_ta/src/funcs/funcs_unaligned.c', 'fast_ta/src/2darray.c', 'fast_ta/src/generic_simd/generic_simd.c']
-compile_args = ['-O3', '-march=native', '-mtune=native', '-malign-double', '-falign-loops=32','-fomit-frame-pointer', '-frename-registers', '-flto']
-link_args = compile_args
+if os.name == 'nt':
+    compile_args = ['/O2', '/GS-', '/fp:fast', '/GL']
+    link_args = ['/LTCG']
+else:
+    compile_args = ['-O3', '-march=native', '-mtune=native', '-malign-double', '-falign-loops=32', '-fomit-frame-pointer', '-frename-registers', '-flto']
+    link_args = compile_args
 
-core_ext = Extension('fast_ta/core',
+common_backend = ['fast_ta/src/error_methods.c', 'fast_ta/src/funcs/funcs.c', 'fast_ta/src/funcs/funcs_unaligned.c', 'fast_ta/src/2darray.c', 'fast_ta/src/generic_simd/generic_simd.c']
+
+core_ext = Extension('fast_ta.core',
                    sources=['fast_ta/src/core.c', 'fast_ta/src/core/core_backend.c']+common_backend,
                    extra_compile_args=compile_args,
                    extra_link_args = link_args)
-momentum_ext = Extension('fast_ta/momentum',
+momentum_ext = Extension('fast_ta.momentum',
                    sources=['fast_ta/src/momentum.c', 'fast_ta/src/momentum/momentum_backend.c']+common_backend,
                    extra_compile_args=compile_args,
                    extra_link_args = link_args)
-volume_ext = Extension('fast_ta/volume',
+volume_ext = Extension('fast_ta.volume',
                    sources=['fast_ta/src/volume.c', 'fast_ta/src/volume/volume_backend.c']+common_backend,
                    extra_compile_args=compile_args,
                    extra_link_args = link_args)
-volatility_ext = Extension('fast_ta/volatility',
+volatility_ext = Extension('fast_ta.volatility',
                    sources=['fast_ta/src/volatility.c', 'fast_ta/src/volatility/volatility_backend.c']+common_backend,
                    extra_compile_args=compile_args,
                    extra_link_args = link_args)
