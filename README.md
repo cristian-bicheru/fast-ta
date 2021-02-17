@@ -1,6 +1,10 @@
 [![Build Status](https://travis-ci.com/cristian-bicheru/fast-ta.svg?branch=master)](https://travis-ci.com/cristian-bicheru/fast-ta)
 [![codecov](https://codecov.io/gh/cristian-bicheru/fast-ta/branch/master/graph/badge.svg)](https://codecov.io/gh/cristian-bicheru/fast-ta)
 
+# Cloning Source Code:
+```bash
+git clone https://github.com/cristian-bicheru/fast-ta.git && cd fast-ta && git submodule update --init
+```
 
 # Building:
 ```bash

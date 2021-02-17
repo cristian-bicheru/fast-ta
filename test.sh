@@ -5,4 +5,4 @@ cd ..
 ./test_build/momentum_test
 ./test_build/volume_test
 ./test_build/volatility_test
-rm -r test_build
+rm -rf test_build
