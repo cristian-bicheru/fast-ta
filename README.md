@@ -6,17 +6,22 @@
 ```bash
 python3.x setup.py build_ext --inplace
 ```
-
+OR using CMake
+```bash
+mkdir test_build && cd test_build
+cmake -D<arch>=1 ..
+make -j
+``
+For debugging purposes, you can use `cmake -DCMAKE_BUILD_TYPE=Debug -D<arch>=1 ..` (where `<arch>` is either SSE2, SSE41, AVX, AVX2, or AVX512, or you can omit the `-D<arch>=1` entirely for a SIMD-free build.) 
+NOTE: without `-DCMAKE_BUILD_TYPE=Debug` the compiler may introduce SIMD optimizations.
 # Testing:
 
 To run CI tests:
 ```bash
-bazel test //fast_ta/src/...
+./test.sh
+
 ```
-All of these must pass for any code to be added to the repo. Info on installing
-bazel [here](https://docs.bazel.build/versions/master/install.html). More
-info on developing & testing can be found in
-[CONTRIBUTING.md](https://github.com/cristian-bicheru/fast-ta/blob/master/CONTRIBUTING.md).
+All of these must pass for any code to be added to the repo.
 
 For general, eyeball testing you can generate plots of the indicators with
 this script.
