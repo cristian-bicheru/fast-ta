@@ -47,7 +47,7 @@ if os.name == 'nt':
     compile_args = ['/O2', '/GS-', '/fp:fast', '/GL']
     link_args = ['/LTCG']
 else:
-    compile_args = ['-O3', '-march=native', '-mtune=native', '-malign-double', '-falign-loops=32', '-fomit-frame-pointer', '-frename-registers', '-flto']
+    compile_args = ['-O3', '-march=native', '-mtune=native', '-malign-double', '-falign-loops=32', '-fomit-frame-pointer', '-frename-registers', '-flto', '-std=c99']
     link_args = compile_args
 
 common_backend = ['fast_ta/src/error_methods.c', 'fast_ta/src/funcs/funcs.c', 'fast_ta/src/funcs/funcs_unaligned.c', 'fast_ta/src/2darray.c', 'fast_ta/src/generic_simd/generic_simd.c']
